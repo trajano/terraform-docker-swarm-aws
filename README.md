@@ -50,13 +50,16 @@ AWS permissions to do the following
 
 ## Example
 
-The following shows an example of how to use the module.
+The following shows an example of how to use the module.  The contents are in `examples/simple` folder
 
 ### vpc.tf
 
 This shows an example of how to set up the VPC and security groups with the required elements for the module also exposes SSH, HTTP and HTTPS along with allowing the swarm to access the Internet.
 
 ```
+provider "aws" {
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = "10.95.0.0/16"
   enable_dns_hostnames = true
@@ -131,7 +134,7 @@ The module is then created as follows
 module "docker-swarm" {
   source  = "trajano/swarm-aws/docker"
   version = "1.0.3"
-  
+
   name   = "My VPC Swarm"
   vpc_id = "${aws_vpc.main.id}"
   cloud_config_extra = "${file("users.cloud-config")}"
