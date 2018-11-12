@@ -8,7 +8,7 @@ In the VPC there will be 2 x _number of availability zones in region_ created.
 
 There are no elastic IPs allocated in the module in order to prevent using up the elastic IP allocation for the VPC. It is up to the caller to set that up.
 
-## Preequisites
+## Prerequisites
 
 The `aws` plugin is configured in your TF file.
 
@@ -29,136 +29,9 @@ AWS permissions to do the following
   - The DNS hostnames support must be enabled (otherwise the node list won't work too well)
   - VPC must have a CIDR block mask of `/16`.
 
-## Inputs
-
-### Required
-
-- `name` specifies the name of the swarm that is going to be built. It is used for names and DNS names.
-- `vpc_id` specifies the VPC to use for the swarm. This needs to be present.
-
-### Optional
-
-- `exposed_security_group_ids` this are security group IDs that specifies the ports that would be exposed by the swarm for external access. Note that the security groups defined neither any egress access nor ssh access to the swarm.
-- `manager_subnet_segment_start` this is added to the index to represent the third segment of the IP address. Defaults to `10`
-- `worker_subnet_segment_start` this is added to the index to represent the third segment of the IP address. Defaults to `110`
-- `cloud_config_extra` this points to a file that contains additional blocks to be added to the cloud-config file. Ideally this is where you would put the `users` block otherwise no one can login to the EC2 instances.
-
-## Outputs
-
-- `manager_instance_ids` AWS instance IDs for the managers.
-- `worker_instance_ids` AWS instance IDs for the managers.
-
 ## Example
 
-The following shows an example of how to use the module.  The contents are in `examples/simple` folder
-
-### vpc.tf
-
-This shows an example of how to set up the VPC and security groups with the required elements for the module also exposes SSH, HTTP and HTTPS along with allowing the swarm to access the Internet.
-
-```
-provider "aws" {
-}
-
-resource "aws_vpc" "main" {
-  cidr_block           = "10.95.0.0/16"
-  enable_dns_hostnames = true
-}
-
-resource "aws_internet_gateway" "main" {
-  vpc_id = "${aws_vpc.main.id}"
-}
-
-resource "aws_route" "internet_access" {
-  route_table_id         = "${aws_vpc.main.main_route_table_id}"
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = "${aws_internet_gateway.main.id}"
-}
-
-resource "aws_security_group" "exposed" {
-  name        = "exposed"
-  vpc_id      = "${aws_vpc.main.id}"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-}
-```
-
-### users.cloud-config
-
-In order to access the servers you need to define administrators and their SSH keys:
-
-```
-users:
-- name: deployer
-  ssh-authorized-keys:
-  - ssh-rsa ...
-  sudo: ['ALL=(ALL) NOPASSWD: /usr/bin/docker']
-- name: admin
-  ssh-authorized-keys:
-  - ssh-rsa ...
-  sudo: ['ALL=(ALL) NOPASSWD:ALL']
-```
-
-### docker-swarm.tf
-
-The module is then created as follows
-
-```
-module "docker-swarm" {
-  source  = "trajano/swarm-aws/docker"
-  version = "1.0.3"
-
-  name   = "My VPC Swarm"
-  vpc_id = "${aws_vpc.main.id}"
-  cloud_config_extra = "${file("users.cloud-config")}"
-  exposed_security_group_ids = [
-    "${aws_security_group.exposed.id}",
-  ]
-}
-```
-
-### eips.tf
-
-In order to ensure that there is a static set of IPs, you can use Elastic IPs. Just note that there is a limit of number of elastic IPs per VPC. As such the creation of the elastic IPs is not performed by the module.
-
-```
-resource "aws_eip" "managers" {
-  count    = "2"
-  instance = "${module.docker-swarm.manager_instance_ids[count.index]}"
-  vpc      = true
-}
-
-output "manager_ip_addresses" {
-  value = "${aws_eip.managers.*.public_ip}"
-}
-```
+The `examples/simple` folder shows an example of how to use this module.
 
 ## Upgrading the swarm
 
