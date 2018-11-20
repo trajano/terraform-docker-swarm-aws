@@ -4,7 +4,7 @@ This is a Terraform configuration that sets up a Docker Swarm on an existing VPC
 
 ## Terraformed layout
 
-In the VPC there will be 2 x _number of availability zones in region_ created.
+In the VPC there will be 2 x _number of availability zones in region_ subnets created.  Each EC2 instance will be placed in an subnet in a round-robin fashion.
 
 There are no elastic IPs allocated in the module in order to prevent using up the elastic IP allocation for the VPC. It is up to the caller to set that up.
 
