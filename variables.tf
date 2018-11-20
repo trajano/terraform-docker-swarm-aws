@@ -50,3 +50,8 @@ variable "worker_subnet_segment_start" {
   description = "This is added to the index to represent the third segment of the IP address."
   default     = 110
 }
+
+variable "key_name" {
+  description = "The key name of the Key Pair to use for the instance; which can be managed using the aws_key_pair resource."
+  default     = ""
+}

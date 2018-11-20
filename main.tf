@@ -207,6 +207,7 @@ resource "aws_instance" "workers" {
   vpc_security_group_ids = ["${local.security_group_ids}"]
   iam_instance_profile   = "${aws_iam_instance_profile.ec2.name}"
   user_data_base64       = "${base64gzip(data.template_file.worker_cloud_config.*.rendered[count.index])}"
+  key_name               = "${var.key_name}"
 
   tags {
     Name = "${var.name} worker ${count.index}"
