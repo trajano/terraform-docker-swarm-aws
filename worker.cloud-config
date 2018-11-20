@@ -1,24 +1,4 @@
 #cloud-config
-yum_repos:
-  docker-ce:
-    name: Docker
-    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-    enabled: true
-    gpgcheck: true
-    gpgkey: https://download.docker.com/linux/centos/gpg
-  epel:
-    name: EPEL
-    baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch
-    enabled: true
-    gpgcheck: true
-    gpgkey: http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
-repo_update: true
-repo_upgrade: all
-packages:
-- docker
-- haveged
-output:
-  all: '| tee -a /var/log/cloud-init-output.log'
 write_files:
 - content: |
     #!/bin/sh
@@ -48,4 +28,3 @@ runcmd:
 - [ systemctl, start, --no-block, haveged.service ]
 - [ systemctl, start, --no-block, docker.service ]
 - [ /root/init_swarm.sh, ${s3_bucket}, "${instance_index}", ${manager0_ip} ]
-${extra}

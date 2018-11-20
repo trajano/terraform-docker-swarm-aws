@@ -1,24 +1,4 @@
 #cloud-config
-yum_repos:
-  docker-ce:
-    name: Docker
-    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-    enabled: true
-    gpgcheck: true
-    gpgkey: https://download.docker.com/linux/centos/gpg
-  epel:
-    name: EPEL
-    baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch
-    enabled: true
-    gpgcheck: true
-    gpgkey: http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
-repo_update: true
-repo_upgrade: all
-packages:
-- docker
-- haveged
-output:
-  all: '| tee -a /var/log/cloud-init-output.log'
 write_files:
 - content: |
     #!/bin/sh
@@ -45,6 +25,8 @@ write_files:
       try:
         os.system("aws s3 cp --quiet s3://%s/ip1 /tmp/ip1" % s3_bucket)
         os.system("aws s3 cp --quiet s3://%s/manager_token /tmp/manager_token" % s3_bucket)
+        if os.stat("/tmp/manager_token").st_size == 0:
+          raise IOError("manager_token is empty")
         with open("/tmp/ip1", "r") as ip:
           manager1_ip = ip.read().strip()
           socket.setdefaulttimeout(1.5)
@@ -61,7 +43,7 @@ write_files:
             err = os.system("docker swarm join --token %s %s" % (manager_token.read().strip(), manager1_ip))
             if (err != 0):
               raise IOError("Got error code %d" % err)
-      except IOError as err:
+      except:
         os.system("docker swarm init")
         os.system("docker swarm join-token -q worker > /tmp/worker_token")
         os.system("docker swarm join-token -q manager > /tmp/manager_token")
@@ -86,4 +68,3 @@ runcmd:
 - [ systemctl, start, --no-block, haveged.service ]
 - [ systemctl, start, --no-block, docker.service ]
 - [ /root/init_swarm.py, ${s3_bucket}, '${instance_index}', ${manager0_ip} ]
-${extra}

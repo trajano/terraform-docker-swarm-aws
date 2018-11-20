@@ -1,0 +1,29 @@
+#cloud-config
+bootcmd:
+- [ cloud-init-per, once, gpg-key-docker, rpm, "--import", "https://download.docker.com/linux/centos/gpg" ]
+- [ cloud-init-per, once, gpg-key-centos, rpm, "--import", "https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7" ]
+- [ cloud-init-per, once, gpg-key-epel, rpm, "--import", "http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7" ]
+yum_repos:
+  docker-ce:
+    name: Docker
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    enabled: true
+    gpgcheck: true
+  centos-extras:
+    name: CentOS - Extras
+    baseurl: http://mirror.centos.org/centos/7/extras/$basearch/
+    mirrorlist: http://mirrorlist.centos.org/?release=7&arch=$basearch&repo=extras
+    enabled: true
+    gpgcheck: true
+  epel:
+    name: EPEL
+    baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch
+    enabled: true
+    gpgcheck: true
+repo_update: true
+repo_upgrade: all
+packages:
+- docker-ce
+- haveged
+output:
+  all: '| tee -a /var/log/cloud-init-output.log'

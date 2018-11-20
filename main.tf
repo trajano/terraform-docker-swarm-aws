@@ -155,6 +155,29 @@ data "template_file" "manager_cloud_config" {
   }
 }
 
+data "template_cloudinit_config" "manager_cloud_config" {
+  count         = "${var.managers}"
+  gzip          = "true"
+  base64_encode = "true"
+
+  part {
+    content = "${file("${path.module}/common.cloud-config")}"
+  }
+
+  part {
+    filename     = "manager.sh"
+    content      = "${data.template_file.manager_cloud_config.*.rendered[count.index]}"
+    content_type = "text/cloud-config"
+  }
+
+  part {
+    filename     = "extra.sh"
+    content      = "${var.cloud_config_extra}"
+    content_type = "text/cloud-config"
+    merge_type   = "list(append)+dict(recurse_array)+str()"
+  }
+}
+
 data "template_file" "worker_cloud_config" {
   count    = "${var.workers}"
   template = "${file("${path.module}/worker.cloud-config")}"
@@ -163,7 +186,29 @@ data "template_file" "worker_cloud_config" {
     s3_bucket      = "${aws_s3_bucket.terraform.bucket}"
     instance_index = "${count.index}"
     manager0_ip    = "${cidrhost(aws_subnet.managers.*.cidr_block[0], 10)}"
-    extra          = "${var.cloud_config_extra}"
+  }
+}
+
+data "template_cloudinit_config" "worker_cloud_config" {
+  count         = "${var.workers}"
+  gzip          = "true"
+  base64_encode = "true"
+
+  part {
+    content = "${file("${path.module}/common.cloud-config")}"
+  }
+
+  part {
+    filename     = "worker.sh"
+    content      = "${data.template_file.worker_cloud_config.*.rendered[count.index]}"
+    content_type = "text/cloud-config"
+  }
+
+  part {
+    filename     = "extra.sh"
+    content_type = "text/cloud-config"
+    content      = "${var.cloud_config_extra}"
+    merge_type   = "list(append)+dict(recurse_array)+str()"
   }
 }
 
@@ -175,8 +220,7 @@ resource "aws_instance" "managers" {
   private_ip             = "${cidrhost(aws_subnet.managers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}"
   vpc_security_group_ids = ["${local.security_group_ids}"]
   iam_instance_profile   = "${aws_iam_instance_profile.ec2.name}"
-
-  user_data_base64 = "${base64gzip(data.template_file.manager_cloud_config.*.rendered[count.index])}"
+  user_data_base64       = "${data.template_cloudinit_config.manager_cloud_config.*.rendered[count.index]}"
 
   tags {
     Name = "${var.name} manager ${count.index}"
