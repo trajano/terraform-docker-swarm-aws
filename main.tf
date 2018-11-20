@@ -134,7 +134,7 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
     ]
 
     resources = [
-      "arn:aws:s3:::*",
+      "${aws_s3_bucket.terraform.arn}",
     ]
   }
 }
@@ -149,11 +149,9 @@ resource "aws_iam_role" "ec2" {
   assume_role_policy = "${data.aws_iam_policy_document.instance-assume-role-policy.json}"
 }
 
-resource "aws_iam_role_policy_attachment" "AmazonS3FullAccess" {
+resource "aws_iam_role_policy_attachment" "s3-access-role-policy" {
   role       = "${aws_iam_role.ec2.name}"
   policy_arn = "${aws_iam_policy.s3-access-role-policy.arn}"
-
-  #  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
 resource "aws_iam_instance_profile" "ec2" {
