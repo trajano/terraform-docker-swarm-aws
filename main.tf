@@ -127,6 +127,22 @@ data "aws_iam_policy_document" "instance-assume-role-policy" {
   }
 }
 
+data "aws_iam_policy_document" "s3-access-role-policy" {
+  statement {
+    actions = [
+      "s3:*",
+    ]
+
+    resources = [
+      "arn:aws:s3:::*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "s3-access-role-policy" {
+  policy = "${data.aws_iam_policy_document.s3-access-role-policy.json}"
+}
+
 resource "aws_iam_role" "ec2" {
   name               = "${local.dns_name}-ec2"
   description        = "Allows reading of infrastructure secrets"
@@ -135,7 +151,9 @@ resource "aws_iam_role" "ec2" {
 
 resource "aws_iam_role_policy_attachment" "AmazonS3FullAccess" {
   role       = "${aws_iam_role.ec2.name}"
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+  policy_arn = "${aws_iam_policy.s3-access-role-policy.arn}"
+
+  #  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
 resource "aws_iam_instance_profile" "ec2" {
