@@ -1,7 +1,3 @@
-provider "null" {
-  version = "~> 1.0"
-}
-
 locals {
   dns_name           = "${lower(replace(var.name, " ", "-"))}"
   s3_bucket_name     = "${var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"}"
