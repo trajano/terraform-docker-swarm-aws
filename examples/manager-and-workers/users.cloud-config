@@ -1,0 +1,9 @@
+users:
+- name: deployer
+  ssh-authorized-keys:
+  - ssh-rsa hbdaySLKr3nRFkKF3mGeUHNZwa6m9vI5xQrkZb0nxqhqQauTT1QkMFO21SrL7jiYTa0DG6
+  sudo: ['ALL=(ALL) NOPASSWD: /usr/bin/docker']
+- name: admin
+  ssh-authorized-keys:
+  - ssh-rsa hbdaySLKr3nRFkKF3mGeUHNZwa6m9vI5xQrkZb0nxqhqQauTT1QkMFO21SrL7jiYTa0DG6
+  sudo: ['ALL=(ALL) NOPASSWD:ALL']

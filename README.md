@@ -10,7 +10,7 @@ There are no elastic IPs allocated in the module in order to prevent using up th
 
 ## Prerequisites
 
-The `aws` plugin is configured in your TF file.
+The `aws` provider is configured in your TF file.
 
 AWS permissions to do the following
 
