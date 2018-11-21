@@ -130,7 +130,10 @@ data "aws_iam_policy_document" "instance-assume-role-policy" {
 data "aws_iam_policy_document" "s3-access-role-policy" {
   statement {
     actions = [
-      "s3:*",
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:DeleteObject",
+      "s3:ListBucket",
     ]
 
     resources = [
