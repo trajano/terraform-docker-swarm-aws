@@ -31,13 +31,16 @@ output:
 write_files:
 - content: |
     #!/bin/sh
-    docker system prune -f > /dev/null
+    docker image prune -f > /dev/null
+    docker container prune -f > /dev/null
   path: /etc/cron.hourly/docker-prune.sh
   owner: root:root
   permissions: '0700'
 - content: |
     #!/bin/sh
-    docker system prune --all -f > /dev/null
+    docker image prune --all -f > /dev/null
+    docker network prune -f > /dev/null
+    docker volume prune -f > /dev/null
   path: /etc/cron.daily/docker-prune.sh
   owner: root:root
   permissions: '0700'
