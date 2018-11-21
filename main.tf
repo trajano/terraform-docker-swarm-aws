@@ -135,11 +135,13 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
 
     resources = [
       "${aws_s3_bucket.terraform.arn}",
+      "${aws_s3_bucket.terraform.arn}/*",
     ]
   }
 }
 
 resource "aws_iam_policy" "s3-access-role-policy" {
+  name   = "${local.dns_name}-ec2-policy"
   policy = "${data.aws_iam_policy_document.s3-access-role-policy.json}"
 }
 
