@@ -25,5 +25,6 @@ repo_upgrade: all
 packages:
 - docker-ce
 - haveged
+- python2-boto3
 output:
   all: '| tee -a /var/log/cloud-init-output.log'
