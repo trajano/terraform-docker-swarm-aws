@@ -28,3 +28,16 @@ packages:
 - python2-boto3
 output:
   all: '| tee -a /var/log/cloud-init-output.log'
+write_files:
+- content: |
+    #!/bin/sh
+    docker system prune -f > /dev/null
+  path: /etc/cron.hourly/docker-prune.sh
+  owner: root:root
+  permissions: '0700'
+- content: |
+    #!/bin/sh
+    docker system prune --all -f > /dev/null
+  path: /etc/cron.daily/docker-prune.sh
+  owner: root:root
+  permissions: '0700'

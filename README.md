@@ -33,6 +33,10 @@ AWS permissions to do the following
 
 The `examples/simple` folder shows an example of how to use this module.
 
+## Usage of S3
+
+S3 was used because EFS and SimpleDB (both better choices in terms of cost and function) are NOT available in `ca-central-1` and likely some other non-US regions.
+
 ## Upgrading the swarm
 
 Though `yum update` can simply update the software, it may be required to update things that are outside such as updates to the module itself, `cloud_config_extra` information or AMI updates. To do such an update without having to recreate the swarm it is best to do it one manager node at a time and do `manager0` last. This module ignores changes to cloud config or AMI information in order to prevent updates of those to force a new resource inadvertently.

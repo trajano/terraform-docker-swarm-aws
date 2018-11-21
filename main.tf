@@ -137,7 +137,31 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
       "${aws_s3_bucket.terraform.arn}/*",
     ]
   }
+
+  # SimpleDB is not available in all regions
+  #
+  # statement {
+  #   actions = [
+  #     "sdb:GetAttributes",
+  #     "sdb:BatchDeleteAttributes",
+  #     "sdb:PutAttributes",
+  #     "sdb:DeleteAttributes",
+  #     "sdb:Select",
+  #     "sdb:DomainMetadata",
+  #     "sdb:BatchPutAttributes",
+  #   ]
+
+  #   resources = [
+  #     "*",
+  #   ]
+  # }
 }
+
+# SimpleDB is not available in all regions
+#
+# resource "aws_simpledb_domain" "db" {
+#   name = "${local.dns_name}.tf"
+# }
 
 resource "aws_iam_policy" "s3-access-role-policy" {
   name   = "${local.dns_name}-ec2-policy"
@@ -160,19 +184,17 @@ resource "aws_iam_instance_profile" "ec2" {
   role = "${aws_iam_role.ec2.name}"
 }
 
-data "template_file" "manager_cloud_config" {
+data "template_file" "init_manager" {
   count    = "${var.managers}"
-  template = "${file("${path.module}/manager.cloud-config")}"
+  template = "${file("${path.module}/init_manager.py")}"
 
   vars {
     s3_bucket      = "${aws_s3_bucket.terraform.bucket}"
     instance_index = "${count.index}"
-    manager0_ip    = "${cidrhost(aws_subnet.managers.*.cidr_block[0], 10)}"
-    extra          = "${var.cloud_config_extra}"
   }
 }
 
-data "template_cloudinit_config" "manager_cloud_config" {
+data "template_cloudinit_config" "managers" {
   count         = "${var.managers}"
   gzip          = "true"
   base64_encode = "true"
@@ -182,31 +204,30 @@ data "template_cloudinit_config" "manager_cloud_config" {
   }
 
   part {
-    filename     = "manager.sh"
-    content      = "${data.template_file.manager_cloud_config.*.rendered[count.index]}"
-    content_type = "text/cloud-config"
-  }
-
-  part {
     filename     = "extra.sh"
     content      = "${var.cloud_config_extra}"
     content_type = "text/cloud-config"
     merge_type   = "list(append)+dict(recurse_array)+str()"
   }
+
+  part {
+    filename     = "init_manager.py"
+    content      = "${data.template_file.init_manager.*.rendered[count.index]}"
+    content_type = "text/x-shellscript"
+  }
 }
 
-data "template_file" "worker_cloud_config" {
+data "template_file" "init_worker" {
   count    = "${var.workers}"
-  template = "${file("${path.module}/worker.cloud-config")}"
+  template = "${file("${path.module}/init_worker.py")}"
 
   vars {
     s3_bucket      = "${aws_s3_bucket.terraform.bucket}"
     instance_index = "${count.index}"
-    manager0_ip    = "${cidrhost(aws_subnet.managers.*.cidr_block[0], 10)}"
   }
 }
 
-data "template_cloudinit_config" "worker_cloud_config" {
+data "template_cloudinit_config" "workers" {
   count         = "${var.workers}"
   gzip          = "true"
   base64_encode = "true"
@@ -216,28 +237,28 @@ data "template_cloudinit_config" "worker_cloud_config" {
   }
 
   part {
-    filename     = "worker.sh"
-    content      = "${data.template_file.worker_cloud_config.*.rendered[count.index]}"
-    content_type = "text/cloud-config"
-  }
-
-  part {
     filename     = "extra.sh"
     content_type = "text/cloud-config"
     content      = "${var.cloud_config_extra}"
     merge_type   = "list(append)+dict(recurse_array)+str()"
   }
+
+  part {
+    filename     = "init_worker.py"
+    content      = "${data.template_file.init_worker.*.rendered[count.index]}"
+    content_type = "text/x-shellscript"
+  }
 }
 
 resource "aws_instance" "managers" {
-  count                  = "${data.template_file.manager_cloud_config.count}"
+  count                  = "${data.template_cloudinit_config.managers.count}"
   ami                    = "${data.aws_ami.base_ami.id}"
   instance_type          = "${var.instance_type}"
   subnet_id              = "${aws_subnet.managers.*.id[count.index % length(data.aws_availability_zones.azs.*.names)]}"
   private_ip             = "${cidrhost(aws_subnet.managers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}"
   vpc_security_group_ids = ["${local.security_group_ids}"]
   iam_instance_profile   = "${aws_iam_instance_profile.ec2.name}"
-  user_data_base64       = "${data.template_cloudinit_config.manager_cloud_config.*.rendered[count.index]}"
+  user_data_base64       = "${data.template_cloudinit_config.managers.*.rendered[count.index]}"
 
   tags {
     Name = "${var.name} manager ${count.index}"
@@ -260,14 +281,14 @@ resource "aws_instance" "managers" {
 }
 
 resource "aws_instance" "workers" {
-  count                  = "${data.template_file.worker_cloud_config.count}"
+  count                  = "${data.template_cloudinit_config.workers.count}"
   ami                    = "${data.aws_ami.base_ami.id}"
   instance_type          = "${var.instance_type}"
   subnet_id              = "${aws_subnet.workers.*.id[count.index % length(data.aws_availability_zones.azs.*.names)]}"
   private_ip             = "${cidrhost(aws_subnet.workers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}"
   vpc_security_group_ids = ["${local.security_group_ids}"]
   iam_instance_profile   = "${aws_iam_instance_profile.ec2.name}"
-  user_data_base64       = "${base64gzip(data.template_file.worker_cloud_config.*.rendered[count.index])}"
+  user_data_base64       = "${base64gzip(data.template_cloudinit_config.workers.*.rendered[count.index])}"
   key_name               = "${var.key_name}"
 
   tags {
