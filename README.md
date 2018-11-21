@@ -47,24 +47,28 @@ The default merge rules of cloud-config is used which may yield unexpected resul
 
 Though `yum update` can simply update the software, it may be required to update things that are outside such as updates to the module itself, `cloud_config_extra` information or AMI updates. To do such an update without having to recreate the swarm it is best to do it one manager node at a time and do `manager0` last. This module ignores changes to cloud config or AMI information in order to prevent updates of those to force a new resource inadvertently.
 
-Before forcing an update, the node cleanly leave swarm otherwise there would be a dangling node in the list. To do this on an an existing manager node run the following to remove the `manager1` for example from the swarm:
+The first thing to do is update the workers.  It is important not to do all the workers at once unless you are certain your swarm can handle the reduced capacity.  You can do the workers in batches but generally the process is
 
-    sudo docker node demote manager1
-    sudo docker node update --availability drain
+    for each batch of workers
+      for each worker in batch
+        on a manager: sudo docker node update --availability drain <worker>
+        on worker: sudo docker swarm leave
+        terraform taint --module=docker-swarm aws_instance.worker.<worker index>
+      terraform apply
 
-Once the `manager1` no longer has any running containers, on `manager1`
+Once the workers are done the managers have to be done next.  The process is similar with the addition of a demotion to take the node out of manager status first and when they rejoin the swarm they will be managers again.
 
-    sudo docker swarm leave
-
-Once it has left the swarm, on the other manager node remove the `manager1`.
-
-    sudo docker node rm manager1
-
-Then force an update by tainting the resource. For `manager1` this will be:
-
-    terraform taint -module=docker-swarm aws_instance.managers.1
+    for each manager > 0
+      on manager0: sudo docker node demote <manager>
+      on manager0: sudo docker node update --availability drain <manager>
+      on manager: sudo docker swarm leave
+      terraform taint --module=docker-swarm aws_instance.manager.<manager index>
+    terraform apply
+    on manager1: sudo docker node demote manager0
+    on manager1: sudo docker node update --availability drain manager0
+    terraform taint --module=docker-swarm aws_instance.manager.0
     terraform apply
 
-By doing the above, you can let the raft consensus recover itself. Make sure you verify your node list before removing another node using `sudo docker node ls` and ensuring all the nodes are there.
+By doing the above, you can let the raft consensus recover itself.
 
 Before updating `manager0` make sure `manager1` is up and running as it checks it it can join using `manager1` otherwise it will initialize a new swarm.
