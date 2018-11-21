@@ -61,6 +61,6 @@ else:
   manager0_ip = manager0_ip_object.get()['Body'].read()
   subprocess.check_call(["docker","swarm","join","--token", manager_token, manager0_ip])
 
-myip = subprocess.check_output(["curl", "http://169.254.169.254/latest/meta-data/local-ipv4"]).strip()
+myip = subprocess.check_output(["curl", "-s", "http://169.254.169.254/latest/meta-data/local-ipv4"]).strip()
 myip_object = s3.Object(s3_bucket,'ip%d' % instance_index)
 myip_object.put(Body=bytes(myip), StorageClass="ONEZONE_IA")
