@@ -21,7 +21,6 @@ data "template_cloudinit_config" "managers" {
     filename     = "extra.sh"
     content      = "${var.cloud_config_extra}"
     content_type = "text/cloud-config"
-    merge_type   = "list(append)+dict(recurse_array)+str()"
   }
 
   part {
@@ -32,7 +31,7 @@ data "template_cloudinit_config" "managers" {
 }
 
 resource "aws_instance" "managers" {
-  count                  = "${data.template_cloudinit_config.managers.count}"
+  count                  = "${var.managers}"
   ami                    = "${data.aws_ami.base_ami.id}"
   instance_type          = "${var.instance_type}"
   subnet_id              = "${aws_subnet.managers.*.id[count.index % length(data.aws_availability_zones.azs.*.names)]}"

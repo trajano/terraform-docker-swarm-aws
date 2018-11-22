@@ -4,7 +4,7 @@ This is a Terraform configuration that sets up a Docker Swarm on an existing VPC
 
 ## Terraformed layout
 
-In the VPC there will be 2 x _number of availability zones in region_ subnets created.  Each EC2 instance will be placed in an subnet in a round-robin fashion.
+In the VPC there will be 2 x _number of availability zones in region_ subnets created. Each EC2 instance will be placed in an subnet in a round-robin fashion.
 
 There are no elastic IPs allocated in the module in order to prevent using up the elastic IP allocation for the VPC. It is up to the caller to set that up.
 
@@ -14,10 +14,10 @@ The `aws` provider is configured in your TF file.
 
 AWS permissions to do the following
 
-* Manage EC2 resource
-* Security Groups
-* IAM permissions
-* S3 Create and Access
+- Manage EC2 resource
+- Security Groups
+- IAM permissions
+- S3 Create and Access
 
 ## Limitations
 
@@ -36,6 +36,12 @@ The `examples/simple` folder shows an example of how to use this module.
 ## Usage of S3
 
 S3 was used because EFS and SimpleDB (both better choices in terms of cost and function) are NOT available in `ca-central-1` and likely some other non-US regions.
+
+## Cloud Config merging
+
+The default merge rules of cloud-config is used which may yield unexpected results (see [cloudconfig merge behaviours](https://jen20.com/2015/10/04/cloudconfig-merging.html)) if you are changing existing keys. To bring back the merge behaviour from 1.2 add
+
+    merge_how: "list(append)+dict(recurse_array)+str()"
 
 ## Upgrading the swarm
 

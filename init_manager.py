@@ -46,7 +46,7 @@ if instance_index == 0:
     manager1_ip = manager1_ip_object.get()['Body'].read()
 
     try:
-      subprocess.check_call(["docker","swarm","join","--token", manager_token, manager1_ip])
+      subprocess.check_output(["docker","swarm","join","--token", manager_token, manager1_ip], stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
       initialize_swarm()
   else:

@@ -1,5 +1,6 @@
 #cloud-config
 bootcmd:
+- [ cloud-init-per, once, fastest-mirror, yum, "install", "-y", "yum-plugin-fastestmirror" ]
 - [ cloud-init-per, once, gpg-key-docker, rpm, "--import", "https://download.docker.com/linux/centos/gpg" ]
 - [ cloud-init-per, once, gpg-key-centos, rpm, "--import", "https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7" ]
 - [ cloud-init-per, once, gpg-key-epel, rpm, "--import", "http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7" ]
@@ -44,3 +45,5 @@ write_files:
   path: /etc/cron.daily/docker-prune.sh
   owner: root:root
   permissions: '0700'
+groups:
+- docker
