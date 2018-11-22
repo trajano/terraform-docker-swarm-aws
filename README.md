@@ -19,6 +19,10 @@ AWS permissions to do the following
 - IAM permissions
 - S3 Create and Access
 
+## TLS
+
+The *manager* nodes will expose port 2376.
+
 ## Limitations
 
 - Maximum of 240 docker managers.
