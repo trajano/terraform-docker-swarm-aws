@@ -44,3 +44,5 @@ write_files:
   path: /etc/cron.daily/docker-prune.sh
   owner: root:root
   permissions: '0700'
+groups:
+- docker
