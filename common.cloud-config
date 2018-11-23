@@ -19,6 +19,7 @@ yum_repos:
   epel:
     name: EPEL
     baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch
+    mirrorlist: https://mirrors.fedoraproject.org/mirrorlist?repo=epel-7&arch=x86_64
     enabled: true
     gpgcheck: true
 repo_update: true
