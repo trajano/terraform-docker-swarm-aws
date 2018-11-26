@@ -55,3 +55,9 @@ variable "key_name" {
   description = "The key name of the Key Pair to use for the instance; which can be managed using the aws_key_pair resource."
   default     = ""
 }
+
+variable "manager_eip_ids" {
+  description = "These are elastic IPs association IDs that will be attached to the manager nodes.  The attachment occurs as part of the module."
+  type        = "list"
+  default     = []
+}

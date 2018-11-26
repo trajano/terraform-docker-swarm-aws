@@ -1,7 +1,27 @@
-resource "tls_private_key" "manager" {
+resource "tls_private_key" "managers" {
   count     = "${var.managers}"
   algorithm = "RSA"
   rsa_bits  = 4096
+}
+
+resource "tls_cert_request" "managers" {
+  count           = "${var.managers}"
+  key_algorithm   = "${tls_private_key.managers.*.algorithm[count.index]}"
+  private_key_pem = "${tls_private_key.managers.*.private_key_pem[count.index]}"
+
+  subject {
+    common_name = "manager${count.index}"
+  }
+
+  dns_names = [
+    "manager${count.index}",
+    "localhost",
+  ]
+
+  ip_addresses = [
+    "${cidrhost(aws_subnet.managers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}",
+    "127.0.0.1",
+  ]
 }
 
 data "template_file" "init_manager" {
@@ -11,6 +31,7 @@ data "template_file" "init_manager" {
   vars {
     s3_bucket      = "${aws_s3_bucket.terraform.bucket}"
     instance_index = "${count.index}"
+    private_key    = "${tls_private_key.managers.*.private_key_pem[count.index]}"
   }
 }
 
@@ -64,4 +85,10 @@ resource "aws_instance" "managers" {
   credit_specification {
     cpu_credits = "standard"
   }
+}
+
+resource "aws_eip_association" "exposed_managers" {
+  count         = "${length(var.manager_eip_ids)}"
+  allocation_id = "${var.manager_eip_ids[count.index]}"
+  instance_id   = "${aws_instance.managers.*.id[count.index]}"
 }
