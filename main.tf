@@ -79,13 +79,6 @@ resource "aws_security_group" "docker" {
   }
 
   ingress {
-    from_port   = 2376
-    to_port     = 2376
-    protocol    = "tcp"
-    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
-  }
-
-  ingress {
     from_port   = 7946
     to_port     = 7946
     protocol    = "tcp"
