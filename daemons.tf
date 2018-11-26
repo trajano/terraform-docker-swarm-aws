@@ -21,6 +21,7 @@ resource "tls_cert_request" "daemons" {
 
   #  ip_addresses = "${concat(data.aws_eip.daemons.*.public_ip, list(cidrhost(aws_subnet.managers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index), "127.0.0.1"))}"
   ip_addresses = [
+    "${data.aws_eip.daemons.*.public_ip[count.index]}",
     "${cidrhost(aws_subnet.managers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}",
     "127.0.0.1",
   ]
