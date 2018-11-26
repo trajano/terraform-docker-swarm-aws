@@ -1,3 +1,9 @@
+resource "tls_private_key" "manager" {
+  count     = "${var.managers}"
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 data "template_file" "init_manager" {
   count    = "${var.managers}"
   template = "${file("${path.module}/init_manager.py")}"
