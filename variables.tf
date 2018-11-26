@@ -56,8 +56,36 @@ variable "key_name" {
   default     = ""
 }
 
+variable "manager_eip_count" {
+  description = "This is the number of manager EIPs.  This is a workaround as count in some contexts cannot be a computed value."
+  default     = 0
+}
+
 variable "manager_eip_ids" {
-  description = "These are elastic IPs association IDs that will be attached to the manager nodes.  The attachment occurs as part of the module."
+  description = "These are elastic IP association IDs that will be attached to the manager nodes.  The attachment occurs as part of the module."
+  type        = "list"
+  default     = []
+}
+
+variable "manager_eip_public_ips" {
+  description = "These are elastic IP public_ip that will be attached to the manager nodes.  The attachment occurs as part of the module."
+  type        = "list"
+  default     = []
+}
+
+variable "manager_private_key_pems" {
+  description = "These are private key PEMs to the manager nodes that will have their Docker sockets exposed."
+  type        = "list"
+  default     = []
+}
+
+variable "manager_private_key_algorithm" {
+  description = "The name of the algorithm for the key provided in manager_private_key_pems."
+  default     = "RSA"
+}
+
+variable "manager_dns" {
+  description = "Public DNS names associated with the manager."
   type        = "list"
   default     = []
 }

@@ -87,8 +87,3 @@ resource "aws_instance" "managers" {
   }
 }
 
-resource "aws_eip_association" "exposed_managers" {
-  count         = "${length(var.manager_eip_ids)}"
-  allocation_id = "${var.manager_eip_ids[count.index]}"
-  instance_id   = "${aws_instance.managers.*.id[count.index]}"
-}

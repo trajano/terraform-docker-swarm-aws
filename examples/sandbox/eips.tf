@@ -1,6 +1,6 @@
 resource "aws_eip" "managers" {
-  count    = "1"
-  vpc      = true
+  count = "1"
+  vpc   = true
 }
 
 output "manager_ip_addresses" {
