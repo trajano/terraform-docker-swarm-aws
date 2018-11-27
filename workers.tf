@@ -36,15 +36,19 @@ resource "aws_instance" "workers" {
     "aws_instance.managers",
   ]
 
-  count                  = "${var.workers}"
-  ami                    = "${data.aws_ami.base_ami.id}"
-  instance_type          = "${var.instance_type}"
-  subnet_id              = "${aws_subnet.workers.*.id[(count.index + var.managers) % length(data.aws_availability_zones.azs.*.names)]}"
-  private_ip             = "${cidrhost(aws_subnet.workers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}"
-  vpc_security_group_ids = ["${local.security_group_ids}"]
-  iam_instance_profile   = "${aws_iam_instance_profile.ec2.name}"
-  user_data_base64       = "${data.template_cloudinit_config.workers.*.rendered[count.index]}"
-  key_name               = "${var.key_name}"
+  count         = "${var.workers}"
+  ami           = "${data.aws_ami.base_ami.id}"
+  instance_type = "${var.instance_type}"
+  subnet_id     = "${aws_subnet.workers.*.id[(count.index + var.managers) % length(data.aws_availability_zones.azs.*.names)]}"
+  private_ip    = "${cidrhost(aws_subnet.workers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}"
+
+  vpc_security_group_ids = [
+    "${local.security_group_ids}",
+  ]
+
+  iam_instance_profile = "${aws_iam_instance_profile.ec2.name}"
+  user_data_base64     = "${data.template_cloudinit_config.workers.*.rendered[count.index]}"
+  key_name             = "${var.key_name}"
 
   tags {
     Name = "${var.name} worker ${count.index}"

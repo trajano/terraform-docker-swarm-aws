@@ -54,6 +54,7 @@ resource "aws_instance" "managers" {
 
   iam_instance_profile = "${aws_iam_instance_profile.ec2.name}"
   user_data_base64     = "${data.template_cloudinit_config.managers.*.rendered[count.index]}"
+  key_name             = "${var.key_name}"
 
   tags {
     Name = "${var.name} manager ${count.index}"
