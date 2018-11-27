@@ -3,9 +3,10 @@ provider "template" {
 }
 
 locals {
-  dns_name           = "${lower(replace(var.name, " ", "-"))}"
-  s3_bucket_name     = "${var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"}"
-  security_group_ids = "${concat(var.exposed_security_group_ids, list(aws_security_group.docker.id))}"
+  dns_name                  = "${lower(replace(var.name, " ", "-"))}"
+  s3_bucket_name            = "${var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"}"
+  security_group_ids        = "${concat(var.exposed_security_group_ids, list(aws_security_group.docker.id))}"
+  daemon_security_group_ids = "${concat(var.exposed_security_group_ids, list(aws_security_group.docker.id, aws_security_group.daemon.id))}"
 }
 
 data "aws_availability_zones" "azs" {}

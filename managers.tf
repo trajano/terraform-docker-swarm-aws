@@ -43,8 +43,9 @@ resource "aws_instance" "managers" {
   subnet_id     = "${aws_subnet.managers.*.id[count.index % length(data.aws_availability_zones.azs.*.names)]}"
   private_ip    = "${cidrhost(aws_subnet.managers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}"
 
-  vpc_security_group_ids = ["${local.security_group_ids}",
-    "${count.index < var.daemon_count ? aws_security_group.daemon.id : ""}",
+  # workaround as noted by https://github.com/hashicorp/terraform/issues/12453#issuecomment-284273475
+  vpc_security_group_ids = [
+    "${split(",", count.index < var.daemon_count ? join(",", local.daemon_security_group_ids) : join(",", local.security_group_ids))}",
   ]
 
   iam_instance_profile = "${aws_iam_instance_profile.ec2.name}"
