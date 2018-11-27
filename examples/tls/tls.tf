@@ -1,6 +1,11 @@
 # Be careful when using this as the tls_private_key stores the private key unencrypted in the Terraform backend.
+resource "aws_eip" "managers" {
+  count = "${var.daemon_count}"
+  vpc   = true
+}
+
 resource "tls_private_key" "daemons" {
-  count     = "${aws_eip.daemons.count}"
+  count     = "${aws_eip.managers.count}"
   algorithm = "RSA"
 }
 
@@ -28,7 +33,7 @@ resource "tls_self_signed_cert" "ca" {
 }
 
 resource "tls_locally_signed_cert" "daemons" {
-  count              = "${aws_eip.daemons.count}"
+  count              = "${aws_eip.managers.count}"
   cert_request_pem   = "${module.docker-swarm.daemon_cert_request_pems[count.index]}"
   ca_key_algorithm   = "${tls_private_key.ca.algorithm}"
   ca_private_key_pem = "${tls_private_key.ca.private_key_pem}"

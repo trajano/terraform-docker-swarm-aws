@@ -62,9 +62,14 @@ variable "daemon_count" {
 }
 
 variable "daemon_eip_ids" {
-  description = "These are elastic IP association IDs that will be attached to the manager nodes.  The attachment occurs as part of the module."
+  description = "These are elastic IP association IDs that will be attached to the daemon nodes.  The association is not performed in the module."
   type        = "list"
   default     = []
+}
+
+variable "daemon_ca_cert_pem" {
+  description = "This is the cert for the CA."
+  default     = ""
 }
 
 variable "daemon_private_key_pems" {
@@ -77,11 +82,6 @@ variable "daemon_cert_pems" {
   description = "These are cert PEMs to the manager nodes that will have their Docker sockets exposed."
   type        = "list"
   default     = []
-}
-
-variable "daemon_ca_cert_pem" {
-  description = "This is the cert for the CA."
-  default     = ""
 }
 
 variable "daemon_private_key_algorithm" {

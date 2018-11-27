@@ -1,5 +1,6 @@
 resource "aws_eip" "managers" {
   count    = "2"
+  instance = "${module.docker-swarm.manager_instance_ids[count.index]}"
   vpc      = true
 }
 

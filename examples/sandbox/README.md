@@ -1,15 +1,6 @@
-# Mostly default example (sandbox)
+# Sandbox
 
-This example showsthe default of a simple 1-manager swarm. In addition some customizations done for the provisioning are:
-
-1. exposing two Elastic IPs (as there's a limit to Elastic IPs being provisioned)
-2. exposing the SSH, HTTP and HTTPS ports
-3. adding two custom users with their SSH keys
-4. Outputting the IPs.
-
-## Source
-
-This uses the source "../.." rather than the release copy and is primarily used for developers to verify the resulting swarm.
+This example is used for integration testing with the current code base. This uses the source "../.." rather than the release copy.
 
 ## Using a private docker-ce repo
 

@@ -44,6 +44,8 @@ As noted in https://www.terraform.io/docs/providers/tls/r/private_key.html
 
 As such the module does not create the private keys (though the example will show how to do it using Terraform). However, the CSRs are still created by the module and it is expected that Terraform will convert it to a CSR.
 
+If you want to use elastic IPs but not expose the Docker socket you just leave the `daemon_count` as `0` (default).
+
 ## Limitations
 
 - Maximum of 240 docker managers.
