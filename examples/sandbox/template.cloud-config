@@ -1,5 +1,5 @@
 #cloud-config
-bootcmd: {}
+bootcmd: []
 yum_repos:
   docker-ce:
     name: Docker

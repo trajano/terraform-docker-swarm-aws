@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 import os
 
-private_key = '''
-${private_key}
-'''
-cert = '''
-${cert}
-'''
-ca_cert = '''
-${ca_cert}
+private_key = '''${private_key}'''
+cert = '''${cert}'''
+ca_cert = '''${ca_cert}'''
+docker_service = '''[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd --tlsverify --tlscacert=/etc/docker/ca.crt --tlscert=/etc/docker/cert.pem --tlskey=/etc/docker/key.pem -H 0.0.0.0:2376 -H unix://
 '''
 instance_index = int('${instance_index}')
 daemon_count = int('${daemon_count}')
@@ -20,3 +18,9 @@ if instance_index < daemon_count:
         text_file.write(cert)
     with open("/etc/docker/ca.crt", "w") as text_file:
         text_file.write(ca_cert)
+    with open("/etc/docker/ca.crt", "w") as text_file:
+        text_file.write(ca_cert)
+
+    os.mkdir("/etc/systemd/system/docker.service.d")
+    with open("/etc/systemd/system/docker.service.d/10-enable-tls.conf",  "w") as text_file:
+        text_file.write(docker_service)
