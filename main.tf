@@ -37,7 +37,6 @@ resource "aws_subnet" "workers" {
 }
 
 data "aws_vpc" "main" {
-  # id = "${local.vpc_id}"
   id = "${var.vpc_id}"
 }
 
@@ -101,6 +100,28 @@ resource "aws_security_group" "docker" {
 
   tags {
     Name = "${var.name} Docker"
+  }
+
+  timeouts {
+    create = "2m"
+    delete = "2m"
+  }
+}
+
+resource "aws_security_group" "daemon" {
+  name        = "docker-daemon"
+  description = "Docker Daemon port"
+  vpc_id      = "${var.vpc_id}"
+
+  ingress {
+    from_port   = 2376
+    to_port     = 2376
+    protocol    = "tcp"
+    cidr_blocks = ["${var.daemon_cidr_block}"]
+  }
+
+  tags {
+    Name = "${var.name} Docker Daemon"
   }
 
   timeouts {

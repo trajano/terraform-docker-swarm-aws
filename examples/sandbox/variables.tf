@@ -1,3 +1,8 @@
+variable "daemon_count" {
+  description = "This is the number of daemons to expose.  This is a workaround as count in some contexts cannot be a computed value."
+  default     = 1
+}
+
 variable "ssh_key" {
   description = "SSH key to access the server."
 }

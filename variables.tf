@@ -57,7 +57,7 @@ variable "key_name" {
 }
 
 variable "daemon_count" {
-  description = "This is the number of manager EIPs.  This is a workaround as count in some contexts cannot be a computed value."
+  description = "This is the number of daemons to expose.  This is a workaround as count in some contexts cannot be a computed value."
   default     = 0
 }
 
@@ -93,4 +93,9 @@ variable "daemon_dns" {
   description = "Public DNS names associated with the manager."
   type        = "list"
   default     = []
+}
+
+variable "daemon_cidr_block" {
+  description = "CIDR block to allow access to the  the Docker daemon."
+  default     = "0.0.0.0/0"
 }
