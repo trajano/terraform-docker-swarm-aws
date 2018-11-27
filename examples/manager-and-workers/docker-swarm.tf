@@ -1,6 +1,6 @@
 module "docker-swarm" {
   source  = "trajano/swarm-aws/docker"
-  version = "~>1.2"
+  version = "~>2.0"
   
   name   = "My VPC Swarm"
   vpc_id = "${aws_vpc.main.id}"
