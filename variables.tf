@@ -55,3 +55,47 @@ variable "key_name" {
   description = "The key name of the Key Pair to use for the instance; which can be managed using the aws_key_pair resource."
   default     = ""
 }
+
+variable "daemon_count" {
+  description = "This is the number of daemons to expose.  This is a workaround as count in some contexts cannot be a computed value."
+  default     = 0
+}
+
+variable "daemon_eip_ids" {
+  description = "These are elastic IP association IDs that will be attached to the manager nodes.  The attachment occurs as part of the module."
+  type        = "list"
+  default     = []
+}
+
+variable "daemon_private_key_pems" {
+  description = "These are private key PEMs to the manager nodes that will have their Docker sockets exposed."
+  type        = "list"
+  default     = []
+}
+
+variable "daemon_cert_pems" {
+  description = "These are cert PEMs to the manager nodes that will have their Docker sockets exposed."
+  type        = "list"
+  default     = []
+}
+
+variable "daemon_ca_cert_pem" {
+  description = "This is the cert for the CA."
+  default     = ""
+}
+
+variable "daemon_private_key_algorithm" {
+  description = "The name of the algorithm for the key provided in manager_private_key_pems."
+  default     = "RSA"
+}
+
+variable "daemon_dns" {
+  description = "Public DNS names associated with the manager."
+  type        = "list"
+  default     = []
+}
+
+variable "daemon_cidr_block" {
+  description = "CIDR block to allow access to the  the Docker daemon."
+  default     = "0.0.0.0/0"
+}

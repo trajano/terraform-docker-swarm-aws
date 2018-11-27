@@ -3,9 +3,10 @@ provider "template" {
 }
 
 locals {
-  dns_name           = "${lower(replace(var.name, " ", "-"))}"
-  s3_bucket_name     = "${var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"}"
-  security_group_ids = "${concat(var.exposed_security_group_ids, list(aws_security_group.docker.id))}"
+  dns_name                  = "${lower(replace(var.name, " ", "-"))}"
+  s3_bucket_name            = "${var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"}"
+  security_group_ids        = "${concat(var.exposed_security_group_ids, list(aws_security_group.docker.id))}"
+  daemon_security_group_ids = "${concat(var.exposed_security_group_ids, list(aws_security_group.docker.id, aws_security_group.daemon.id))}"
 }
 
 data "aws_availability_zones" "azs" {}
@@ -37,7 +38,6 @@ resource "aws_subnet" "workers" {
 }
 
 data "aws_vpc" "main" {
-  # id = "${local.vpc_id}"
   id = "${var.vpc_id}"
 }
 
@@ -79,13 +79,6 @@ resource "aws_security_group" "docker" {
   }
 
   ingress {
-    from_port   = 2376
-    to_port     = 2376
-    protocol    = "tcp"
-    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
-  }
-
-  ingress {
     from_port   = 7946
     to_port     = 7946
     protocol    = "tcp"
@@ -108,6 +101,28 @@ resource "aws_security_group" "docker" {
 
   tags {
     Name = "${var.name} Docker"
+  }
+
+  timeouts {
+    create = "2m"
+    delete = "2m"
+  }
+}
+
+resource "aws_security_group" "daemon" {
+  name        = "docker-daemon"
+  description = "Docker Daemon port"
+  vpc_id      = "${var.vpc_id}"
+
+  ingress {
+    from_port   = 2376
+    to_port     = 2376
+    protocol    = "tcp"
+    cidr_blocks = ["${var.daemon_cidr_block}"]
+  }
+
+  tags {
+    Name = "${var.name} Docker Daemon"
   }
 
   timeouts {
