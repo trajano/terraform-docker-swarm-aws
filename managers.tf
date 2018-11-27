@@ -37,6 +37,10 @@ data "template_cloudinit_config" "managers" {
 }
 
 resource "aws_instance" "managers" {
+  depends_on = [
+    "aws_s3_bucket.terraform",
+  ]
+
   count         = "${var.managers}"
   ami           = "${data.aws_ami.base_ami.id}"
   instance_type = "${var.instance_type}"
