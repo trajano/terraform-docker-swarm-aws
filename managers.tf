@@ -1,29 +1,3 @@
-resource "tls_private_key" "managers" {
-  count     = "${var.managers}"
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "tls_cert_request" "managers" {
-  count           = "${var.managers}"
-  key_algorithm   = "${tls_private_key.managers.*.algorithm[count.index]}"
-  private_key_pem = "${tls_private_key.managers.*.private_key_pem[count.index]}"
-
-  subject {
-    common_name = "manager${count.index}"
-  }
-
-  dns_names = [
-    "manager${count.index}",
-    "localhost",
-  ]
-
-  ip_addresses = [
-    "${cidrhost(aws_subnet.managers.*.cidr_block[count.index % length(data.aws_availability_zones.azs.*.names)], 10 + count.index)}",
-    "127.0.0.1",
-  ]
-}
-
 data "template_file" "init_manager" {
   count    = "${var.managers}"
   template = "${file("${path.module}/init_manager.py")}"
@@ -31,7 +5,6 @@ data "template_file" "init_manager" {
   vars {
     s3_bucket      = "${aws_s3_bucket.terraform.bucket}"
     instance_index = "${count.index}"
-    private_key    = "${tls_private_key.managers.*.private_key_pem[count.index]}"
   }
 }
 
@@ -48,6 +21,12 @@ data "template_cloudinit_config" "managers" {
     filename     = "extra.sh"
     content      = "${var.cloud_config_extra}"
     content_type = "text/cloud-config"
+  }
+
+  part {
+    filename     = "init_daemon.py"
+    content      = "${data.template_file.init_daemon.*.rendered[count.index]}"
+    content_type = "text/x-shellscript"
   }
 
   part {
@@ -86,4 +65,3 @@ resource "aws_instance" "managers" {
     cpu_credits = "standard"
   }
 }
-
