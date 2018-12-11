@@ -18,8 +18,6 @@ if instance_index < daemon_count:
         text_file.write(cert)
     with open("/etc/docker/ca.crt", "w") as text_file:
         text_file.write(ca_cert)
-    with open("/etc/docker/ca.crt", "w") as text_file:
-        text_file.write(ca_cert)
 
     os.mkdir("/etc/systemd/system/docker.service.d")
     with open("/etc/systemd/system/docker.service.d/10-enable-tls.conf",  "w") as text_file:
