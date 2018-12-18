@@ -10,6 +10,12 @@ yum_repos:
     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
     enabled: true
     gpgcheck: true
+  centos-base:
+    name: CentOS - Base
+    baseurl: http://mirror.centos.org/centos/7/os/$basearch/
+    mirrorlist: http://mirrorlist.centos.org/?release=7&arch=$basearch&repo=os
+    enabled: true
+    gpgcheck: true
   centos-updates:
     name: CentOS - Updates
     baseurl: http://mirror.centos.org/centos/7/updates/$basearch/
