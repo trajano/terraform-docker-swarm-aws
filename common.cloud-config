@@ -10,18 +10,6 @@ yum_repos:
     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
     enabled: true
     gpgcheck: true
-  centos-base:
-    name: CentOS - Base
-    baseurl: http://mirror.centos.org/centos/7/os/$basearch/
-    mirrorlist: http://mirrorlist.centos.org/?release=7&arch=$basearch&repo=os
-    enabled: true
-    gpgcheck: true
-  centos-updates:
-    name: CentOS - Updates
-    baseurl: http://mirror.centos.org/centos/7/updates/$basearch/
-    mirrorlist: http://mirrorlist.centos.org/?release=7&arch=$basearch&repo=updates
-    enabled: true
-    gpgcheck: true
   centos-extras:
     name: CentOS - Extras
     baseurl: http://mirror.centos.org/centos/7/extras/$basearch/
@@ -38,6 +26,7 @@ repo_update: true
 repo_upgrade: all
 packages:
 - docker-ce
+- container-selinux-2:2.68-1.el7.noarch
 - haveged
 - python2-boto3
 output:
