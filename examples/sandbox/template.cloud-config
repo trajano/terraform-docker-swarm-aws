@@ -1,29 +1,4 @@
 #cloud-config
-bootcmd: []
-yum_repos:
-  docker-ce:
-    name: Docker
-    baseurl: ${repo_url}7/$basearch/stable
-    username: ${repo_username}
-    password: ${repo_password}
-    enabled: true
-    gpgcheck: false
-  centos-extras:
-    name: CentOS - Extras
-    baseurl: ${repo_url}7/extras/$basearch/
-    username: ${repo_username}
-    password: ${repo_password}
-    enabled: true
-    gpgcheck: false
-  epel:
-    name: EPEL
-    baseurl: ${repo_url}7/$basearch
-    username: ${repo_username}
-    password: ${repo_password}
-    enabled: true
-    gpgcheck: false
-repo_update: false
-repo_upgrade: null
 users:
 - name: admin
   groups:

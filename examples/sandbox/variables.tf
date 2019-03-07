@@ -9,14 +9,17 @@ variable "ssh_key" {
 
 variable "repo_url" {
   description = "URL to the proxy repo.  We are using Nexus so the URL is something like https://repo.trajano.net/repository/yum-group/.  Note trailing slash at the end."
+  default     = ""
 }
 
 variable "repo_username" {
   description = "Username for the repo."
+  default     = ""
 }
 
 variable "repo_password" {
   description = "Password for the repo."
+  default     = ""
 }
 
 variable "managers" {
