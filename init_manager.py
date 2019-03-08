@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import boto3
+import os
 import subprocess
 
 # Load system daemons
@@ -12,6 +13,7 @@ subprocess.check_call(["systemctl", "start", "docker.service"])
 # Set values loaded by the template
 s3_bucket = '${s3_bucket}'
 instance_index = int('${instance_index}')
+swapsize = int('${swapsize}')
 
 # Set the host name
 subprocess.check_call(["hostnamectl", "set-hostname",
@@ -73,3 +75,14 @@ myip = subprocess.check_output(
     ["curl", "-s", "http://169.254.169.254/latest/meta-data/local-ipv4"]).strip()
 myip_object = s3.Object(s3_bucket, 'ip%d' % instance_index)
 myip_object.put(Body=bytes(myip), StorageClass="ONEZONE_IA")
+
+f = open("/swapfile", "wb")
+for i in xrange(swapsize * 1024):
+    f.write("\0" * 1024 * 1024)
+f.close()
+os.chmod("/swapfile", 0o600)
+subprocess.check_output(["mkswap", "/swapfile"])
+f = open("/etc/fstab", "a")
+f.write("/swapfile none swap defaults 0 0\n")
+f.close()
+subprocess.check_output(["swapon", "-a"])

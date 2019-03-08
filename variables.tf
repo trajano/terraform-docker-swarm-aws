@@ -41,6 +41,11 @@ variable "volume_size" {
   default     = 8
 }
 
+variable "swap_size" {
+  description = "Size of swap file in gigabytes.  It should be smaller than volume size as the file is put in the root volume."
+  default     = 1
+}
+
 variable "manager_subnet_segment_start" {
   description = "This is added to the index to represent the third segment of the IP address."
   default     = 10

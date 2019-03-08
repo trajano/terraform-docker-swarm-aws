@@ -5,6 +5,7 @@ data "template_file" "init_manager" {
   vars {
     s3_bucket      = "${aws_s3_bucket.terraform.bucket}"
     instance_index = "${count.index}"
+    swapsize       = "${var.swap_size}"
   }
 }
 

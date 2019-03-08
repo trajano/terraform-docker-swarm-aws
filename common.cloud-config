@@ -1,6 +1,4 @@
 #cloud-config
-bootcmd:
-- [ cloud-init-per, once, fastest-mirror, yum, "install", "-y", "yum-plugin-fastestmirror" ]
 yum_repos:
   amzn2extra-docker:
     enabled: true
@@ -13,26 +11,26 @@ yum_repos:
 repo_update: true
 repo_upgrade: all
 packages:
-- docker
-- haveged
-- python2-boto3
+  - docker
+  - haveged
+  - python2-boto3
 output:
-  all: '| tee -a /var/log/cloud-init-output.log'
+  all: "| tee -a /var/log/cloud-init-output.log"
 write_files:
-- content: |
-    #!/bin/sh
-    docker image prune -f > /dev/null
-    docker container prune -f > /dev/null
-  path: /etc/cron.hourly/docker-prune.sh
-  owner: root:root
-  permissions: '0700'
-- content: |
-    #!/bin/sh
-    docker image prune --all -f > /dev/null
-    docker network prune -f > /dev/null
-    docker volume prune -f > /dev/null
-  path: /etc/cron.daily/docker-prune.sh
-  owner: root:root
-  permissions: '0700'
+  - content: |
+      #!/bin/sh
+      docker image prune -f > /dev/null
+      docker container prune -f > /dev/null
+    path: /etc/cron.hourly/docker-prune.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/bin/sh
+      docker image prune --all -f > /dev/null
+      docker network prune -f > /dev/null
+      docker volume prune -f > /dev/null
+    path: /etc/cron.daily/docker-prune.sh
+    owner: root:root
+    permissions: "0700"
 groups:
-- docker
+  - docker
