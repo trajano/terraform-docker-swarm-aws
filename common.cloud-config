@@ -1,32 +1,19 @@
 #cloud-config
 bootcmd:
 - [ cloud-init-per, once, fastest-mirror, yum, "install", "-y", "yum-plugin-fastestmirror" ]
-- [ cloud-init-per, once, gpg-key-docker, rpm, "--import", "https://download.docker.com/linux/centos/gpg" ]
-- [ cloud-init-per, once, gpg-key-centos, rpm, "--import", "https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7" ]
-- [ cloud-init-per, once, gpg-key-epel, rpm, "--import", "http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7" ]
 yum_repos:
-  docker-ce:
-    name: Docker
-    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+  amzn2extra-docker:
     enabled: true
-    gpgcheck: true
-  centos-extras:
-    name: CentOS - Extras
-    baseurl: http://mirror.centos.org/centos/7/extras/$basearch/
-    mirrorlist: http://mirrorlist.centos.org/?release=7&arch=$basearch&repo=extras
-    enabled: true
-    gpgcheck: true
   epel:
     name: EPEL
     baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch
     mirrorlist: https://mirrors.fedoraproject.org/mirrorlist?repo=epel-7&arch=x86_64
     enabled: true
-    gpgcheck: true
+    gpgcheck: false
 repo_update: true
 repo_upgrade: all
 packages:
-- docker-ce
-- container-selinux-2:2.68-1.el7.noarch
+- docker
 - haveged
 - python2-boto3
 output:
