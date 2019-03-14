@@ -32,5 +32,32 @@ write_files:
     path: /etc/cron.daily/docker-prune.sh
     owner: root:root
     permissions: "0700"
+  - content: |
+      #!/bin/sh
+      docker node update --availability drain $(docker info -f '{{.Swarm.NodeID}}')
+      sleep 10
+      docker node demote $(docker info -f '{{.Swarm.NodeID}}')
+      sleep 10
+      docker swarm leave
+    path: /root/bin/leave-swarm.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/bin/sh
+      docker node rm $(docker node ls --format "{{.ID}} {{.Status}} {{.Availability}}" | grep " Down Drain" |  awk '{ print $1 }')
+    path: /root/bin/prune-nodes.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/bin/sh
+      for node_name in $*
+      do
+        docker node update --availability drain ${node_name}
+      done
+      sleep 10
+      docker node rm --force $*
+    path: /root/bin/rm-workers.sh
+    owner: root:root
+    permissions: "0700"
 groups:
   - docker

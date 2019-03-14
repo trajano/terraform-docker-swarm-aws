@@ -72,30 +72,35 @@ The default merge rules of cloud-config is used which may yield unexpected resul
 
 ## Upgrading the swarm
 
-Though `yum update` can simply update the software, it may be required to update things that are outside such as updates to the module itself, `cloud_config_extra` information or AMI updates. To do such an update without having to recreate the swarm it is best to do it one manager node at a time and do `manager0` last. This module ignores changes to cloud config or AMI information in order to prevent updates of those to force a new resource inadvertently.
+Though `yum update` can simply update the software, it may be required to update things that are outside such as updates to the module itself, `cloud_config_extra` information or AMI updates.  For this to work, you need to have at least 3 managers otherwise you'd lose raft consensus and have to rebuild the swarm from scratch.
 
-The first thing to do is update the workers. It is important not to do all the workers at once unless you are certain your swarm can handle the reduced capacity. You can do the workers in batches but generally the process is
+### Example of how to upgrade a 3 manager swawrm
 
-    for each batch of workers
-      for each worker in batch
-        on a manager: sudo docker node update --availability drain <worker>
-        on worker: sudo docker swarm leave
-        terraform taint --module=docker-swarm aws_instance.worker.<worker index>
-      terraform apply
+Upgrading a 3 manager swarm needs to be done one at a time to prevent raft consensus loss.
 
-Once the workers are done the managers have to be done next. The process is similar with the addition of a demotion to take the node out of manager status first and when they rejoin the swarm they will be managers again.
+1. ssh to `manager0`
+2. Leave the swarm by executing  `sudo /root/bin/leave-swarm.sh`
+3. Taint `manager0` from the command line `terraform taint --module=docker-swarm aws_instance.managers.0`
+4. Rebuild `manager0` from the command line `terraform apply`
+5. ssh to `manager1`
+6. Wait until `manager0` rejoins the swarm by checking `docker node ls`
+7. Leave the swarm by executing  `sudo /root/bin/leave-swarm.sh`
+8. Taint `manager1` from the command line `terraform taint --module=docker-swarm aws_instance.managers.1`
+9. Rebuild `manager1` from the command line `terraform apply`
+10. ssh to `manager2`
+11. Wait until `manager1` rejoins the swarm by checking `docker node ls`
+12. Leave the swarm by executing  `sudo /root/bin/leave-swarm.sh`
+13. Taint `manager2` from the command line `terraform taint --module=docker-swarm aws_instance.managers.2`
+14. Rebuild `manager2` from the command line `terraform apply`
+15. ssh to `manager0`
+16. Wait until `manager2` rejoins the swarm by checking `docker node ls`
+17. Prune the nodes that are down and are drained `sudo /root/bin/prune-nodes.sh`
 
-    for each manager > 0
-      on manager0: sudo docker node demote <manager>
-      on manager0: sudo docker node update --availability drain <manager>
-      on manager: sudo docker swarm leave
-      terraform taint --module=docker-swarm aws_instance.manager.<manager index>
-    terraform apply
-    on manager1: sudo docker node demote manager0
-    on manager1: sudo docker node update --availability drain manager0
-    terraform taint --module=docker-swarm aws_instance.manager.0
-    terraform apply
+### Upgrading the worker nodes
 
-By doing the above, you can let the raft consensus recover itself.
+A future relase of this would utilize auto-scaling for now this needs to be done manually
 
-Before updating `manager0` make sure `manager1` is up and running as it checks it it can join using `manager1` otherwise it will initialize a new swarm.
+1. ssh to `manager0`
+2. Drain and remove the worker node(s) from the swarm using `sudo /root/bin/rm-workers.sh <nodename[s]>`
+3. Taint the workers that are removed from the command line `terraform taint --module=docker-swarm aws_instance.worker.#`
+4. Rebuild the workers from the command line `terraform apply`
