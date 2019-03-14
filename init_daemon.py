@@ -11,7 +11,8 @@ ExecStart=/usr/bin/dockerd --tlsverify --tlscacert=/etc/docker/ca.crt --tlscert=
 instance_index = int('${instance_index}')
 daemon_count = int('${daemon_count}')
 if instance_index < daemon_count:
-    os.mkdir("/etc/docker", 0700)
+    if (not os.path.isdir("/etc/docker")):
+      os.mkdir("/etc/docker", 0o700)
     with open("/etc/docker/key.pem", "w") as text_file:
         text_file.write(private_key)
     with open("/etc/docker/cert.pem", "w") as text_file:
@@ -19,6 +20,7 @@ if instance_index < daemon_count:
     with open("/etc/docker/ca.crt", "w") as text_file:
         text_file.write(ca_cert)
 
-    os.mkdir("/etc/systemd/system/docker.service.d")
+    if (not os.path.isdir("/etc/systemd/system/docker.service.d")):
+      os.makedirs("/etc/systemd/system/docker.service.d")
     with open("/etc/systemd/system/docker.service.d/10-enable-tls.conf",  "w") as text_file:
         text_file.write(docker_service)
