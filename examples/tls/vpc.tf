@@ -1,6 +1,6 @@
 provider "aws" {
   region  = "us-east-1"
-  version = "~> 1.46"
+  version = "~> 2.0"
 }
 
 resource "aws_vpc" "main" {
