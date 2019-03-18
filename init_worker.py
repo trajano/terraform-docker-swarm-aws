@@ -14,7 +14,7 @@ subprocess.check_call(["systemctl", "start", "docker.service"])
 s3_bucket = '${s3_bucket}'
 instance_index = int('${instance_index}')
 swapsize = int('${swapsize}')
-vpc_name = int('${vpc_name}')
+vpc_name = '${vpc_name}'
 
 # Set the host name
 subprocess.check_call(["hostnamectl", "set-hostname",
