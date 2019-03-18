@@ -19,7 +19,7 @@ AWS permissions to do the following
 - IAM permissions
 - S3 Create and Access
 
-## TLS
+## Secure Docker daemon port
 
 The first few _manager_ nodes will expose port 2376. For TLS to work, the following are required
 
