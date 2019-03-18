@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import boto3
+from botocore.exceptions import NoCredentialsError
 import os
 import subprocess
+import time
 
 # Load system daemons
 subprocess.check_call(["systemctl", "daemon-reload"])
@@ -21,7 +23,6 @@ subprocess.check_call(["hostnamectl", "set-hostname",
                        "worker%d-%s" % (instance_index, vpc_name)])
 
 s3 = boto3.resource('s3')
-
 worker_token_object = s3.Object(s3_bucket, 'worker_token')
 manager0_ip_object = s3.Object(s3_bucket, 'ip0')
 worker_token_object.wait_until_exists()

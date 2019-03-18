@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import boto3
+from botocore.exceptions import NoCredentialsError
 import os
 import subprocess
+import time
 
 # Load system daemons
 subprocess.check_call(["systemctl", "daemon-reload"])
@@ -40,6 +42,12 @@ def initialize_swarm():
     worker_token_object.put(Body=bytes(worker_token),
                             StorageClass="ONEZONE_IA")
 
+
+try:
+    bucket = s3.Bucket(s3_bucket)
+    bucket.objects.all()
+except NoCredentialsError as e:
+    time.sleep(5)
 
 if instance_index == 0:
     # if this is the first node, check if there exists a manager token and ip1 file
