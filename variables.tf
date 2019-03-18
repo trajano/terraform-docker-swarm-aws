@@ -78,13 +78,13 @@ variable "daemon_ca_cert_pem" {
 }
 
 variable "daemon_private_key_pems" {
-  description = "These are private key PEMs to the manager nodes that will have their Docker sockets exposed."
+  description = "These are private key PEMs to the manager nodes that will have their Docker sockets exposed.  Private key generation is not performed by this module."
   type        = "list"
   default     = []
 }
 
 variable "daemon_cert_pems" {
-  description = "These are cert PEMs to the manager nodes that will have their Docker sockets exposed."
+  description = "These are cert PEMs to the manager nodes that will have their Docker sockets exposed.  These are the  `daemon_cert_request_pems` that are signed by the CA."
   type        = "list"
   default     = []
 }
