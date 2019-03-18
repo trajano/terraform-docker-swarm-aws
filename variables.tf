@@ -22,7 +22,7 @@ variable "cloud_config_extra" {
 }
 
 variable "exposed_security_group_ids" {
-  description = "This is the security group ID that specifies the ports that would be exposed by the swarm for external access."
+  description = "These are security groups that are applied to the Docker swarm nodes primarily for accessing other resources or exposing to the Internet. (The variable name is kept for legacy reasons, but will be renamed to `additional_security_group_ids` the future)"
   type        = "list"
 }
 
