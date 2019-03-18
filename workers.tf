@@ -6,6 +6,7 @@ data "template_file" "init_worker" {
     s3_bucket      = "${aws_s3_bucket.terraform.bucket}"
     instance_index = "${count.index}"
     swapsize       = "${var.swap_size}"
+    vpc_name       = "${local.dns_name}"
   }
 }
 
