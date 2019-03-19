@@ -23,6 +23,11 @@ subprocess.check_call(["hostnamectl", "set-hostname",
                        "worker%d-%s" % (instance_index, vpc_name)])
 
 s3 = boto3.resource('s3')
+try:
+    bucket = s3.Bucket(s3_bucket)
+    bucket.objects.all()
+except NoCredentialsError as e:
+    time.sleep(5)
 worker_token_object = s3.Object(s3_bucket, 'worker_token')
 manager0_ip_object = s3.Object(s3_bucket, 'ip0')
 worker_token_object.wait_until_exists()
