@@ -21,6 +21,11 @@ variable "cloud_config_extra" {
   default     = ""
 }
 
+variable "cloud_config_extra_script" {
+  description = "Shell script that will be executed on every node.  This can be used to set up EFS mounts in fstab or do node specific bootstrapping. This is executed after `init_manager.py`"
+  default     = ""
+}
+
 variable "exposed_security_group_ids" {
   description = "These are security groups that are applied to the Docker swarm nodes primarily for accessing other resources or exposing to the Internet. (The variable name is kept for legacy reasons, but will be renamed to `additional_security_group_ids` the future)"
   type        = "list"

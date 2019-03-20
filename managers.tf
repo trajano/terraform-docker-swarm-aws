@@ -20,7 +20,7 @@ data "template_cloudinit_config" "managers" {
   }
 
   part {
-    filename     = "extra.sh"
+    filename     = "extra.cloud-config"
     content      = "${var.cloud_config_extra}"
     content_type = "text/cloud-config"
   }
@@ -34,6 +34,12 @@ data "template_cloudinit_config" "managers" {
   part {
     filename     = "init_manager.py"
     content      = "${data.template_file.init_manager.*.rendered[count.index]}"
+    content_type = "text/x-shellscript"
+  }
+
+  part {
+    filename     = "extra.sh"
+    content      = "${var.cloud_config_extra_script}"
     content_type = "text/x-shellscript"
   }
 }

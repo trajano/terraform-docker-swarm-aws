@@ -20,7 +20,7 @@ data "template_cloudinit_config" "workers" {
   }
 
   part {
-    filename     = "extra.sh"
+    filename     = "extra.cloud-config"
     content      = "${var.cloud_config_extra}"
     content_type = "text/cloud-config"
   }
@@ -28,6 +28,12 @@ data "template_cloudinit_config" "workers" {
   part {
     filename     = "init_worker.py"
     content      = "${data.template_file.init_worker.*.rendered[count.index]}"
+    content_type = "text/x-shellscript"
+  }
+
+  part {
+    filename     = "extra.sh"
+    content      = "${var.cloud_config_extra_script}"
     content_type = "text/x-shellscript"
   }
 }
