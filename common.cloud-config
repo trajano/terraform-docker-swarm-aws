@@ -1,6 +1,6 @@
 #cloud-config
 bootcmd:
-  - [ cloud-init-per, once, gpg-key-epel, rpm, "--import", https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 ]
+  - [ "cloud-init-per", "once", "gpg-key-epel", "rpm", "--import", "https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7" ]
 yum_repos:
   amzn2extra-docker:
     enabled: true
@@ -13,7 +13,6 @@ repo_update: true
 repo_upgrade: all
 packages:
   - docker
-  - haveged
   - python2-boto3
 output:
   all: "| tee -a /var/log/cloud-init-output.log"
