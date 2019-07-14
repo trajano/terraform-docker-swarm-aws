@@ -7,9 +7,7 @@ import time
 
 # Load system daemons
 subprocess.check_call(["systemctl", "daemon-reload"])
-subprocess.check_call(["systemctl", "enable", "haveged.service"])
 subprocess.check_call(["systemctl", "enable", "docker.service"])
-subprocess.check_call(["systemctl", "start", "haveged.service"])
 subprocess.check_call(["systemctl", "start", "docker.service"])
 
 # Set values loaded by the template

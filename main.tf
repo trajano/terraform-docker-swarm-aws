@@ -1,44 +1,59 @@
 provider "template" {
-  version = "~> 1.0"
+  version = "~> 2.1"
 }
 
 locals {
-  dns_name                  = "${lower(replace(var.name, " ", "-"))}"
-  s3_bucket_name            = "${var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"}"
-  security_group_ids        = "${concat(var.exposed_security_group_ids, list(aws_security_group.docker.id))}"
-  daemon_security_group_ids = "${concat(var.exposed_security_group_ids, list(aws_security_group.docker.id, aws_security_group.daemon.id))}"
+  dns_name       = lower(replace(var.name, " ", "-"))
+  s3_bucket_name = var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"
+  security_group_ids = concat(
+    var.exposed_security_group_ids,
+    [aws_security_group.docker.id],
+  )
+  daemon_security_group_ids = concat(
+    var.exposed_security_group_ids,
+    [aws_security_group.docker.id, aws_security_group.daemon.id],
+  )
 }
 
-data "aws_availability_zones" "azs" {}
+data "aws_availability_zones" "azs" {
+}
 
 resource "aws_subnet" "managers" {
-  count                   = "${length(data.aws_availability_zones.azs.names)}"
-  vpc_id                  = "${var.vpc_id}"
-  cidr_block              = "${cidrsubnet(data.aws_vpc.main.cidr_block, 8, var.manager_subnet_segment_start + count.index)}"
+  count  = length(data.aws_availability_zones.azs.names)
+  vpc_id = var.vpc_id
+  cidr_block = cidrsubnet(
+    data.aws_vpc.main.cidr_block,
+    8,
+    var.manager_subnet_segment_start + count.index,
+  )
   map_public_ip_on_launch = true
 
-  tags {
+  tags = {
     Name = "${var.name} managers ${data.aws_availability_zones.azs.names[count.index]}"
   }
 
-  availability_zone = "${data.aws_availability_zones.azs.names[count.index]}"
+  availability_zone = data.aws_availability_zones.azs.names[count.index]
 }
 
 resource "aws_subnet" "workers" {
-  count                   = "${length(data.aws_availability_zones.azs.names)}"
-  vpc_id                  = "${var.vpc_id}"
-  cidr_block              = "${cidrsubnet(data.aws_vpc.main.cidr_block, 8, var.worker_subnet_segment_start + count.index)}"
+  count  = length(data.aws_availability_zones.azs.names)
+  vpc_id = var.vpc_id
+  cidr_block = cidrsubnet(
+    data.aws_vpc.main.cidr_block,
+    8,
+    var.worker_subnet_segment_start + count.index,
+  )
   map_public_ip_on_launch = true
 
-  tags {
+  tags = {
     Name = "${var.name} workers ${data.aws_availability_zones.azs.names[count.index]}"
   }
 
-  availability_zone = "${data.aws_availability_zones.azs.names[count.index]}"
+  availability_zone = data.aws_availability_zones.azs.names[count.index]
 }
 
 data "aws_vpc" "main" {
-  id = "${var.vpc_id}"
+  id = var.vpc_id
 }
 
 data "aws_ami" "base_ami" {
@@ -48,7 +63,7 @@ data "aws_ami" "base_ami" {
 }
 
 resource "aws_s3_bucket" "terraform" {
-  bucket        = "${local.s3_bucket_name}"
+  bucket        = local.s3_bucket_name
   acl           = "private"
   force_destroy = true
 
@@ -61,7 +76,7 @@ resource "aws_s3_bucket" "terraform" {
     }
   }
 
-  tags {
+  tags = {
     Name = "${var.name} Swarm"
   }
 }
@@ -69,37 +84,37 @@ resource "aws_s3_bucket" "terraform" {
 resource "aws_security_group" "docker" {
   name        = "docker"
   description = "Docker Swarm ports"
-  vpc_id      = "${var.vpc_id}"
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 2377
     to_port     = 2377
     protocol    = "tcp"
-    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 
   ingress {
     from_port   = 7946
     to_port     = 7946
     protocol    = "tcp"
-    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 
   ingress {
     from_port   = 7946
     to_port     = 7946
     protocol    = "udp"
-    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 
   ingress {
     from_port   = 4789
     to_port     = 4789
     protocol    = "udp"
-    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 
-  tags {
+  tags = {
     Name = "${var.name} Docker"
   }
 
@@ -112,16 +127,16 @@ resource "aws_security_group" "docker" {
 resource "aws_security_group" "daemon" {
   name        = "docker-daemon"
   description = "Docker Daemon port"
-  vpc_id      = "${var.vpc_id}"
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 2376
     to_port     = 2376
     protocol    = "tcp"
-    cidr_blocks = ["${var.daemon_cidr_block}"]
+    cidr_blocks = [var.daemon_cidr_block]
   }
 
-  tags {
+  tags = {
     Name = "${var.name} Docker Daemon"
   }
 
@@ -152,11 +167,10 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.terraform.arn}",
+      aws_s3_bucket.terraform.arn,
       "${aws_s3_bucket.terraform.arn}/*",
     ]
   }
-
   # SimpleDB is not available in all regions
   #
   # statement {
@@ -184,21 +198,22 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
 
 resource "aws_iam_policy" "s3-access-role-policy" {
   name   = "${local.dns_name}-ec2-policy"
-  policy = "${data.aws_iam_policy_document.s3-access-role-policy.json}"
+  policy = data.aws_iam_policy_document.s3-access-role-policy.json
 }
 
 resource "aws_iam_role" "ec2" {
   name               = "${local.dns_name}-ec2"
   description        = "Allows reading of infrastructure secrets"
-  assume_role_policy = "${data.aws_iam_policy_document.instance-assume-role-policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.instance-assume-role-policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "s3-access-role-policy" {
-  role       = "${aws_iam_role.ec2.name}"
-  policy_arn = "${aws_iam_policy.s3-access-role-policy.arn}"
+  role       = aws_iam_role.ec2.name
+  policy_arn = aws_iam_policy.s3-access-role-policy.arn
 }
 
 resource "aws_iam_instance_profile" "ec2" {
   name = "${local.dns_name}-ec2"
-  role = "${aws_iam_role.ec2.name}"
+  role = aws_iam_role.ec2.name
 }
+

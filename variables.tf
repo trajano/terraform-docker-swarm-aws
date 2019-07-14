@@ -28,7 +28,7 @@ variable "cloud_config_extra_script" {
 
 variable "exposed_security_group_ids" {
   description = "These are security groups that are applied to the Docker swarm nodes primarily for accessing other resources or exposing to the Internet. (The variable name is kept for legacy reasons, but will be renamed to `additional_security_group_ids` the future)"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "s3_bucket_name" {
@@ -73,7 +73,7 @@ variable "daemon_count" {
 
 variable "daemon_eip_ids" {
   description = "These are elastic IP association IDs that will be attached to the daemon nodes.  The association is not performed in the module."
-  type        = "list"
+  type        = list(string)
   default     = []
 }
 
@@ -84,13 +84,13 @@ variable "daemon_ca_cert_pem" {
 
 variable "daemon_private_key_pems" {
   description = "These are private key PEMs to the manager nodes that will have their Docker sockets exposed.  Private key generation is not performed by this module."
-  type        = "list"
+  type        = list(string)
   default     = []
 }
 
 variable "daemon_cert_pems" {
   description = "These are cert PEMs to the manager nodes that will have their Docker sockets exposed.  These are the  `daemon_cert_request_pems` that are signed by the CA."
-  type        = "list"
+  type        = list(string)
   default     = []
 }
 
@@ -101,7 +101,7 @@ variable "daemon_private_key_algorithm" {
 
 variable "daemon_dns" {
   description = "Public DNS names associated with the manager."
-  type        = "list"
+  type        = list(string)
   default     = []
 }
 
@@ -109,3 +109,4 @@ variable "daemon_cidr_block" {
   description = "CIDR block to allow access to the  the Docker daemon."
   default     = "0.0.0.0/0"
 }
+
