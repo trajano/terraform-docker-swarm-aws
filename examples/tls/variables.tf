@@ -3,7 +3,6 @@ variable "daemon_count" {
   default     = 1
 }
 
-
 variable "managers" {
   description = "Number of managers in the swarm.  This should be an odd number otherwise there may be issues with raft consensus."
   default     = 3
@@ -18,3 +17,4 @@ variable "instance_type" {
   description = "EC2 instance type."
   default     = "t3.micro"
 }
+
