@@ -7,18 +7,18 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_internet_gateway" "main" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = aws_vpc.main.id
 }
 
 resource "aws_route" "internet_access" {
-  route_table_id         = "${aws_vpc.main.main_route_table_id}"
+  route_table_id         = aws_vpc.main.main_route_table_id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = "${aws_internet_gateway.main.id}"
+  gateway_id             = aws_internet_gateway.main.id
 }
 
 resource "aws_security_group" "exposed" {
-  name        = "exposed"
-  vpc_id      = "${aws_vpc.main.id}"
+  name   = "exposed"
+  vpc_id = aws_vpc.main.id
 
   ingress {
     from_port   = 22
@@ -47,5 +47,5 @@ resource "aws_security_group" "exposed" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
 }
+
