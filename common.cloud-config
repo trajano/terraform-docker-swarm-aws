@@ -12,7 +12,7 @@ yum_repos:
 repo_update: true
 repo_upgrade: all
 packages:
-  - docker
+  - [docker, 18.03.1ce-2.amzn2]
   - python2-boto3
 output:
   all: "| tee -a /var/log/cloud-init-output.log"
