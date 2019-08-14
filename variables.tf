@@ -36,9 +36,14 @@ variable "s3_bucket_name" {
   default     = ""
 }
 
-variable "instance_type" {
-  description = "EC2 instance type."
-  default     = "t3.micro"
+variable "instance_type_manager" {
+  description = "EC2 instance type for managers."
+  default     = "t2.medium"
+}
+
+variable "instance_type_node" {
+  description = "EC2 instance type for nodes."
+  default     = "t2.xlarge"
 }
 
 variable "volume_size" {
