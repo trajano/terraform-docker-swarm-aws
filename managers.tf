@@ -9,7 +9,6 @@ data "template_file" "init_manager" {
     vpc_name       = local.dns_name
   }
 }
-
 data "template_cloudinit_config" "managers" {
   count         = var.managers
   gzip          = "true"
@@ -49,7 +48,7 @@ resource "aws_instance" "managers" {
 
   count         = var.managers
   ami           = data.aws_ami.base_ami.id
-  instance_type = var.instance_type
+  instance_type = var.instance_type_manager
   subnet_id     = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.*.names)].id
   private_ip = cidrhost(
     aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.*.names)].cidr_block,
