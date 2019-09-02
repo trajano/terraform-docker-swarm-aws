@@ -87,32 +87,82 @@ resource "aws_security_group" "docker" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = 2377
-    to_port     = 2377
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
+    cidr_blocks      = [
+        "10.95.0.0/16",
+      ]
+    description      = ""
+    from_port        = 0
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    protocol         = "tcp"
+    security_groups  = []
+    self             = false
+    to_port          = 65535
   }
-
   ingress {
-    from_port   = 7946
-    to_port     = 7946
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
-  }
-
+      cidr_blocks      = [
+          "10.95.0.0/16",
+        ]
+      description      = ""
+      from_port        = 0
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "udp"
+      security_groups  = []
+      self             = false
+      to_port          = 65535
+    }
   ingress {
-    from_port   = 7946
-    to_port     = 7946
-    protocol    = "udp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
-  }
-
+      cidr_blocks      = [
+          "10.95.0.0/16",
+        ]
+      description      = ""
+      from_port        = 2377
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "tcp"
+      security_groups  = []
+      self             = false
+      to_port          = 2377
+    }
   ingress {
-    from_port   = 4789
-    to_port     = 4789
-    protocol    = "udp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
-  }
+      cidr_blocks      = [
+          "10.95.0.0/16",
+        ]
+      description      = ""
+      from_port        = 4789
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "udp"
+      security_groups  = []
+      self             = false
+      to_port          = 4789
+    }
+  ingress {
+      cidr_blocks      = [
+          "10.95.0.0/16",
+        ]
+      description      = ""
+      from_port        = 7946
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "tcp"
+      security_groups  = []
+      self             = false
+      to_port          = 7946
+    }
+  ingress {
+      cidr_blocks      = [
+          "10.95.0.0/16",
+        ]
+      description      = ""
+      from_port        = 7946
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "udp"
+      security_groups  = []
+      self             = false
+      to_port          = 7946
 
   tags = {
     Name = "${var.name} Docker"
