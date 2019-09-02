@@ -24,7 +24,7 @@ variable "repo_password" {
 
 variable "managers" {
   description = "Number of managers in the swarm.  This should be an odd number otherwise there may be issues with raft consensus."
-  default     = 3
+  default     = 1
 }
 
 variable "workers" {

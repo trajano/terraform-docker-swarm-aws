@@ -1,14 +1,7 @@
 #cloud-config
 bootcmd:
-  - [ "cloud-init-per", "once", "gpg-key-epel", "rpm", "--import", "https://archive.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7" ]
-yum_repos:
-  amzn2extra-docker:
-    enabled: true
-  epel:
-    name: EPEL
-    metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=$basearch
-    enabled: true
-    gpgcheck: true
+  - [ "cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker" ]
+  - [ "cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel" ]
 repo_update: true
 repo_upgrade: all
 packages:
