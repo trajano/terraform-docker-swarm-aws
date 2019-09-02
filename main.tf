@@ -99,70 +99,20 @@ resource "aws_security_group" "docker" {
     self             = false
     to_port          = 65535
   }
+
   ingress {
-      cidr_blocks      = [
-          "10.95.0.0/16",
-        ]
-      description      = ""
-      from_port        = 0
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      protocol         = "udp"
-      security_groups  = []
-      self             = false
-      to_port          = 65535
-    }
-  ingress {
-      cidr_blocks      = [
-          "10.95.0.0/16",
-        ]
-      description      = ""
-      from_port        = 2377
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      protocol         = "tcp"
-      security_groups  = []
-      self             = false
-      to_port          = 2377
-    }
-  ingress {
-      cidr_blocks      = [
-          "10.95.0.0/16",
-        ]
-      description      = ""
-      from_port        = 4789
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      protocol         = "udp"
-      security_groups  = []
-      self             = false
-      to_port          = 4789
-    }
-  ingress {
-      cidr_blocks      = [
-          "10.95.0.0/16",
-        ]
-      description      = ""
-      from_port        = 7946
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      protocol         = "tcp"
-      security_groups  = []
-      self             = false
-      to_port          = 7946
-    }
-  ingress {
-      cidr_blocks      = [
-          "10.95.0.0/16",
-        ]
-      description      = ""
-      from_port        = 7946
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      protocol         = "udp"
-      security_groups  = []
-      self             = false
-      to_port          = 7946
+    cidr_blocks      = [
+        "10.95.0.0/16",
+      ]
+    description      = ""
+    from_port        = 0
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    protocol         = "udp"
+    security_groups  = []
+    self             = false
+    to_port          = 65535
+  }
 
   tags = {
     Name = "${var.name} Docker"
