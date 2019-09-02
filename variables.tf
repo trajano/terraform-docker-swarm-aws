@@ -78,18 +78,18 @@ variable "daemon_eip_ids" {
 }
 
 variable "daemon_ca_cert_pem" {
-  description = "This is the cert for the CA."
+  description = "This is the cert for the CA. If this starts with `/` then a symlink will be created instead of writing out the file."
   default     = ""
 }
 
 variable "daemon_private_key_pems" {
-  description = "These are private key PEMs to the manager nodes that will have their Docker sockets exposed.  Private key generation is not performed by this module."
+  description = "These are private key PEMs to the manager nodes that will have their Docker sockets exposed.  Private key generation is not performed by this module.  If this starts with `/` then a symlink will be created instead of writing out the file."
   type        = list(string)
   default     = []
 }
 
 variable "daemon_cert_pems" {
-  description = "These are cert PEMs to the manager nodes that will have their Docker sockets exposed.  These are the  `daemon_cert_request_pems` that are signed by the CA."
+  description = "These are cert PEMs to the manager nodes that will have their Docker sockets exposed.  These are the  `daemon_cert_request_pems` that are signed by the CA.   If this starts with `/` then a symlink will be created instead of writing out the file."
   type        = list(string)
   default     = []
 }

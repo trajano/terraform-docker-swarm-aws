@@ -10,15 +10,20 @@ ExecStart=/usr/bin/dockerd --tlsverify --tlscacert=/etc/docker/ca.crt --tlscert=
 '''
 instance_index = int('${instance_index}')
 daemon_count = int('${daemon_count}')
+
+def write_or_link(path, content):
+  if content[0] == "/":
+    os.symlink(content, path)
+  else:
+    with open(path, "w") as text_file:
+      text_file.write(content)
+
 if instance_index < daemon_count:
     if (not os.path.isdir("/etc/docker")):
       os.mkdir("/etc/docker", 0o700)
-    with open("/etc/docker/key.pem", "w") as text_file:
-        text_file.write(private_key)
-    with open("/etc/docker/cert.pem", "w") as text_file:
-        text_file.write(cert)
-    with open("/etc/docker/ca.crt", "w") as text_file:
-        text_file.write(ca_cert)
+    write_or_link("/etc/docker/key.pem", private_key)
+    write_or_link("/etc/docker/cert.pem", cert)
+    write_or_link("/etc/docker/ca.crt", ca_cert)
 
     if (not os.path.isdir("/etc/systemd/system/docker.service.d")):
       os.makedirs("/etc/systemd/system/docker.service.d")
