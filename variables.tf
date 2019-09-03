@@ -37,10 +37,19 @@ variable "s3_bucket_name" {
 }
 
 variable "instance_type" {
-  description = "EC2 instance type."
+  description = "EC2 instance type.  This is can be overriden by `instance_type_manager` or `instance_type_worker`"
   default     = "t3.micro"
 }
 
+variable "instance_type_manager" {
+  description = "Manager node EC2 instance type.  If not specified it will use the value of `instance_type`."
+  default     = ""
+}
+
+variable "instance_type_worker" {
+  description = "Worker node EC2 instance type.  If not specified it will use the value of `instance_type`"
+  default     = ""
+}
 variable "volume_size" {
   description = "Size of root volume in gigabytes."
   default     = 8

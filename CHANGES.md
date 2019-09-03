@@ -1,5 +1,10 @@
 # Change Log
 
+## 3.1.2 (2019-09-02)
+
+* Add support to have different instance types for workers and managers.
+* Documented how to change the docker version being used.
+
 ## 3.1.1 (2019-09-02)
 
 * Use amazon-extras for epel.

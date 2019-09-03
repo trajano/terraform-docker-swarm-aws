@@ -46,7 +46,7 @@ resource "aws_instance" "workers" {
 
   count         = var.workers
   ami           = data.aws_ami.base_ami.id
-  instance_type = var.instance_type
+  instance_type = local.instance_type_worker
   subnet_id     = aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.*.names)].id
   private_ip = cidrhost(
     aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.*.names)].cidr_block,

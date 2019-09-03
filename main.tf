@@ -13,6 +13,9 @@ locals {
     var.exposed_security_group_ids,
     [aws_security_group.docker.id, aws_security_group.daemon.id],
   )
+
+  instance_type_manager = coalesce(var.instance_type_manager, var.instance_type)
+  instance_type_worker  = coalesce(var.instance_type_worker, var.instance_type)
 }
 
 data "aws_availability_zones" "azs" {
