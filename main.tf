@@ -227,6 +227,9 @@ resource "aws_iam_instance_profile" "ec2" {
 }
 
 resource "aws_s3_bucket_public_access_block" "terraform" {
+  depends_on = [
+    aws_s3_bucket.terraform
+  ]
   bucket = "${aws_s3_bucket.terraform.id}"
 
   block_public_acls       = true
