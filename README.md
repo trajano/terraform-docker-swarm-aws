@@ -114,3 +114,5 @@ A future relase of this would utilize auto-scaling for now this needs to be done
     packages:
       - [docker, 18.03.1ce-2.amzn2]
       - python2-boto3
+
+* If the private key or certificate is not locally available.  `create_daemon_certificate_request` should be set to `false`.

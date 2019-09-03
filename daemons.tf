@@ -8,7 +8,7 @@ data "aws_eip" "daemons" {
 }
 
 resource "tls_cert_request" "daemons" {
-  count           = var.daemon_count
+  count           = var.create_daemon_certificate_request ? var.daemon_count : 0
   key_algorithm   = var.daemon_private_key_algorithm
   private_key_pem = var.daemon_private_key_pems[count.index]
 

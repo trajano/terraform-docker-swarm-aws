@@ -12,6 +12,11 @@ variable "workers" {
   default     = 0
 }
 
+variable "create_daemon_certificate_request" {
+  description = "Create daemon certificate request."
+  default     = true
+}
+
 variable "vpc_id" {
   description = "The VPC that will contain the swarm."
 }
