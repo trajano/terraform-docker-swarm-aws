@@ -1,6 +1,6 @@
 # Change Log
 
-## 3.1.2 (2019-09-02)
+## 3.1.2 (2019-09-03)
 
 * Add support to have different instance types for workers and managers.
 * Documented how to change the docker version being used.

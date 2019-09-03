@@ -90,6 +90,7 @@ resource "aws_security_group" "docker" {
   vpc_id      = var.vpc_id
 
   ingress {
+    description = "Docker swarm management"
     from_port   = 2377
     to_port     = 2377
     protocol    = "tcp"
@@ -97,6 +98,7 @@ resource "aws_security_group" "docker" {
   }
 
   ingress {
+    description = "Docker container network discovery"
     from_port   = 7946
     to_port     = 7946
     protocol    = "tcp"
@@ -104,6 +106,7 @@ resource "aws_security_group" "docker" {
   }
 
   ingress {
+    description = "Docker container network discovery"
     from_port   = 7946
     to_port     = 7946
     protocol    = "udp"
@@ -111,6 +114,7 @@ resource "aws_security_group" "docker" {
   }
 
   ingress {
+    description = "Docker overlay network"
     from_port   = 4789
     to_port     = 4789
     protocol    = "udp"
