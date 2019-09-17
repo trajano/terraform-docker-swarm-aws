@@ -230,7 +230,7 @@ resource "aws_s3_bucket_public_access_block" "terraform" {
   depends_on = [
     aws_s3_bucket.terraform
   ]
-  bucket = "${aws_s3_bucket.terraform.id}"
+  bucket = aws_s3_bucket.terraform.id
 
   block_public_acls       = true
   block_public_policy     = true
