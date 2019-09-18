@@ -12,6 +12,7 @@ subprocess.check_call(["systemctl", "start", "docker.service"])
 
 # Set values loaded by the tempalte
 s3_bucket = '${s3_bucket}'
+region_name = '${region_name}'
 instance_index = int('${instance_index}')
 swapsize = int('${swapsize}')
 vpc_name = '${vpc_name}'
@@ -20,7 +21,7 @@ vpc_name = '${vpc_name}'
 subprocess.check_call(["hostnamectl", "set-hostname",
                        "worker%d-%s" % (instance_index, vpc_name)])
 
-s3 = boto3.resource('s3')
+s3 = boto3.resource('s3', region_name=region_name)
 try:
     bucket = s3.Bucket(s3_bucket)
     bucket.objects.all()
