@@ -18,6 +18,8 @@ locals {
   instance_type_worker  = coalesce(var.instance_type_worker, var.instance_type)
 }
 
+data "aws_region" "current" {}
+
 data "aws_availability_zones" "azs" {
 }
 
