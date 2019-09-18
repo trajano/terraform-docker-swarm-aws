@@ -19,6 +19,49 @@ AWS permissions to do the following
 - IAM permissions
 - S3 Create and Access
 
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "iam:CreateInstanceProfile",
+                    "iam:DeleteInstanceProfile",
+                    "iam:GetRole",
+                    "iam:GetPolicyVersion",
+                    "iam:GetInstanceProfile",
+                    "iam:GetPolicy",
+                    "iam:RemoveRoleFromInstanceProfile",
+                    "iam:CreateRole",
+                    "iam:DeleteRole",
+                    "iam:AttachRolePolicy",
+                    "iam:AddRoleToInstanceProfile",
+                    "iam:CreatePolicy",
+                    "iam:ListInstanceProfilesForRole",
+                    "iam:ListAttachedRolePolicies"
+                ],
+                "Resource": [
+                    "arn:aws:iam::*:policy/*",
+                    "arn:aws:iam::*:instance-profile/*",
+                    "arn:aws:iam::*:role/*"
+                ]
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ec2:DescribeImages",
+                    "ec2:*"
+                ],
+                "Resource": "*"
+            },
+            {
+                "Effect": "Allow",
+                "Action": "s3:*",
+                "Resource": "*"
+            }
+        ]
+    }
+
 ## Secure Docker daemon port
 
 The first few _manager_ nodes will expose port 2376. For TLS to work, the following are required
