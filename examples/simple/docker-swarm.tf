@@ -3,7 +3,7 @@ module "docker-swarm" {
   # version = "~>2.0"
   source = "../.."
 
-  name               = "My VPC Swarm"
+  name               = "My Simple VPC Swarm"
   vpc_id             = aws_vpc.main.id
   cloud_config_extra = file("users.cloud-config")
 
