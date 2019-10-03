@@ -6,7 +6,6 @@ data "template_file" "init_manager" {
     s3_bucket      = aws_s3_bucket.terraform.bucket
     region_name    = data.aws_region.current.name
     instance_index = count.index
-    swapsize       = var.swap_size
     vpc_name       = local.dns_name
   }
 }
@@ -73,6 +72,11 @@ resource "aws_instance" "managers" {
 
   root_block_device {
     volume_size = var.volume_size
+  }
+
+  ebs_block_device {
+    device_name = "xvdf"
+    volume_size = var.swap_size
   }
 
   lifecycle {

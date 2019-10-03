@@ -14,7 +14,6 @@ subprocess.check_call(["systemctl", "start", "docker.service"])
 s3_bucket = '${s3_bucket}'
 region_name = '${region_name}'
 instance_index = int('${instance_index}')
-swapsize = int('${swapsize}')
 vpc_name = '${vpc_name}'
 
 # Set the host name
@@ -84,13 +83,8 @@ myip = subprocess.check_output(
 myip_object = s3.Object(s3_bucket, 'ip%d' % instance_index)
 myip_object.put(Body=bytes(myip), StorageClass="ONEZONE_IA")
 
-f = open("/swapfile", "wb")
-for i in xrange(swapsize * 1024):
-    f.write("\0" * 1024 * 1024)
-f.close()
-os.chmod("/swapfile", 0o600)
-subprocess.check_output(["mkswap", "/swapfile"])
+subprocess.check_output(["mkswap", "/dev/xvdf"])
 f = open("/etc/fstab", "a")
-f.write("/swapfile none swap defaults 0 0\n")
+f.write("/dev/xvdf none swap defaults 0 0\n")
 f.close()
 subprocess.check_output(["swapon", "-a"])
