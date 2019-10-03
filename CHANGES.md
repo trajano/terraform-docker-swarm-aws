@@ -1,5 +1,9 @@
 # Change Log
 
+## 3.1.4
+
+* Use an EBS volume to hold the swap rather than a swap file.
+
 ## 3.1.2 (2019-09-03)
 
 * Add support to have different instance types for workers and managers.
