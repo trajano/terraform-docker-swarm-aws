@@ -123,6 +123,13 @@ resource "aws_security_group" "docker" {
     cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
+  }
+
   tags = {
     Name = "${var.name} Docker"
   }
