@@ -1,5 +1,10 @@
 # Change Log
 
+## 3.1.5
+
+* Use Amazon DNS server
+* Allow outbound traffic from Docker security group to other hosts on the VPC
+
 ## 3.1.4
 
 * Use an EBS volume to hold the swap rather than a swap file.
