@@ -124,9 +124,18 @@ resource "aws_security_group" "docker" {
   }
 
   egress {
+    description = "Docker swarm (udp)"
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"
+    protocol    = "udp"
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
+  }
+
+  egress {
+    description = "Docker swarm (tcp)"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "tcp"
     cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 
