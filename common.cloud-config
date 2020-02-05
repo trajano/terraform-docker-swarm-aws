@@ -9,6 +9,9 @@ packages:
   - python2-boto3
 output:
   all: "| tee -a /var/log/cloud-init-output.log"
+manage_resolve_conf: true
+resolve_conf:
+  name_servers: [ '169.254.169.253' ]
 write_files:
   - content: |
       #!/bin/sh
