@@ -12,19 +12,24 @@ output:
 manage_resolve_conf: true
 resolve_conf:
   name_servers: [ '169.254.169.253' ]
+runcmd:
+  - [ sysctl, -w, vm.max_map_count=262144 ]
+  - [ sysctl, -w, fs.file-max=65536 ]
+  - [ ulimit, -n, 65536 ]
+  - [ ulimit, -u, 4096 ]
 write_files:
   - content: |
       vm.max_map_count=262144
       fs.file-max=65536
     path: /etc/sysctl.d/01-docker.conf
     owner: root:root
-    permissions: "0600"
+    permissions: "0444"
   - content: |
       *          soft    nproc     4096
       *          soft    nofile    65536
     path: /etc/security/limits.d/01-docker.conf
     owner: root:root
-    permissions: "0600"
+    permissions: "0444"
   - content: |
       #!/bin/sh
       docker image prune -f > /dev/null
