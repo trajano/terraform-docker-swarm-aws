@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.1.7
+
+* Ignored `ebs_block_device` changes on workers.  This is to preserve backwards compatibility for swarms that were built without the EBS swap space.
+
+## 3.1.6
+
+* Ignored `ebs_block_device` changes on managers.
+
 ## 3.1.5
 
 * Use Amazon DNS server
