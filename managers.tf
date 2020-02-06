@@ -82,6 +82,7 @@ resource "aws_instance" "managers" {
   lifecycle {
     ignore_changes = [
       ami,
+      ebs_block_device,
       user_data_base64,
     ]
   }
