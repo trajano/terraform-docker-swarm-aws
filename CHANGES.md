@@ -4,6 +4,7 @@
 
 * Ignored `ebs_block_device` changes on workers.  This is to preserve backwards compatibility for swarms that were built without the EBS swap space.
 * Increased limits to support Elasticsearch Docker images in [production mode](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode) by default.  Also set the requirements for the [file descriptors](https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html).
+* simple example exposes only one EIP.
 
 ## 3.1.6
 
