@@ -9,6 +9,7 @@
         "iam:AttachRolePolicy",
         "iam:CreateInstanceProfile",
         "iam:CreatePolicy",
+        "iam:CreatePolicyVersion",
         "iam:CreateRole",
         "iam:DeleteInstanceProfile",
         "iam:DeletePolicy",

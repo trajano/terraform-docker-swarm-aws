@@ -1,5 +1,9 @@
 # Change Log
 
+## 4.0.1
+
+* Allow policy version updates in the terraform IAM policies
+
 ## 4.0.0
 
 This version deprecates support for exposing the Docker daemon and removal is expected on 5.0.  It is recommended to switch to use SSH to access to the Docker daemon as it forgoes managing certificates.
