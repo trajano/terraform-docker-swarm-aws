@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.0.0
+
+This version deprecates support for exposing the Docker daemon and removal is expected on 5.0.  It is recommended to switch to use SSH to access to the Docker daemon as it forgoes managing certificates.
+
+* The ssh port is exposed by default controlled by `daemon_ssh` variable.
+* The Docker TLS port is not exposed by default controlled by `daemon_tls` variable.
+
 ## 3.1.7
 
 * Ignored `ebs_block_device` changes on workers.  This is to preserve backwards compatibility for swarms that were built without the EBS swap space.

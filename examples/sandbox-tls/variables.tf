@@ -1,6 +1,3 @@
-variable "name" {
-  description = "Name of the swarm.  Note this has to be globally unique."
-}
 variable "daemon_count" {
   description = "This is the number of daemons to expose.  This is a workaround as count in some contexts cannot be a computed value."
   default     = 1

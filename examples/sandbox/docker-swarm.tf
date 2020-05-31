@@ -14,20 +14,20 @@ module "docker-swarm" {
   # version = "~>1.2"
   source = "../../"
 
-  name                    = "My VPC Swarm"
-  vpc_id                  = aws_vpc.main.id
-  managers                = var.managers
-  workers                 = var.workers
-  cloud_config_extra      = data.template_file.cloud-config.rendered
-  instance_type           = var.instance_type
-  daemon_count            = length(aws_eip.daemons)
-  daemon_eip_ids          = aws_eip.daemons.*.id
-  daemon_private_key_pems = tls_private_key.daemons.*.private_key_pem
-  daemon_cert_pems        = tls_locally_signed_cert.daemons.*.cert_pem
-  daemon_ca_cert_pem      = tls_self_signed_cert.ca.cert_pem
+  name               = var.name
+  vpc_id             = aws_vpc.main.id
+  managers           = var.managers
+  workers            = var.workers
+  cloud_config_extra = data.template_file.cloud-config.rendered
+  instance_type      = var.instance_type
+  daemon_count       = length(aws_eip.daemons)
+  daemon_eip_ids     = aws_eip.daemons.*.id
 
   exposed_security_group_ids = [
     aws_security_group.exposed.id,
   ]
 }
 
+terraform {
+  required_version = ">= 0.12"
+}

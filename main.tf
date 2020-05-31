@@ -11,7 +11,9 @@ locals {
   )
   daemon_security_group_ids = concat(
     var.exposed_security_group_ids,
-    [aws_security_group.docker.id, aws_security_group.daemon.id],
+    [aws_security_group.docker.id],
+    aws_security_group.daemon.*.id,
+    aws_security_group.daemon_ssh.*.id,
   )
 
   instance_type_manager = coalesce(var.instance_type_manager, var.instance_type)
@@ -149,7 +151,31 @@ resource "aws_security_group" "docker" {
   }
 }
 
+resource "aws_security_group" "daemon_ssh" {
+  count       = var.daemon_ssh ? 1 : 0
+  name        = "docker-daemon-ssh"
+  description = "Docker Daemon SSH port"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.daemon_cidr_block]
+  }
+
+  tags = {
+    Name = "${var.name} Docker Daemon SSH"
+  }
+
+  timeouts {
+    create = "2m"
+    delete = "2m"
+  }
+}
+
 resource "aws_security_group" "daemon" {
+  count       = var.daemon_tls ? 1 : 0
   name        = "docker-daemon"
   description = "Docker Daemon port"
   vpc_id      = var.vpc_id
@@ -162,7 +188,7 @@ resource "aws_security_group" "daemon" {
   }
 
   tags = {
-    Name = "${var.name} Docker Daemon"
+    Name = "${var.name} Docker TLS Daemon"
   }
 
   timeouts {

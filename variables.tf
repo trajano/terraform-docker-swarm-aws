@@ -85,6 +85,17 @@ variable "daemon_count" {
   default     = 0
 }
 
+variable "daemon_ssh" {
+  description = "Exposes SSH port for the daemon."
+  default     = true
+}
+
+variable "daemon_tls" {
+  description = "Exposes TLS port for the daemon."
+  default     = false
+}
+
+
 variable "daemon_eip_ids" {
   description = "These are elastic IP association IDs that will be attached to the daemon nodes.  The association is not performed in the module."
   type        = list(string)
