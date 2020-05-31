@@ -9,6 +9,7 @@ import time
 subprocess.check_call(["systemctl", "daemon-reload"])
 subprocess.check_call(["systemctl", "enable", "docker.service"])
 subprocess.check_call(["systemctl", "start", "docker.service"])
+subprocess.check_call(["systemctl", "enable", "yum-cron"])
 
 # Set values loaded by the template
 s3_bucket = '${s3_bucket}'

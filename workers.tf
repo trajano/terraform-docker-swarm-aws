@@ -10,7 +10,7 @@ data "template_file" "init_worker" {
   }
 }
 
-data "template_cloudinit_config" "workers" {
+data "cloudinit_config" "workers" {
   count         = var.workers
   gzip          = "true"
   base64_encode = "true"
@@ -56,7 +56,7 @@ resource "aws_instance" "workers" {
   vpc_security_group_ids = local.security_group_ids
 
   iam_instance_profile = aws_iam_instance_profile.ec2.name
-  user_data_base64     = data.template_cloudinit_config.workers[count.index].rendered
+  user_data_base64     = data.cloudinit_config.workers[count.index].rendered
   key_name             = var.key_name
 
   tags = {
@@ -85,3 +85,49 @@ resource "aws_instance" "workers" {
   }
 }
 
+resource "aws_cloudwatch_metric_alarm" "low-cpu-credit-workers" {
+  count           = local.burstable_instance_type_worker ? var.workers : 0
+  actions_enabled = true
+  alarm_actions = [
+    aws_sns_topic.alarms.arn,
+  ]
+  alarm_name          = "${local.dns_name}-low-cpu-credit-worker${count.index}"
+  comparison_operator = "LessThanThreshold"
+  datapoints_to_alarm = 1
+  dimensions = {
+    "InstanceId" = aws_instance.workers[count.index].id
+  }
+  evaluation_periods        = 1
+  insufficient_data_actions = []
+  metric_name               = "CPUCreditBalance"
+  namespace                 = "AWS/EC2"
+  ok_actions                = []
+  period                    = 300
+  statistic                 = "Average"
+  tags                      = {}
+  threshold                 = 75
+  treat_missing_data        = "missing"
+}
+
+resource "aws_cloudwatch_metric_alarm" "high-cpu-workers" {
+  count           = var.workers
+  actions_enabled = true
+  alarm_actions = [
+    aws_sns_topic.alarms.arn,
+  ]
+  alarm_name          = "${local.dns_name}-high-cpu-worker${count.index}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  datapoints_to_alarm = 5
+  dimensions = {
+    "InstanceId" = aws_instance.workers[count.index].id
+  }
+  evaluation_periods        = 5
+  insufficient_data_actions = []
+  metric_name               = "CPUUtilization"
+  namespace                 = "AWS/EC2"
+  ok_actions                = []
+  period                    = 60
+  statistic                 = "Average"
+  tags                      = {}
+  threshold                 = 85
+}

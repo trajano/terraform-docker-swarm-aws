@@ -8,7 +8,7 @@ data "aws_eip" "daemons" {
 }
 
 resource "tls_cert_request" "daemons" {
-  count           = var.create_daemon_certificate_request ? var.daemon_count : 0
+  count           = (var.daemon_tls && var.create_daemon_certificate_request) ? var.daemon_count : 0
   key_algorithm   = var.daemon_private_key_algorithm
   private_key_pem = var.daemon_private_key_pems[count.index]
 
@@ -34,6 +34,7 @@ data "template_file" "init_daemon" {
 
   vars = {
     daemon_count   = var.daemon_count
+    daemon_tls     = var.daemon_tls ? "True" : "False"
     instance_index = count.index
     private_key    = count.index < var.daemon_count ? element(concat(var.daemon_private_key_pems, [""]), count.index) : ""
     cert           = count.index < var.daemon_count ? element(concat(var.daemon_cert_pems, [""]), count.index) : ""

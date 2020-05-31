@@ -7,6 +7,7 @@ repo_upgrade: all
 packages:
   - docker
   - python2-boto3
+  - yum-cron
 output:
   all: "| tee -a /var/log/cloud-init-output.log"
 manage_resolve_conf: true

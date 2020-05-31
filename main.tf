@@ -2,6 +2,10 @@ provider "template" {
   version = "~> 2.1"
 }
 
+provider "cloudinit" {
+  version = "~> 1.0"
+}
+
 locals {
   dns_name       = lower(replace(var.name, " ", "-"))
   s3_bucket_name = var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"
@@ -11,11 +15,15 @@ locals {
   )
   daemon_security_group_ids = concat(
     var.exposed_security_group_ids,
-    [aws_security_group.docker.id, aws_security_group.daemon.id],
+    [aws_security_group.docker.id],
+    aws_security_group.daemon.*.id,
+    aws_security_group.daemon_ssh.*.id,
   )
 
-  instance_type_manager = coalesce(var.instance_type_manager, var.instance_type)
-  instance_type_worker  = coalesce(var.instance_type_worker, var.instance_type)
+  instance_type_manager           = coalesce(var.instance_type_manager, var.instance_type)
+  instance_type_worker            = coalesce(var.instance_type_worker, var.instance_type)
+  burstable_instance_type_manager = regex("^t\\d\\..*", local.instance_type_manager) != ""
+  burstable_instance_type_worker  = regex("^t\\d\\..*", local.instance_type_worker) != ""
 }
 
 data "aws_region" "current" {}
@@ -149,7 +157,31 @@ resource "aws_security_group" "docker" {
   }
 }
 
+resource "aws_security_group" "daemon_ssh" {
+  count       = var.daemon_ssh ? 1 : 0
+  name        = "docker-daemon-ssh"
+  description = "Docker Daemon SSH port"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.daemon_cidr_block]
+  }
+
+  tags = {
+    Name = "${var.name} Docker Daemon SSH"
+  }
+
+  timeouts {
+    create = "2m"
+    delete = "2m"
+  }
+}
+
 resource "aws_security_group" "daemon" {
+  count       = var.daemon_tls ? 1 : 0
   name        = "docker-daemon"
   description = "Docker Daemon port"
   vpc_id      = var.vpc_id
@@ -162,7 +194,7 @@ resource "aws_security_group" "daemon" {
   }
 
   tags = {
-    Name = "${var.name} Docker Daemon"
+    Name = "${var.name} Docker TLS Daemon"
   }
 
   timeouts {
@@ -196,30 +228,7 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
       "${aws_s3_bucket.terraform.arn}/*",
     ]
   }
-  # SimpleDB is not available in all regions
-  #
-  # statement {
-  #   actions = [
-  #     "sdb:GetAttributes",
-  #     "sdb:BatchDeleteAttributes",
-  #     "sdb:PutAttributes",
-  #     "sdb:DeleteAttributes",
-  #     "sdb:Select",
-  #     "sdb:DomainMetadata",
-  #     "sdb:BatchPutAttributes",
-  #   ]
-
-  #   resources = [
-  #     "*",
-  #   ]
-  # }
 }
-
-# SimpleDB is not available in all regions
-#
-# resource "aws_simpledb_domain" "db" {
-#   name = "${local.dns_name}.tf"
-# }
 
 resource "aws_iam_policy" "s3-access-role-policy" {
   name   = "${local.dns_name}-ec2-policy"
@@ -252,4 +261,8 @@ resource "aws_s3_bucket_public_access_block" "terraform" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_sns_topic" "alarms" {
+  name = "${local.dns_name}-alarms"
 }

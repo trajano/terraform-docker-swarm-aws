@@ -1,6 +1,6 @@
 # Sandbox
 
-This example is used for integration testing with the current code base with TLS removed. This uses the source "../.." rather than the release copy.
+This example is used for integration testing with the current code base. This uses the source "../.." rather than the release copy.
 
 ## Using a private docker-ce repo
 

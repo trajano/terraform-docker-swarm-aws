@@ -1,8 +1,6 @@
 provider "aws" {
   region  = "us-east-1"
-  version = "~> 2.63"
-  access_key = var.access_key
-  secret_key = var.secret_key
+  version = "~> 2.2"
 }
 
 resource "aws_vpc" "main" {
