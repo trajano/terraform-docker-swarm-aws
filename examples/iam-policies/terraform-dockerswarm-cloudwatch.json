@@ -5,11 +5,12 @@
       "Sid": "CloudwatchResource",
       "Effect": "Allow",
       "Action": [
-        "cloudwatch:PutMetricAlarm",
-        "cloudwatch:EnableAlarmActions",
         "cloudwatch:DeleteAlarms",
+        "cloudwatch:DescribeAlarms",
         "cloudwatch:DisableAlarmActions",
-        "cloudwatch:DescribeAlarms"
+        "cloudwatch:EnableAlarmActions",
+        "cloudwatch:ListTagsForResource",
+        "cloudwatch:PutMetricAlarm"
       ],
       "Resource": "arn:aws:cloudwatch:*:*:alarm:*"
     },
@@ -35,6 +36,15 @@
         "sns:UntagResource"
       ],
       "Resource": "*"
+    },
+    {
+      "Sid": "SnsResource",
+      "Effect": "Allow",
+      "Action": [
+        "sns:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:sns:*:*:*"
     }
+
   ]
 }
