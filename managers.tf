@@ -3,10 +3,11 @@ data "template_file" "init_manager" {
   template = file("${path.module}/init_manager.py")
 
   vars = {
-    s3_bucket      = aws_s3_bucket.terraform.bucket
-    region_name    = data.aws_region.current.name
-    instance_index = count.index
-    vpc_name       = local.dns_name
+    s3_bucket                 = aws_s3_bucket.terraform.bucket
+    region_name               = data.aws_region.current.name
+    instance_index            = count.index
+    vpc_name                  = local.dns_name
+    store_join_tokens_as_tags = var.store_join_tokens_as_tags
   }
 }
 
@@ -68,6 +69,7 @@ resource "aws_instance" "managers" {
 
   tags = {
     Name = "${var.name} manager ${count.index}"
+    Role = "manager"
   }
 
   root_block_device {

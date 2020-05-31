@@ -1,5 +1,9 @@
 # Change Log
 
+## 4.0.1
+
+* Allow using VPC Tags to store the join tokens instead of S3.  This is not the default.
+
 ## 4.0.0
 
 This version deprecates support for exposing the Docker daemon and removal is expected on 5.0.  It is recommended to switch to use SSH to access to the Docker daemon as it forgoes managing certificates.

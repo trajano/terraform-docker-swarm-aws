@@ -61,6 +61,7 @@ resource "aws_instance" "workers" {
 
   tags = {
     Name = "${var.name} worker ${count.index}"
+    Role = "worker"
   }
 
   root_block_device {
