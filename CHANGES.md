@@ -3,6 +3,7 @@
 ## 4.0.1
 
 * Allow policy version updates in the terraform IAM policies
+* Compute region name from instance metadata
 
 ## 4.0.0
 

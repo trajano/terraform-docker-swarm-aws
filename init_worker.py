@@ -4,6 +4,8 @@ from botocore.exceptions import NoCredentialsError
 import os
 import subprocess
 import time
+import json
+import urllib2
 
 # Load system daemons
 subprocess.check_call(["systemctl", "daemon-reload"])
@@ -13,7 +15,6 @@ subprocess.check_call(["systemctl", "enable", "yum-cron"])
 
 # Set values loaded by the tempalte
 s3_bucket = '${s3_bucket}'
-region_name = '${region_name}'
 instance_index = int('${instance_index}')
 vpc_name = '${vpc_name}'
 
@@ -21,6 +22,7 @@ vpc_name = '${vpc_name}'
 subprocess.check_call(["hostnamectl", "set-hostname",
                        "worker%d-%s" % (instance_index, vpc_name)])
 
+region_name = json.load(urllib2.urlopen(' http://169.254.169.254/latest/dynamic/instance-identity/document'))['region']
 s3 = boto3.resource('s3', region_name=region_name)
 try:
     bucket = s3.Bucket(s3_bucket)
