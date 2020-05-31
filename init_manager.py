@@ -4,8 +4,8 @@ from botocore.exceptions import NoCredentialsError
 import os
 import subprocess
 import time
-import urllib2
 import json
+import urllib2
 
 # Load system daemons
 subprocess.check_call(["systemctl", "daemon-reload"])
@@ -17,10 +17,6 @@ subprocess.check_call(["systemctl", "enable", "yum-cron"])
 store_join_tokens_as_tags = ${store_join_tokens_as_tags}
 s3_bucket = '${s3_bucket}'
 
-region_name = json.load(urllib2.urlopen('http://169.254.169.254/latest/dynamic/instance-identity/document'))['region']
-mac = urllib2.urlopen('http://169.254.169.254/latest/meta-data/mac').read().decode()
-vpc_id = urllib2.urlopen('http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id' % mac).read().decode()
-
 instance_index = int('${instance_index}')
 vpc_name = '${vpc_name}'
 
@@ -28,6 +24,9 @@ vpc_name = '${vpc_name}'
 subprocess.check_call(["hostnamectl", "set-hostname",
                        "manager%d-%s" % (instance_index, vpc_name)])
 
+region_name = json.load(urllib2.urlopen(' http://169.254.169.254/latest/dynamic/instance-identity/document'))['region']
+mac = urllib2.urlopen('http://169.254.169.254/latest/meta-data/mac').read().decode()
+vpc_id = urllib2.urlopen('http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id' % mac).read().decode()
 s3 = boto3.resource('s3', region_name=region_name)
 ec2 = boto3.resource('ec2', region_name=region_name)
 vpc = ec2.vpc(vpc_id)
