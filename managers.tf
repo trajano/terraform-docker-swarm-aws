@@ -92,3 +92,49 @@ resource "aws_instance" "managers" {
   }
 }
 
+resource "aws_cloudwatch_metric_alarm" "low-cpu-credit-managers" {
+  count           = local.burstable_instance_type_manager ? var.managers : 0
+  actions_enabled = true
+  alarm_actions = [
+    aws_sns_topic.alarms.arn,
+  ]
+  alarm_name          = "${local.dns_name}-low-cpu-credit-manager${count.index}"
+  comparison_operator = "LessThanThreshold"
+  datapoints_to_alarm = 1
+  dimensions = {
+    "InstanceId" = aws_instance.managers[count.index].id
+  }
+  evaluation_periods        = 1
+  insufficient_data_actions = []
+  metric_name               = "CPUCreditBalance"
+  namespace                 = "AWS/EC2"
+  ok_actions                = []
+  period                    = 300
+  statistic                 = "Average"
+  tags                      = {}
+  threshold                 = 75
+  treat_missing_data        = "missing"
+}
+
+resource "aws_cloudwatch_metric_alarm" "high-cpu-managers" {
+  count           = var.managers
+  actions_enabled = true
+  alarm_actions = [
+    aws_sns_topic.alarms.arn,
+  ]
+  alarm_name          = "${local.dns_name}-high-cpu-manager${count.index}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  datapoints_to_alarm = 5
+  dimensions = {
+    "InstanceId" = aws_instance.managers[count.index].id
+  }
+  evaluation_periods        = 5
+  insufficient_data_actions = []
+  metric_name               = "CPUUtilization"
+  namespace                 = "AWS/EC2"
+  ok_actions                = []
+  period                    = 60
+  statistic                 = "Average"
+  tags                      = {}
+  threshold                 = 85
+}

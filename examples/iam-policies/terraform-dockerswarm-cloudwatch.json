@@ -1,0 +1,40 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudwatchResource",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:EnableAlarmActions",
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:DisableAlarmActions",
+        "cloudwatch:DescribeAlarms"
+      ],
+      "Resource": "arn:aws:cloudwatch:*:*:alarm:*"
+    },
+    {
+      "Sid": "CloudwatchAny",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:DescribeAlarmsForMetric",
+        "cloudwatch:ListMetrics"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SnsAny",
+      "Effect": "Allow",
+      "Action": [
+        "sns:TagResource",
+        "sns:GetTopicAttributes",
+        "sns:DeleteTopic",
+        "sns:CreateTopic",
+        "sns:ListTopics",
+        "sns:SetTopicAttributes",
+        "sns:UntagResource"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
