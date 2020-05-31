@@ -5,9 +5,11 @@ bootcmd:
 repo_update: true
 repo_upgrade: all
 packages:
-  - yum-cron
   - docker
   - python2-boto3
+  - yum-cron
+output:
+  all: "| tee -a /var/log/cloud-init-output.log"
 manage_resolve_conf: true
 resolve_conf:
   name_servers: [ '169.254.169.253' ]

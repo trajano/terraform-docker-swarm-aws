@@ -8,7 +8,6 @@ This version deprecates support for exposing the Docker daemon and removal is ex
 * The Docker TLS port is not exposed by default controlled by `daemon_tls` variable.
 * Use the [cloud-init provider](https://www.terraform.io/docs/providers/cloudinit/index.html) rather than [`template_cloudinit_config`](https://www.terraform.io/docs/providers/template/d/cloudinit_config.html)
 * `yum-cron` is enabled to keep your nodes up to date.  Note if you alter the `packages` used in cloud-init, `yum-cron` should be added.
-* remove explicit write to /var/log/cloud-init-output.log
 
 ## 3.1.7
 
