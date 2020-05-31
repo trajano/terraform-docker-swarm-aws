@@ -56,7 +56,7 @@ resource "aws_instance" "workers" {
   vpc_security_group_ids = local.security_group_ids
 
   iam_instance_profile = aws_iam_instance_profile.ec2.name
-  user_data_base64     = data.template_cloudinit_config.workers[count.index].rendered
+  user_data_base64     = data.cloudinit_config.workers[count.index].rendered
   key_name             = var.key_name
 
   tags = {

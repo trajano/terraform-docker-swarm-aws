@@ -6,7 +6,3 @@ users:
   ssh-authorized-keys:
   - ${ssh_key}
   sudo: ['ALL=(ALL) NOPASSWD:ALL']
-packages:
-  - docker
-  - python2-boto3
-  - s3fs-fuse
