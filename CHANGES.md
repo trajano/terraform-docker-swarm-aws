@@ -6,6 +6,7 @@ This version deprecates support for exposing the Docker daemon and removal is ex
 
 * The ssh port is exposed by default controlled by `daemon_ssh` variable.
 * The Docker TLS port is not exposed by default controlled by `daemon_tls` variable.
+* Use the [cloud-init provider](https://www.terraform.io/docs/providers/cloudinit/index.html) rather than [`template_cloudinit_config`](https://www.terraform.io/docs/providers/template/d/cloudinit_config.html)
 
 ## 3.1.7
 

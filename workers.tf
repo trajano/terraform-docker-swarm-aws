@@ -10,7 +10,7 @@ data "template_file" "init_worker" {
   }
 }
 
-data "template_cloudinit_config" "workers" {
+data "cloudinit_config" "workers" {
   count         = var.workers
   gzip          = "true"
   base64_encode = "true"

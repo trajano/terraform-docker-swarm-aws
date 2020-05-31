@@ -10,7 +10,7 @@ data "template_file" "init_manager" {
   }
 }
 
-data "template_cloudinit_config" "managers" {
+data "cloudinit_config" "managers" {
   count         = var.managers
   gzip          = "true"
   base64_encode = "true"
