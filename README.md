@@ -102,10 +102,9 @@ Upgrading a 3 manager swarm needs to be done one at a time to prevent raft conse
 
 A future relase of this would utilize auto-scaling for now this needs to be done manually
 
-1. ssh to `manager0`
-2. Drain and remove the worker node(s) from the swarm using `sudo /root/bin/rm-workers.sh <nodename[s]>`
-3. Taint the workers that are removed from the command line `terraform taint module.docker-swarm.aws_instance.managers[#]`
-4. Rebuild the workers from the command line `terraform apply`
+1. Drain and remove the worker node(s) from the swarm using `ssh <username>@<manager0> sudo /root/bin/rm-workers.sh <nodename[s]>`
+2. Taint the workers that are removed from the command line `terraform taint module.docker-swarm.aws_instance.managers[#]`
+3. Rebuild the workers from the command line `terraform apply`
 
 ## Other tips
 
