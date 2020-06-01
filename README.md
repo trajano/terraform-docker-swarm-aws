@@ -104,7 +104,7 @@ A future relase of this would utilize auto-scaling for now this needs to be done
 
 1. ssh to `manager0`
 2. Drain and remove the worker node(s) from the swarm using `sudo /root/bin/rm-workers.sh <nodename[s]>`
-3. Taint the workers that are removed from the command line `terraform taint --module=docker-swarm aws_instance.worker.#`
+3. Taint the workers that are removed from the command line `terraform taint module.docker-swarm.aws_instance.managers[#]`
 4. Rebuild the workers from the command line `terraform apply`
 
 ## Other tips
