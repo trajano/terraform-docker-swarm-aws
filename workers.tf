@@ -1,12 +1,13 @@
 data "template_file" "init_worker" {
   count    = var.workers
-  template = file("${path.module}/init_worker.py")
+  template = file("${path.module}/init_node.py")
 
   vars = {
-    s3_bucket      = aws_s3_bucket.terraform.bucket
-    region_name    = data.aws_region.current.name
-    instance_index = count.index
-    vpc_name       = local.dns_name
+    s3_bucket                 = aws_s3_bucket.terraform.bucket
+    region_name               = data.aws_region.current.name
+    instance_index            = count.index
+    vpc_name                  = local.dns_name
+    store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
   }
 }
 

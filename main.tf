@@ -239,7 +239,9 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
   }
   statement {
     actions = [
-      "ec2:DescribeInstances"
+      "ec2:DescribeInstances",
+      "ec2:CreateTags",
+      "ec2:DeleteTags",
     ]
 
     resources = [

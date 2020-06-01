@@ -2,7 +2,7 @@
 
 ## 4.0.1
 
-* Allow using VPC Tags to store the join tokens instead of S3.  This is not the default.
+* Allow using Instance Tags to store the join tokens instead of S3.  This is not the default.  Instance tags are used because VPCs are set outside of the module.
 * Allow policy version updates in the terraform IAM policies
 * Compute region name from instance metadata
 

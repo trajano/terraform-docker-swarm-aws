@@ -1,13 +1,13 @@
 data "template_file" "init_manager" {
   count    = var.managers
-  template = file("${path.module}/init_manager.py")
+  template = file("${path.module}/init_node.py")
 
   vars = {
     s3_bucket                 = aws_s3_bucket.terraform.bucket
     region_name               = data.aws_region.current.name
     instance_index            = count.index
     vpc_name                  = local.dns_name
-    store_join_tokens_as_tags = var.store_join_tokens_as_tags
+    store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
   }
 }
 
@@ -33,7 +33,7 @@ data "cloudinit_config" "managers" {
   }
 
   part {
-    filename     = "init_manager.py"
+    filename     = "init_node.py"
     content      = data.template_file.init_manager[count.index].rendered
     content_type = "text/x-shellscript"
   }
@@ -68,8 +68,10 @@ resource "aws_instance" "managers" {
   key_name             = var.key_name
 
   tags = {
-    Name = "${var.name} manager ${count.index}"
-    Role = "manager"
+    Name             = "${var.name} manager ${count.index}"
+    Role             = "manager"
+    ManagerJoinToken = ""
+    WorkerJoinToken  = ""
   }
 
   root_block_device {
@@ -86,6 +88,8 @@ resource "aws_instance" "managers" {
       ami,
       ebs_block_device,
       user_data_base64,
+      tags["ManagerJoinToken"],
+      tags["WorkerJoinToken"],
     ]
   }
 
