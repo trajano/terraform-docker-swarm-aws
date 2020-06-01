@@ -126,7 +126,7 @@ def get_manager_instance_s3(exclude_self=False):
     manager_instance = None
     instances_considered = get_running_instances()
     if exclude_self:
-        instances_considered = filter(lambda vpc_instance: vpc_instance != instance, instances_considered)
+        instances_considered = filter(lambda vpc_instance: vpc_instance != get_current_instance(), instances_considered)
     for vpc_instance in instances_considered:
         if vpc_instance.private_ip_address == manager0_ip or vpc_instance.private_ip_address == manager1_ip:
             manager_instance = vpc_instance
@@ -137,6 +137,7 @@ def get_manager_instance_s3(exclude_self=False):
             manager_token,
             worker_token)
     else:
+        logger.warning("Unable to locate manager manager_token=%s worker_token=%s manager0_ip=%s manager1_ip=%s", manager_token, worker_token, manager0_ip, manager1_ip)
         return None
 
 
@@ -172,8 +173,7 @@ def join_as_manager(get_manager_instance, update_tokens):
 
     another_manager_instance = None
     for attempt in range(10 * instance_index):
-        # another_manager_instance = get_manager_instance(exclude_self=True)
-        another_manager_instance = get_manager_instance()
+        another_manager_instance = get_manager_instance(exclude_self=True)
         if another_manager_instance == None:
             logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
             time.sleep(random.randint(5,15))

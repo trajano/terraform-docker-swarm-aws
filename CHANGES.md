@@ -1,5 +1,9 @@
 # Change Log
 
+## 4.0.2
+
+* Bugfix in script
+
 ## 4.0.1
 
 * Allow using Instance Tags to store the join tokens instead of S3.  This is not the default.  Instance tags are used because VPCs are set outside of the module.  Note this should not be used on an existing system as the cluster will be invalidated.
