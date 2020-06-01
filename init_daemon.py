@@ -19,7 +19,7 @@ def write_or_link(path, content):
     with open(path, "w") as text_file:
       text_file.write(content)
 
-if daemon_tls && instance_index < daemon_count:
+if daemon_tls and instance_index < daemon_count:
     if (not os.path.isdir("/etc/docker")):
       os.mkdir("/etc/docker", 0o700)
     write_or_link("/etc/docker/key.pem", private_key)

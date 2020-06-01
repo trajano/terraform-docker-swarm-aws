@@ -135,3 +135,7 @@ variable "daemon_cidr_block" {
   default     = "0.0.0.0/0"
 }
 
+variable "store_join_tokens_as_tags" {
+  description = "Store the Docker swarm join tokens as VPC tags."
+  default     = false
+}

@@ -1,12 +1,13 @@
 data "template_file" "init_manager" {
   count    = var.managers
-  template = file("${path.module}/init_manager.py")
+  template = file("${path.module}/init_node.py")
 
   vars = {
-    s3_bucket      = aws_s3_bucket.terraform.bucket
-    region_name    = data.aws_region.current.name
-    instance_index = count.index
-    vpc_name       = local.dns_name
+    s3_bucket                 = aws_s3_bucket.terraform.bucket
+    region_name               = data.aws_region.current.name
+    instance_index            = count.index
+    vpc_name                  = local.dns_name
+    store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
   }
 }
 
@@ -32,7 +33,7 @@ data "cloudinit_config" "managers" {
   }
 
   part {
-    filename     = "init_manager.py"
+    filename     = "init_node.py"
     content      = data.template_file.init_manager[count.index].rendered
     content_type = "text/x-shellscript"
   }
@@ -50,11 +51,12 @@ resource "aws_instance" "managers" {
   count         = var.managers
   ami           = data.aws_ami.base_ami.id
   instance_type = local.instance_type_manager
-  subnet_id     = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.*.names)].id
+  subnet_id     = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs)].id
   private_ip = cidrhost(
-    aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.*.names)].cidr_block,
+    aws_subnet.managers[count.index % length(data.aws_availability_zones.azs)].cidr_block,
     10 + count.index,
   )
+  
 
   # workaround as noted by https://github.com/hashicorp/terraform/issues/12453#issuecomment-284273475
   vpc_security_group_ids = split(
@@ -67,7 +69,10 @@ resource "aws_instance" "managers" {
   key_name             = var.key_name
 
   tags = {
-    Name = "${var.name} manager ${count.index}"
+    Name             = "${var.name} manager ${count.index}"
+    Role             = "manager"
+    ManagerJoinToken = ""
+    WorkerJoinToken  = ""
   }
 
   root_block_device {
@@ -84,6 +89,11 @@ resource "aws_instance" "managers" {
       ami,
       ebs_block_device,
       user_data_base64,
+      subnet_id,
+      private_ip,
+      availability_zone,
+      tags["ManagerJoinToken"],
+      tags["WorkerJoinToken"],
     ]
   }
 

@@ -228,6 +228,26 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
       "${aws_s3_bucket.terraform.arn}/*",
     ]
   }
+  statement {
+    actions = [
+      "ec2:DescribeVpcs",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+  statement {
+    actions = [
+      "ec2:DescribeInstances",
+      "ec2:CreateTags",
+      "ec2:DeleteTags",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "s3-access-role-policy" {

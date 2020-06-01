@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.0.1
+
+* Allow using Instance Tags to store the join tokens instead of S3.  This is not the default.  Instance tags are used because VPCs are set outside of the module.  Note this should not be used on an existing system as the cluster will be invalidated.
+* Allow policy version updates in the terraform IAM policies
+* Compute region name from instance metadata
+* (fixed) all instances were going to the same availability zone.  To prevent recreating the instances these changes are ignored in the lifecycle.
+
 ## 4.0.0
 
 This version deprecates support for exposing the Docker daemon and removal is expected on 5.0.  It is recommended to switch to use SSH to access to the Docker daemon as it forgoes managing certificates.

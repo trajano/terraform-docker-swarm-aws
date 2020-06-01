@@ -1,12 +1,13 @@
 data "template_file" "init_worker" {
   count    = var.workers
-  template = file("${path.module}/init_worker.py")
+  template = file("${path.module}/init_node.py")
 
   vars = {
-    s3_bucket      = aws_s3_bucket.terraform.bucket
-    region_name    = data.aws_region.current.name
-    instance_index = count.index
-    vpc_name       = local.dns_name
+    s3_bucket                 = aws_s3_bucket.terraform.bucket
+    region_name               = data.aws_region.current.name
+    instance_index            = count.index
+    vpc_name                  = local.dns_name
+    store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
   }
 }
 
@@ -47,9 +48,9 @@ resource "aws_instance" "workers" {
   count         = var.workers
   ami           = data.aws_ami.base_ami.id
   instance_type = local.instance_type_worker
-  subnet_id     = aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.*.names)].id
+  subnet_id     = aws_subnet.workers[count.index % length(data.aws_availability_zones.azs)].id
   private_ip = cidrhost(
-    aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.*.names)].cidr_block,
+    aws_subnet.workers[count.index % length(data.aws_availability_zones.azs)].cidr_block,
     10 + count.index,
   )
 
@@ -61,6 +62,7 @@ resource "aws_instance" "workers" {
 
   tags = {
     Name = "${var.name} worker ${count.index}"
+    Role = "worker"
   }
 
   root_block_device {
@@ -77,6 +79,9 @@ resource "aws_instance" "workers" {
       ami,
       ebs_block_device,
       user_data_base64,
+      subnet_id,
+      private_ip,
+      availability_zone,
     ]
   }
 
