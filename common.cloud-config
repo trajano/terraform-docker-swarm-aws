@@ -16,8 +16,8 @@ resolve_conf:
 runcmd:
   - [ sysctl, -w, vm.max_map_count=262144 ]
   - [ sysctl, -w, fs.file-max=65536 ]
-  - [ ulimit, -n, 65536 ]
-  - [ ulimit, -u, 4096 ]
+  - [ ulimit, -n, '65536' ]
+  - [ ulimit, -u, '4096' ]
 write_files:
   - content: |
       vm.max_map_count=262144
