@@ -17,11 +17,12 @@ AWS permissions to do the following:
 - Manage EC2 resource
 - Security Groups
 - IAM permissions
-- S3 Create and Access
 - SNS
 - Cloudwatch Alarms
 
 The `examples/iam-policies` shows the policy JSONs that are used.
+
+For earlier versions of the module, *S3 Create and Access* was required to store the tokens.  Tags are used in the current releases to save on S3 costs.  This method is not deprecated as of yet.
 
 ## Secure Docker daemon port
 

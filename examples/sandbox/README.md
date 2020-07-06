@@ -1,6 +1,10 @@
 # Sandbox
 
-This example is used for integration testing with the current code base with TLS removed. This uses the source "../.." rather than the release copy.
+This example is used for integration testing with the current code base with TLS removed and provides a bastion server. This uses the source "../.." rather than the release copy.
+
+## Connecting to the Docker daemon
+
+    docker -H ssh://username@bastionIP <commands>
 
 ## Using a private docker-ce repo
 
@@ -10,11 +14,3 @@ Note the slowest part is the `instance_type` on a `t3.micro` the time to finish 
 
 See the `variables.tf` file to see what to set in `terraform.tfvars`
 
-## Connecting to the Docker daemon
-
-    export DOCKER_CERT_PATH=<directory where you're extracting the PEM files>
-    export DOCKER_TLS_VERIFY=1
-    export DOCKER_HOST=tcp://<ip>:2376
-    terraform output client_private_key_pem > key.pem
-    terraform output client_cert_pem > cert.pem
-    terraform output ca_cert_pem > ca.pem

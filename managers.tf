@@ -3,7 +3,7 @@ data "template_file" "init_manager" {
   template = file("${path.module}/init_node.py")
 
   vars = {
-    s3_bucket                 = aws_s3_bucket.terraform.bucket
+    s3_bucket                 = var.store_join_tokens_as_tags ? "" : aws_s3_bucket.terraform[0].bucket
     region_name               = data.aws_region.current.name
     instance_index            = count.index
     vpc_name                  = local.dns_name
@@ -56,7 +56,7 @@ resource "aws_instance" "managers" {
     aws_subnet.managers[count.index % length(data.aws_availability_zones.azs)].cidr_block,
     10 + count.index,
   )
-  
+
 
   # workaround as noted by https://github.com/hashicorp/terraform/issues/12453#issuecomment-284273475
   vpc_security_group_ids = split(

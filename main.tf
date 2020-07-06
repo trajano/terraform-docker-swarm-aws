@@ -5,10 +5,8 @@ provider "template" {
 provider "cloudinit" {
   version = "~> 1.0"
 }
-
 locals {
   dns_name       = lower(replace(var.name, " ", "-"))
-  s3_bucket_name = var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.dns_name}.terraform"
   security_group_ids = concat(
     var.exposed_security_group_ids,
     [aws_security_group.docker.id],
@@ -73,25 +71,6 @@ data "aws_ami" "base_ami" {
   most_recent = true
   name_regex  = "^amzn2-ami-hvm-.*-x86_64-ebs"
   owners      = ["amazon", "self"]
-}
-
-resource "aws_s3_bucket" "terraform" {
-  bucket        = local.s3_bucket_name
-  acl           = "private"
-  force_destroy = true
-
-  lifecycle_rule {
-    enabled = true
-
-    transition {
-      days          = 30
-      storage_class = "ONEZONE_IA"
-    }
-  }
-
-  tags = {
-    Name = "${var.name} Swarm"
-  }
 }
 
 resource "aws_security_group" "docker" {
@@ -214,20 +193,7 @@ data "aws_iam_policy_document" "instance-assume-role-policy" {
   }
 }
 
-data "aws_iam_policy_document" "s3-access-role-policy" {
-  statement {
-    actions = [
-      "s3:PutObject",
-      "s3:GetObject",
-      "s3:DeleteObject",
-      "s3:ListBucket",
-    ]
-
-    resources = [
-      aws_s3_bucket.terraform.arn,
-      "${aws_s3_bucket.terraform.arn}/*",
-    ]
-  }
+data "aws_iam_policy_document" "swarm-access-role-policy" {
   statement {
     actions = [
       "ec2:DescribeVpcs",
@@ -250,9 +216,14 @@ data "aws_iam_policy_document" "s3-access-role-policy" {
   }
 }
 
-resource "aws_iam_policy" "s3-access-role-policy" {
-  name   = "${local.dns_name}-ec2-policy"
-  policy = data.aws_iam_policy_document.s3-access-role-policy.json
+resource "aws_iam_policy" "swarm-access-role-policy" {
+  name   = "${local.dns_name}-swarm-ec2-policy"
+  policy = data.aws_iam_policy_document.swarm-access-role-policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "swarm-access-role-policy" {
+  role       = aws_iam_role.ec2.name
+  policy_arn = aws_iam_policy.swarm-access-role-policy.arn
 }
 
 resource "aws_iam_role" "ec2" {
@@ -261,27 +232,11 @@ resource "aws_iam_role" "ec2" {
   assume_role_policy = data.aws_iam_policy_document.instance-assume-role-policy.json
 }
 
-resource "aws_iam_role_policy_attachment" "s3-access-role-policy" {
-  role       = aws_iam_role.ec2.name
-  policy_arn = aws_iam_policy.s3-access-role-policy.arn
-}
-
 resource "aws_iam_instance_profile" "ec2" {
   name = "${local.dns_name}-ec2"
   role = aws_iam_role.ec2.name
 }
 
-resource "aws_s3_bucket_public_access_block" "terraform" {
-  depends_on = [
-    aws_s3_bucket.terraform
-  ]
-  bucket = aws_s3_bucket.terraform.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
 
 resource "aws_sns_topic" "alarms" {
   name = "${local.dns_name}-alarms"
