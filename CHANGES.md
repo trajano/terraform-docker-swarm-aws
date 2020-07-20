@@ -1,5 +1,9 @@
 # Change Log
 
+## 4.0.5
+
+* Added `[]` as default value for `exposed_security_group_ids`
+
 ## 4.0.4
 
 * Corrected host name for workers
