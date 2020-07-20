@@ -31,8 +31,14 @@ variable "cloud_config_extra_script" {
   default     = ""
 }
 
+variable "additional_security_group_ids" {
+  description = "These are security groups that are applied to the Docker swarm nodes primarily for accessing other resources or exposing to the Internet."
+  type        = list(string)
+  default     = []
+}
+
 variable "exposed_security_group_ids" {
-  description = "These are security groups that are applied to the Docker swarm nodes primarily for accessing other resources or exposing to the Internet. (The variable name is kept for legacy reasons, but will be renamed to `additional_security_group_ids` the future)"
+  description = "These are security groups that are applied to the Docker swarm nodes primarily for accessing other resources or exposing to the Internet. The variable name is kept for legacy reasons, use `additional_security_group_ids`"
   type        = list(string)
   default     = []
 }
