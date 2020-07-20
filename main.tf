@@ -9,10 +9,12 @@ locals {
   dns_name       = lower(replace(var.name, " ", "-"))
   security_group_ids = concat(
     var.exposed_security_group_ids,
+    var.additional_security_group_ids,
     [aws_security_group.docker.id],
   )
   daemon_security_group_ids = concat(
     var.exposed_security_group_ids,
+    var.additional_security_group_ids,
     [aws_security_group.docker.id],
     aws_security_group.daemon.*.id,
     aws_security_group.daemon_ssh.*.id,
