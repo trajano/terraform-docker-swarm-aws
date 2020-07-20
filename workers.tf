@@ -7,6 +7,7 @@ data "template_file" "init_worker" {
     region_name               = data.aws_region.current.name
     instance_index            = count.index
     vpc_name                  = local.dns_name
+    group                     = "worker"
     store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
   }
 }

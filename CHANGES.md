@@ -1,5 +1,9 @@
 # Change Log
 
+## 4.0.4
+
+* Corrected host name for workers
+
 ## 4.0.3
 
 * When `store_join_tokens_as_tags`, S3 resources are no longer created.  The S3 specific code had also been refactored out to `s3.tf`

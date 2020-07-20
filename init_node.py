@@ -17,6 +17,7 @@ store_join_tokens_as_tags = bool('${store_join_tokens_as_tags}')
 instance_index = int('${instance_index}')
 s3_bucket = '${s3_bucket}'
 vpc_name = '${vpc_name}'
+group = '${group}'
 
 # Global cached results
 _current_instance = None
@@ -40,7 +41,7 @@ def initialize_system_daemons_and_hostname():
     subprocess.check_call(["systemctl", "enable", "yum-cron"])
 
     subprocess.check_call(["hostnamectl", "set-hostname",
-        "manager%d-%s" % (instance_index, vpc_name)])
+        "%s%d-%s" % (group, instance_index, vpc_name)])
 
 def create_swap():
     """
