@@ -120,5 +120,6 @@ A future relase of this would utilize auto-scaling for now this needs to be done
       - yum-cron
 
 * If the private key or certificate is not locally available.  `create_daemon_certificate_request` should be set to `false`.
+* Add additional SSH users using `sudo /root/bin/add-docker-user.sh <username> <ssh key string>`.  Note this creates users in such a way that it only allows the use of `docker context`
 
 [ssh-daemon]: https://github.com/docker/cli/pull/1014

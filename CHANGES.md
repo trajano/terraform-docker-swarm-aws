@@ -3,7 +3,8 @@
 ## 4.0.5
 
 * Added `[]` as default value for `exposed_security_group_ids` but noted that this is deprecated.
-* Added `[]` as default value for `additional_security_group_ids`
+* Added `[]` as default value for `additional_security_group_ids`.
+* Added `root/bin/add-docker-user.sh` to help add additional users to use `docker context`.
 
 ## 4.0.4
 

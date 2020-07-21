@@ -63,6 +63,16 @@ write_files:
     owner: root:root
     permissions: "0700"
   - content: |
+      #!/bin/bash
+      USER="$1"
+      shift
+      SSH_PUBLIC_KEY="command=\\\"docker system dial-stdio\\\" $*"
+      useradd -s /bin/sh -G docker ${USER}
+      su - ${USER} -c "umask 077 ; mkdir .ssh ; echo $SSH_PUBLIC_KEY >> .ssh/authorized_keys"
+    path: /root/bin/add-docker-user.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
       #!/bin/sh
       for node_name in $*
       do
