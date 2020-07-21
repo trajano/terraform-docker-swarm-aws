@@ -25,7 +25,7 @@ module "docker-swarm" {
   store_join_tokens_as_tags = true
   key_name = aws_key_pair.deployer.key_name
 
-  exposed_security_group_ids = [
+  additional_security_group_ids = [
     aws_security_group.exposed.id,
   ]
 }

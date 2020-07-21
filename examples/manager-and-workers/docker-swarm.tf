@@ -9,7 +9,7 @@ module "docker-swarm" {
   managers           = 3
   cloud_config_extra = file("users.cloud-config")
 
-  exposed_security_group_ids = [
+  exposed_seadditional_security_group_idscurity_group_ids = [
     aws_security_group.exposed.id,
   ]
 }

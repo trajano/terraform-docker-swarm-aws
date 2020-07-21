@@ -27,7 +27,7 @@ module "docker-swarm" {
   daemon_ca_cert_pem      = tls_self_signed_cert.ca.cert_pem
   daemon_tls              = true
 
-  exposed_security_group_ids = [
+  additional_security_group_ids = [
     aws_security_group.exposed.id,
   ]
 }
