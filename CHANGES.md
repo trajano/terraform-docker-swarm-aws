@@ -1,5 +1,9 @@
 # Change Log
 
+## 4.1.0
+
+* Install the `haveged` package to provide better entropy.
+
 ## 4.0.5
 
 * Added `[]` as default value for `exposed_security_group_ids` but noted that this is deprecated.

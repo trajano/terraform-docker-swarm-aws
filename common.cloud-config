@@ -6,6 +6,7 @@ repo_update: true
 repo_upgrade: all
 packages:
   - docker
+  - haveged
   - python2-boto3
   - yum-cron
 output:

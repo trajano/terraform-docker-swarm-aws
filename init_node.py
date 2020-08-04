@@ -39,6 +39,9 @@ def initialize_system_daemons_and_hostname():
     subprocess.check_call(["systemctl", "enable", "docker.service"])
     subprocess.check_call(["systemctl", "start", "docker.service"])
     subprocess.check_call(["systemctl", "enable", "yum-cron"])
+    subprocess.check_call(["systemctl", "start", "yum-cron"])
+    subprocess.check_call(["systemctl", "enable", "haveged"])
+    subprocess.check_call(["systemctl", "start", "haveged"])
 
     subprocess.check_call(["hostnamectl", "set-hostname",
         "%s%d-%s" % (group, instance_index, vpc_name)])

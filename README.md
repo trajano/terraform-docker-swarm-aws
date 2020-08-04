@@ -116,10 +116,13 @@ A future relase of this would utilize auto-scaling for now this needs to be done
 
     packages:
       - [docker, 18.03.1ce-2.amzn2]
+      - haveged
       - python2-boto3
       - yum-cron
 
 * If the private key or certificate is not locally available.  `create_daemon_certificate_request` should be set to `false`.
 * Add additional SSH users using `sudo /root/bin/add-docker-user.sh <username> <ssh key string>`.  Note this creates users in such a way that it only allows the use of `docker context`
+* In order to improve performance when using strong cryptography, [haveged] should be installed.  This is 
 
 [ssh-daemon]: https://github.com/docker/cli/pull/1014
+[haveged]: http://issihosts.com/haveged/
