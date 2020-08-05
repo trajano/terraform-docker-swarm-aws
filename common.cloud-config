@@ -9,6 +9,7 @@ packages:
   - haveged
   - python2-boto3
   - yum-cron
+  - ec2-instance-connect
 output:
   all: "| tee -a /var/log/cloud-init-output.log"
 manage_resolve_conf: true
