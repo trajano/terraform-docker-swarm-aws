@@ -2,7 +2,9 @@
 
 ## 4.1.0
 
+* Made `haveged` and `yum-cron` packages optional.
 * Install the `haveged` package to provide better entropy.
+* Install the `ec2-instance-connect` package to provide IAM based logins.
 
 ## 4.0.5
 

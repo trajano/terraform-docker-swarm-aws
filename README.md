@@ -123,7 +123,8 @@ A future relase of this would utilize auto-scaling for now this needs to be done
 * If the private key or certificate is not locally available.  `create_daemon_certificate_request` should be set to `false`.
 * Add additional SSH users using `sudo /root/bin/add-docker-user.sh <username> <ssh key string>`.  Note this creates users in such a way that it only allows the use of `docker context`
 * Use [ec2-instance-connect] to connect to the server.  As of 4.1.0 this is installed by default, but it is not required when customizing the package list.
-* In order to improve performance when using strong cryptography, [haveged] should be installed.  This is package is required when customizing the package list.
+* In order to improve performance when using strong cryptography, [haveged] should be installed.
+* `yum-cron` and `haveged` can be removed from the `packages` in the custom cloud config if desired.
 
 [ssh-daemon]: https://github.com/docker/cli/pull/1014
 [haveged]: http://issihosts.com/haveged/
