@@ -1,7 +1,3 @@
-provider "tls" {
-  version = "~> 2.0"
-}
-
 data "aws_eip" "daemons" {
   count = var.daemon_count
   id    = var.daemon_eip_ids[count.index]

@@ -1,10 +1,3 @@
-provider "template" {
-  version = "~> 2.1"
-}
-
-provider "cloudinit" {
-  version = "~> 1.0"
-}
 locals {
   dns_name       = lower(replace(var.name, " ", "-"))
   security_group_ids = concat(

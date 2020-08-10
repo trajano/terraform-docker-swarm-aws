@@ -1,5 +1,9 @@
 # Change Log
 
+## 4.1.1
+
+* Use [provider version constraints][https://www.terraform.io/docs/configuration/modules.html#provider-version-constraints-in-modules]
+
 ## 4.1.0
 
 * Made `haveged` and `yum-cron` packages optional.
