@@ -1,5 +1,5 @@
 locals {
-  dns_name       = lower(replace(var.name, " ", "-"))
+  dns_name = lower(replace(var.name, " ", "-"))
   security_group_ids = concat(
     var.exposed_security_group_ids,
     var.additional_security_group_ids,
@@ -205,6 +205,7 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
       "ec2:DeleteTags",
       "logs:CreateLogStream",
       "logs:DescribeLogGroups",
+      "logs:PutLogEvents",
     ]
 
     resources = [

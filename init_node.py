@@ -47,7 +47,10 @@ def configure_logging():
         daemon_json = json.loads("{}")
 
     daemon_json["log-driver"] = "awslogs"
-    daemon_json["log-opts"] = { "awslogs-group" : cloudwatch_log_group }
+    daemon_json["log-opts"] = {
+        "awslogs-group" : cloudwatch_log_group,
+        "tag": "{{.Name}}"
+    }
 
     f = open(DAEMON_JSON, "w")
     f.write(json.dumps(daemon_json))
