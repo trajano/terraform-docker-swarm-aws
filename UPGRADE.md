@@ -11,4 +11,8 @@
 
 ## 4.x to 5.x
 
+FYI at time of this writing, it is NOT recommended that users upgrade to 5.x unless they need to due to usability bugs in Terraform and the AWS provider.  Workarounds are provided to known issues.  It is best to wait for 0.13.1
 * Terraform 0.13 is now required.  Perform a `terraform 0.13ugprade` and `terraform init -upgrade` to update your Terraform files before using.
+* [`aws_availability_zones` will always have a diff](https://github.com/terraform-providers/terraform-provider-aws/issues/14579)
+* `terraform state replace-provider -- -/aws hashicorp/aws` generally helps address existing state issues [terraform#25819](https://github.com/hashicorp/terraform/issues/25819#issuecomment-672939811)
+* [State files may need to be modified using pull and push](https://github.com/hashicorp/terraform/issues/25752#issuecomment-672217777) to [remove resource state attributes that are no longer in the schema that was fixed for 0.13.1](https://github.com/hashicorp/terraform/issues/25752#issuecomment-672217777)
