@@ -203,6 +203,8 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
       "ec2:DescribeInstances",
       "ec2:CreateTags",
       "ec2:DeleteTags",
+      "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
     ]
 
     resources = [

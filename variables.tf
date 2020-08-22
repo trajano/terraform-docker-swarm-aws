@@ -31,6 +31,16 @@ variable "cloud_config_extra_script" {
   default     = ""
 }
 
+variable "cloudwatch_logs" {
+  description = "Enables logging to Cloudwatch."
+  default     = false
+}
+
+variable "cloudwatch_retention_in_days" {
+  description = " Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653."
+  default     = 7
+}
+
 variable "additional_security_group_ids" {
   description = "These are security groups that are applied to the Docker swarm nodes primarily for accessing other resources or exposing to the Internet."
   type        = list(string)

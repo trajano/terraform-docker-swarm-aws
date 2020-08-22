@@ -23,7 +23,8 @@ module "docker-swarm" {
   daemon_count              = length(aws_eip.daemons)
   daemon_eip_ids            = aws_eip.daemons.*.id
   store_join_tokens_as_tags = true
-  key_name = aws_key_pair.deployer.key_name
+  cloudwatch_logs           = true
+  key_name                  = aws_key_pair.deployer.key_name
 
   additional_security_group_ids = [
     aws_security_group.exposed.id,

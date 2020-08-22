@@ -7,6 +7,7 @@ data "template_file" "init_manager" {
     region_name               = data.aws_region.current.name
     instance_index            = count.index
     vpc_name                  = local.dns_name
+    cloudwatch_log_group      = var.cloudwatch_logs ? aws_cloudwatch_log_group.managers[count.index].name : ""
     group                     = "manager"
     store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
   }
@@ -47,7 +48,7 @@ data "cloudinit_config" "managers" {
 }
 
 resource "aws_instance" "managers" {
-  depends_on = [aws_s3_bucket.terraform]
+  depends_on = [aws_s3_bucket.terraform, aws_cloudwatch_log_group.managers]
 
   count         = var.managers
   ami           = data.aws_ami.base_ami.id
@@ -148,4 +149,16 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu-managers" {
   statistic                 = "Average"
   tags                      = {}
   threshold                 = 85
+}
+
+resource "aws_cloudwatch_log_group" "managers" {
+  count             = var.cloudwatch_logs ? var.managers : 0
+  name              = "${local.dns_name}-manager${count.index}"
+  retention_in_days = var.cloudwatch_retention_in_days
+
+  tags = {
+    Environment = var.name
+    Name        = "${var.name} manager ${count.index}"
+    Node        = "${local.dns_name}-manager${count.index}"
+  }
 }

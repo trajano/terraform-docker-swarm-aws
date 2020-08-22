@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 from botocore.exceptions import NoCredentialsError
 import boto3
-import json
+import simplejson as json
 import logging
 import os
+import os.path
 import random
 import subprocess
 import time
 import urllib2
 
+DAEMON_JSON = "/etc/docker/daemon.json"
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "WARNING"))
 
@@ -18,6 +20,7 @@ instance_index = int('${instance_index}')
 s3_bucket = '${s3_bucket}'
 vpc_name = '${vpc_name}'
 group = '${group}'
+cloudwatch_log_group = '${cloudwatch_log_group}'
 
 # Global cached results
 _current_instance = None
@@ -30,6 +33,26 @@ region_name = instance_identity['region']
 # AWS resources
 ec2 = boto3.resource('ec2', region_name=region_name)
 s3 = boto3.resource('s3', region_name=region_name)
+
+def configure_logging():
+    """
+    Updates daemon.json to enable AWS Cloudwatch logging
+    """
+    if cloudwatch_log_group == "":
+        return
+
+    if os.path.exists(DAEMON_JSON):
+        daemon_json = json.load(DAEMON_JSON)
+    else:
+        daemon_json = json.loads("{}")
+
+    daemon_json["log-driver"] = "awslogs"
+    daemon_json["log-opts"] = { "awslogs-group" : cloudwatch_log_group }
+
+    f = open(DAEMON_JSON, "w")
+    f.write(json.dumps(daemon_json))
+    f.close()
+
 
 def initialize_system_daemons_and_hostname():
     """
@@ -247,6 +270,7 @@ def join_swarm():
     else:
         join_as_worker(get_manager_instance)
 
+configure_logging()
 initialize_system_daemons_and_hostname()
 join_swarm()
 create_swap()

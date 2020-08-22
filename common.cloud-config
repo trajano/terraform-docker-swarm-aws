@@ -43,7 +43,6 @@ write_files:
   - content: |
       #!/bin/sh
       docker image prune --all -f > /dev/null
-      docker network prune -f > /dev/null
       docker volume prune -f > /dev/null
     path: /etc/cron.daily/docker-prune.sh
     owner: root:root

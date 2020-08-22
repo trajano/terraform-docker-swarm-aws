@@ -1,5 +1,10 @@
 # Change Log
 
+## 5.1.0
+
+* `cloudwatch_logs` enables containers to log to CloudWatch.
+* Networks are no longer pruned daily.  They don't take up much space unlike volumes and images.
+
 ## 5.0.0
 
 * Terraform 0.13 is now required.
