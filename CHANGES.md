@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.2
+
+* Commented out the `source` in the [provider version constraints][https://www.terraform.io/docs/configuration/modules.html#provider-version-constraints-in-modules].  These require Terraform 0.13 to work.
+* Set the constraints to allow AWS 3.x as well since they are compatible.
+* Expose private IPs to allow use with Security Groups.
+
 ## 4.1.1
 
 * Use [provider version constraints][https://www.terraform.io/docs/configuration/modules.html#provider-version-constraints-in-modules]
