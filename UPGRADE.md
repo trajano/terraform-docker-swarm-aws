@@ -8,3 +8,7 @@
 ## 4.0.x to 4.1.x
 
 * If packages are customized, `haveged` is now required.
+
+## 4.x to 5.x
+
+* Terraform 0.13 is now required.  Perform a `terraform 0.13ugprade` and `terraform init -upgrade` to update your Terraform files before using.

@@ -1,5 +1,10 @@
 # Change Log
 
+## 5.0.0
+
+* Terraform 0.13 is now required.
+* AWS 3.3 required
+
 ## 4.1.2
 
 * Commented out the `source` in the [provider version constraints][https://www.terraform.io/docs/configuration/modules.html#provider-version-constraints-in-modules].  These require Terraform 0.13 to work.
