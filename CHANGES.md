@@ -2,7 +2,7 @@
 
 ## 5.1.0
 
-* `cloudwatch_logs` enables containers to log to CloudWatch.
+* `cloudwatch_logs` enables containers to log to CloudWatch.  Note if this is enabled, then logs will not be available when SSH to the server. 
 * Networks are no longer pruned daily.  They don't take up much space unlike volumes and images.
 
 ## 5.0.0
