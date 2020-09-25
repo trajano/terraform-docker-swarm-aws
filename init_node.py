@@ -296,17 +296,20 @@ def install_monitoring_tools():
             crontab += "\n"
         except subprocess.CalledProcessError:
             crontab = ""
-        crontab += "*/5 * * * * /root/aws-scripts-mon/mon-put-instance-data.pl "
-        crontab += "--mem-used-incl-cache-buff "
-        crontab += "--mem-util "
-        crontab += "--mem-used "
-        crontab += "--swap-util "
-        crontab += "--swap-used "
-        crontab += "--disk-space-util "
-        crontab += "--disk-space-avail "
-        crontab += "--disk-space-used "
-        crontab += "--disk-path=/ "
-        crontab += "--from-cron"
+        crontab += "*/5 * * * * "
+        crontab += " ".join([
+            "/root/aws-scripts-mon/mon-put-instance-data.pl"
+            "--mem-used-incl-cache-buff",
+            "--mem-util",
+            "--mem-used",
+            "--swap-util",
+            "--swap-used",
+            "--disk-space-util",
+            "--disk-space-avail",
+            "--disk-space-used",
+            "--disk-path=/",
+            "--from-cron"
+        ])
         crontab += "\n"
         f.write(crontab)
         f.close()
