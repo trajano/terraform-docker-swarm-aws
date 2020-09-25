@@ -1,9 +1,12 @@
 # Change Log
 
-## 5.1.0
+## 5.1.0 Cloudwatching
 
-* `cloudwatch_logs` enables containers to log to CloudWatch.  Note if this is enabled, then logs will not be available when SSH to the server. 
+This release includes support for more Cloudwatch functions.
+
+* `cloudwatch_logs` enables containers to log to CloudWatch.  Note if this is enabled, then logs will not be available when SSH to the server.  This is disabled by default.
 * Networks are no longer pruned daily.  They don't take up much space unlike volumes and images.
+* Added [monitoring EC2 instance scripts](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html).
 
 ## 5.0.0
 

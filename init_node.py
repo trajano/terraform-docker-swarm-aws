@@ -6,9 +6,11 @@ import logging
 import os
 import os.path
 import random
+import stat
 import subprocess
 import time
 import urllib2
+import zipfile
 
 DAEMON_JSON = "/etc/docker/daemon.json"
 logger = logging.getLogger(__name__)
@@ -273,7 +275,51 @@ def join_swarm():
     else:
         join_as_worker(get_manager_instance)
 
+def install_monitoring_tools():
+
+    """
+    As documented in https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html
+    """
+
+    scripts_zip_path = "/tmp/CloudWatchMonitoringScripts.zip"
+    crontab_path = "/tmp/aws-scripts-mon.crontab"
+    scripts_zip = urllib2.urlopen('https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip').read()
+    scripts_zip_file = open(scripts_zip_path, 'wb')
+    scripts_zip_file.write(scripts_zip)
+    scripts_zip_file.close()
+
+    zipfile.ZipFile(scripts_zip_path, 'r').extractall("/root")
+
+    with open(crontab_path, 'w') as f:
+        try:
+            crontab = subprocess.check_output(['crontab', '-l']).decode()
+            crontab += "\n"
+        except subprocess.CalledProcessError:
+            crontab = ""
+        crontab += "*/5 * * * * "
+        crontab += " ".join([
+            "/root/aws-scripts-mon/mon-put-instance-data.pl"
+            "--mem-used-incl-cache-buff",
+            "--mem-util",
+            "--mem-used",
+            "--swap-util",
+            "--swap-used",
+            "--disk-space-util",
+            "--disk-space-avail",
+            "--disk-space-used",
+            "--disk-path=/",
+            "--from-cron"
+        ])
+        crontab += "\n"
+        f.write(crontab)
+        f.close()
+    subprocess.check_call(["crontab", crontab_path])
+    os.remove(crontab_path)
+    os.remove(scripts_zip_path)
+    os.chmod("/root/aws-scripts-mon/mon-put-instance-data.pl", stat.S_IRWXU)
+
 configure_logging()
 initialize_system_daemons_and_hostname()
 join_swarm()
 create_swap()
+install_monitoring_tools()
