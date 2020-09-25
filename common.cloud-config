@@ -10,6 +10,11 @@ packages:
   - python2-boto3
   - yum-cron
   - ec2-instance-connect
+  - perl-Switch 
+  - perl-DateTime
+  - perl-Sys-Syslog
+  - perl-LWP-Protocol-https
+  - perl-Digest-SHA.x86_64
 output:
   all: "| tee -a /var/log/cloud-init-output.log"
 manage_resolve_conf: true

@@ -1,6 +1,6 @@
 # AWS Docker Swarm Terraform Module
 
-This is a Terraform configuration that sets up a Docker Swarm on an existing VPC with a configurable amount of managers and worker nodes. The swarm is configured to have [SSH daemon access][ssh-daemon] enabled by default.
+This is a Terraform configuration that sets up a Docker Swarm on an existing VPC with a configurable amount of managers and worker nodes. The swarm is configured to have [SSH daemon access][ssh-daemon] enabled by default with [EC2 instance monitoring](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html).
 
 ## Terraformed layout
 
@@ -119,6 +119,12 @@ A future relase of this would utilize auto-scaling for now this needs to be done
       - haveged
       - python2-boto3
       - yum-cron
+      - ec2-instance-connect
+      - perl-Switch 
+      - perl-DateTime
+      - perl-Sys-Syslog
+      - perl-LWP-Protocol-https
+      - perl-Digest-SHA.x86_64
 
 * If the private key or certificate is not locally available.  `create_daemon_certificate_request` should be set to `false`.
 * Add additional SSH users using `sudo /root/bin/add-docker-user.sh <username> <ssh key string>`.  Note this creates users in such a way that it only allows the use of `docker context`
