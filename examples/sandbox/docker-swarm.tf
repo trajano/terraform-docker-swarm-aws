@@ -20,8 +20,9 @@ module "docker-swarm" {
   workers                   = var.workers
   cloud_config_extra        = data.template_file.cloud-config.rendered
   instance_type             = var.instance_type
-  daemon_count              = length(aws_eip.daemons)
-  daemon_eip_ids            = aws_eip.daemons.*.id
+  # daemon_count              = length(aws_eip.daemons)
+  # daemon_eip_ids            = aws_eip.daemons.*.id
+  daemon_count              = 0
   store_join_tokens_as_tags = true
   cloudwatch_logs           = true
   key_name                  = aws_key_pair.deployer.key_name

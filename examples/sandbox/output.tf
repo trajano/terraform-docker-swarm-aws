@@ -1,6 +1,6 @@
-output "daemon_ip_addresses" {
-  value = aws_eip.daemons.*.public_ip
-}
+# output "daemon_ip_addresses" {
+#   value = aws_eip.daemons.*.public_ip
+# }
 
 output "manager_ips" {
   value = module.docker-swarm.manager_ips
