@@ -293,9 +293,9 @@ def install_monitoring_tools():
     with open(crontab_path, 'w') as f:
         try:
             crontab = subprocess.check_output(['crontab', '-l']).decode()
+            crontab += "\n"
         except subprocess.CalledProcessError:
             crontab = ""
-        crontab += "\n"
         crontab += "*/5 * * * * /root/aws-scripts-mon/mon-put-instance-data.pl "
         crontab += "--mem-used-incl-cache-buff "
         crontab += "--mem-util "
