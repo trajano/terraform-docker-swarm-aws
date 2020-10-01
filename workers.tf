@@ -7,7 +7,7 @@ data "template_file" "init_worker" {
     region_name               = data.aws_region.current.name
     instance_index            = count.index
     vpc_name                  = local.dns_name
-    cloudwatch_log_group      = var.cloudwatch_logs ? ( var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.workers[count.index].name ) : ""
+    cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.workers[count.index].name) : ""
     group                     = "worker"
     store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
   }
@@ -45,7 +45,8 @@ resource "aws_instance" "workers" {
   depends_on = [
     aws_s3_bucket.terraform,
     aws_instance.managers,
-    aws_cloudwatch_log_group.managers,
+    aws_cloudwatch_log_group.workers,
+    aws_cloudwatch_log_group.main,
   ]
 
   count         = var.workers
@@ -141,7 +142,7 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu-workers" {
 }
 
 resource "aws_cloudwatch_log_group" "workers" {
-  count             = var.cloudwatch_logs ? var.workers : 0
+  count             = (var.cloudwatch_logs && ! var.cloudwatch_single_log_group) ? var.workers : 0
   name              = "${local.dns_name}-worker${count.index}"
   retention_in_days = var.cloudwatch_retention_in_days
 

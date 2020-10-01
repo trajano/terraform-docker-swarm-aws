@@ -2,6 +2,10 @@
 
 ## 5.1.2
 
+* Fixed issue with `cloudwatch_single_log_group` in that the log group isn't created causing issues with the start up of services.
+
+## 5.1.2
+
 * Fixed issue with system metrics not coming up.
 
 ## 5.1.1

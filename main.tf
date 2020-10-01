@@ -242,3 +242,14 @@ resource "aws_iam_instance_profile" "ec2" {
 resource "aws_sns_topic" "alarms" {
   name = "${local.dns_name}-alarms"
 }
+
+resource "aws_cloudwatch_log_group" "main" {
+  count             = (var.cloudwatch_logs && var.cloudwatch_single_log_group) ? 1 : 0
+  name              = local.dns_name
+  retention_in_days = var.cloudwatch_retention_in_days
+
+  tags = {
+    Environment = var.name
+    Name        = "${var.name}"
+  }
+}
