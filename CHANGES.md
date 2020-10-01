@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.1.2
+
+* Fixed issue with system metrics not coming up.
+
 ## 5.1.1
 
 * `cloudwatch_single_log_group` (default `false`) creates a single log group for the whole swarm rather than one per node.  This will make use of [aws tail](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/logs/tail.html) work as it only supports a single log group.

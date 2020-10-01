@@ -298,7 +298,7 @@ def install_monitoring_tools():
             crontab = ""
         crontab += "*/5 * * * * "
         crontab += " ".join([
-            "/root/aws-scripts-mon/mon-put-instance-data.pl"
+            "/root/aws-scripts-mon/mon-put-instance-data.pl",
             "--mem-used-incl-cache-buff",
             "--mem-util",
             "--mem-used",
