@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.1.1
+
+* `cloudwatch_single_log_group` (default `false`) creates a single log group for the whole swarm rather than one per node.  This will make use of [aws tail](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/logs/tail.html) work as it only supports a single log group.
+
 ## 5.1.0 Cloudwatching
 
 This release includes support for more Cloudwatch functions.
@@ -15,7 +19,7 @@ This release includes support for more Cloudwatch functions.
 
 ## 4.1.2
 
-* Commented out the `source` in the [provider version constraints][https://www.terraform.io/docs/configuration/modules.html#provider-version-constraints-in-modules].  These require Terraform 0.13 to work.
+* Commented out the `source` in the [provider version constraints](https://www.terraform.io/docs/configuration/modules.html#provider-version-constraints-in-modules).  These require Terraform 0.13 to work.
 * Set the constraints to allow AWS 3.x as well since they are compatible.
 * Expose private IPs to allow use with Security Groups.
 

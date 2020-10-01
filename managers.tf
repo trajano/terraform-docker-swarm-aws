@@ -7,7 +7,7 @@ data "template_file" "init_manager" {
     region_name               = data.aws_region.current.name
     instance_index            = count.index
     vpc_name                  = local.dns_name
-    cloudwatch_log_group      = var.cloudwatch_logs ? aws_cloudwatch_log_group.managers[count.index].name : ""
+    cloudwatch_log_group      = var.cloudwatch_logs ? ( var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name ) : ""
     group                     = "manager"
     store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
   }
