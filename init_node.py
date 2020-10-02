@@ -36,6 +36,7 @@ region_name = instance_identity['region']
 ec2 = boto3.resource('ec2', region_name=region_name)
 s3 = boto3.resource('s3', region_name=region_name)
 
+
 def configure_logging():
     """
     Updates daemon.json to enable AWS Cloudwatch logging
@@ -50,7 +51,7 @@ def configure_logging():
 
     daemon_json["log-driver"] = "awslogs"
     daemon_json["log-opts"] = {
-        "awslogs-group" : cloudwatch_log_group,
+        "awslogs-group": cloudwatch_log_group,
         "tag": "{{.Name}}"
     }
 
@@ -76,7 +77,8 @@ def initialize_system_daemons_and_hostname():
         subprocess.check_call(["systemctl", "start", "haveged"])
 
     subprocess.check_call(["hostnamectl", "set-hostname",
-        "%s%d-%s" % (group, instance_index, vpc_name)])
+                           "%s%d-%s" % (group, instance_index, vpc_name)])
+
 
 def create_swap():
     """
@@ -87,6 +89,7 @@ def create_swap():
     f.write("/dev/xvdf none swap defaults 0 0\n")
     f.close()
     subprocess.check_output(["swapon", "-a"])
+
 
 def initialize_swarm():
     """
@@ -100,23 +103,27 @@ def initialize_swarm():
         ["docker", "swarm", "join-token", "-q", "worker"]).strip()
     return (manager_token, worker_token)
 
+
 def instance_tags(instance):
     """
     Converts boto3 tags to a dict()
     """
     return {tag['Key']: tag['Value'] for tag in instance.tags}
 
+
 def get_running_instances():
     """
     Gets the running instances in a VPC as a set.
     """
-    return { vpc_instance for vpc_instance in get_vpc().instances.all() if vpc_instance.state['Name'] == 'running' }
+    return {vpc_instance for vpc_instance in get_vpc().instances.all() if vpc_instance.state['Name'] == 'running'}
+
 
 class ManagerInstance:
     def __init__(self, instance, manager_token, worker_token):
         self.ip = instance.private_ip_address
         self.manager_token = manager_token
         self.worker_token = worker_token
+
 
 def join_swarm_with_token(swarm_manager_ip, token):
     """
@@ -133,7 +140,8 @@ def get_manager_instance_vpc_tags(exclude_self=False):
         instances_considered = filter(lambda vpc_instance: vpc_instance != get_current_instance(), instances_considered)
     for vpc_instance in instances_considered:
         vpc_instance_tags = instance_tags(instance=vpc_instance)
-        if vpc_instance_tags['Role'] == 'manager' and vpc_instance_tags['ManagerJoinToken'] and vpc_instance_tags['WorkerJoinToken']:
+        if vpc_instance_tags['Role'] == 'manager' and vpc_instance_tags['ManagerJoinToken'] and vpc_instance_tags[
+            'WorkerJoinToken']:
             return ManagerInstance(
                 vpc_instance,
                 vpc_instance_tags['ManagerJoinToken'],
@@ -141,8 +149,8 @@ def get_manager_instance_vpc_tags(exclude_self=False):
 
     return None
 
-def get_manager_instance_s3(exclude_self=False):
 
+def get_manager_instance_s3(exclude_self=False):
     def get_object_from_s3(name):
         """
         Gets an object from S3, returns None for any error
@@ -173,7 +181,8 @@ def get_manager_instance_s3(exclude_self=False):
             manager_token,
             worker_token)
     else:
-        logger.warning("Unable to locate manager manager_token=%s worker_token=%s manager0_ip=%s manager1_ip=%s", manager_token, worker_token, manager0_ip, manager1_ip)
+        logger.warning("Unable to locate manager manager_token=%s worker_token=%s manager0_ip=%s manager1_ip=%s",
+                       manager_token, worker_token, manager0_ip, manager1_ip)
         return None
 
 
@@ -192,6 +201,7 @@ def update_tokens_vpc_tags(instance, manager_token, worker_token):
     )
     logger.debug("update %s %s %s", instance.private_ip_address, manager_token, worker_token)
 
+
 def update_tokens_s3(instance, manager_token, worker_token):
     manager_token_object = s3.Object(s3_bucket, 'manager_token')
     manager_token_object.put(Body=bytes(manager_token),
@@ -201,6 +211,7 @@ def update_tokens_s3(instance, manager_token, worker_token):
                             StorageClass="ONEZONE_IA")
     myip_object = s3.Object(s3_bucket, 'ip%d' % instance_index)
     myip_object.put(Body=bytes(instance.private_ip_address), StorageClass="ONEZONE_IA")
+
 
 def join_as_manager(get_manager_instance, update_tokens):
     def initialize_swarm_and_update_tokens():
@@ -212,7 +223,7 @@ def join_as_manager(get_manager_instance, update_tokens):
         another_manager_instance = get_manager_instance(exclude_self=True)
         if another_manager_instance == None:
             logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
-            time.sleep(random.randint(5,15))
+            time.sleep(random.randint(5, 15))
         else:
             break
 
@@ -221,10 +232,12 @@ def join_as_manager(get_manager_instance, update_tokens):
     else:
         try:
             join_swarm_with_token(another_manager_instance.ip, another_manager_instance.manager_token)
-            update_tokens(get_current_instance(), another_manager_instance.manager_token, another_manager_instance.worker_token)
+            update_tokens(get_current_instance(), another_manager_instance.manager_token,
+                          another_manager_instance.worker_token)
         except:
             # Unable to join the swarm, it may no longer be valid.  Create a new one.
             initialize_swarm_and_update_tokens()
+
 
 def join_as_worker(get_manager_instance):
     manager_instance = None
@@ -232,7 +245,7 @@ def join_as_worker(get_manager_instance):
         manager_instance = get_manager_instance()
         if manager_instance == None:
             logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
-            time.sleep(random.randint(5,15))
+            time.sleep(random.randint(5, 15))
         else:
             break
     if manager_instance == None:
@@ -240,13 +253,17 @@ def join_as_worker(get_manager_instance):
 
     join_swarm_with_token(manager_instance.ip, manager_instance.worker_token)
 
+
 def is_manager_role():
     return instance_tags(get_current_instance())['Role'] == 'manager'
 
+
 def get_vpc():
     mac = urllib2.urlopen('http://169.254.169.254/latest/meta-data/mac').read().decode()
-    vpc_id = urllib2.urlopen('http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id' % mac).read().decode()
+    vpc_id = urllib2.urlopen(
+        'http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id' % mac).read().decode()
     return ec2.Vpc(vpc_id)
+
 
 def get_current_instance():
     global _current_instance
@@ -255,8 +272,8 @@ def get_current_instance():
     _current_instance = ec2.Instance(instance_id)
     return _current_instance
 
-def join_swarm():
 
+def join_swarm():
     get_manager_instance = get_manager_instance_vpc_tags
     update_tokens = update_tokens_vpc_tags
 
@@ -275,15 +292,16 @@ def join_swarm():
     else:
         join_as_worker(get_manager_instance)
 
-def install_monitoring_tools():
 
+def install_monitoring_tools():
     """
     As documented in https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html
     """
 
     scripts_zip_path = "/tmp/CloudWatchMonitoringScripts.zip"
     crontab_path = "/tmp/aws-scripts-mon.crontab"
-    scripts_zip = urllib2.urlopen('https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip').read()
+    scripts_zip = urllib2.urlopen(
+        'https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip').read()
     scripts_zip_file = open(scripts_zip_path, 'wb')
     scripts_zip_file.write(scripts_zip)
     scripts_zip_file.close()
@@ -317,6 +335,7 @@ def install_monitoring_tools():
     os.remove(crontab_path)
     os.remove(scripts_zip_path)
     os.chmod("/root/aws-scripts-mon/mon-put-instance-data.pl", stat.S_IRWXU)
+
 
 configure_logging()
 initialize_system_daemons_and_hostname()
