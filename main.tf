@@ -3,12 +3,16 @@ locals {
   security_group_ids = concat(
     var.exposed_security_group_ids,
     var.additional_security_group_ids,
-    [aws_security_group.docker.id],
+    [
+      aws_security_group.docker.id
+    ],
   )
   daemon_security_group_ids = concat(
     var.exposed_security_group_ids,
     var.additional_security_group_ids,
-    [aws_security_group.docker.id],
+    [
+      aws_security_group.docker.id
+    ],
     aws_security_group.daemon.*.id,
     aws_security_group.daemon_ssh.*.id,
   )
@@ -65,7 +69,10 @@ data "aws_vpc" "main" {
 data "aws_ami" "base_ami" {
   most_recent = true
   name_regex  = "^amzn2-ami-hvm-.*-x86_64-ebs"
-  owners      = ["amazon", "self"]
+  owners = [
+    "amazon",
+    "self",
+  ]
 }
 
 resource "aws_security_group" "docker" {
@@ -78,7 +85,9 @@ resource "aws_security_group" "docker" {
     from_port   = 2377
     to_port     = 2377
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
+    cidr_blocks = [
+      data.aws_vpc.main.cidr_block,
+    ]
   }
 
   ingress {
@@ -86,7 +95,9 @@ resource "aws_security_group" "docker" {
     from_port   = 7946
     to_port     = 7946
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
+    cidr_blocks = [
+      data.aws_vpc.main.cidr_block,
+    ]
   }
 
   ingress {
@@ -94,7 +105,9 @@ resource "aws_security_group" "docker" {
     from_port   = 7946
     to_port     = 7946
     protocol    = "udp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
+    cidr_blocks = [
+      data.aws_vpc.main.cidr_block,
+    ]
   }
 
   ingress {
@@ -102,7 +115,9 @@ resource "aws_security_group" "docker" {
     from_port   = 4789
     to_port     = 4789
     protocol    = "udp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
+    cidr_blocks = [
+      data.aws_vpc.main.cidr_block,
+    ]
   }
 
   egress {
@@ -110,7 +125,9 @@ resource "aws_security_group" "docker" {
     from_port   = 0
     to_port     = 0
     protocol    = "udp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
+    cidr_blocks = [
+      data.aws_vpc.main.cidr_block,
+    ]
   }
 
   egress {
@@ -118,7 +135,9 @@ resource "aws_security_group" "docker" {
     from_port   = 0
     to_port     = 0
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
+    cidr_blocks = [
+      data.aws_vpc.main.cidr_block,
+    ]
   }
 
   tags = {
@@ -138,10 +157,12 @@ resource "aws_security_group" "daemon_ssh" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.daemon_cidr_block]
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
+    cidr_blocks = [
+      var.daemon_cidr_block,
+    ]
   }
 
   tags = {
@@ -161,10 +182,12 @@ resource "aws_security_group" "daemon" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = 2376
-    to_port     = 2376
-    protocol    = "tcp"
-    cidr_blocks = [var.daemon_cidr_block]
+    from_port = 2376
+    to_port   = 2376
+    protocol  = "tcp"
+    cidr_blocks = [
+      var.daemon_cidr_block,
+    ]
   }
 
   tags = {
@@ -179,11 +202,14 @@ resource "aws_security_group" "daemon" {
 
 data "aws_iam_policy_document" "instance-assume-role-policy" {
   statement {
-    actions = ["sts:AssumeRole"]
+    actions = [
+    "sts:AssumeRole"]
 
     principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
+      type = "Service"
+      identifiers = [
+        "ec2.amazonaws.com",
+      ]
     }
   }
 }
@@ -250,6 +276,6 @@ resource "aws_cloudwatch_log_group" "main" {
 
   tags = {
     Environment = var.name
-    Name        = "${var.name}"
+    Name        = var.name
   }
 }
