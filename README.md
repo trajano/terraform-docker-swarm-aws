@@ -132,6 +132,12 @@ A future relase of this would utilize auto-scaling for now this needs to be done
 * In order to improve performance when using strong cryptography, [haveged] should be installed.
 * `yum-cron` and `haveged` can be removed from the `packages` in the custom cloud config if desired.
 
+## Thanks JetBrains
+
+Thanks to [JetBrains License for Open Source Development](https://www.jetbrains.com/community/opensource/#support) for allowing use on this project.
+
+![IntelliJ screenshot](examples/intellij.jpg)
+
 [ssh-daemon]: https://github.com/docker/cli/pull/1014
 [haveged]: http://issihosts.com/haveged/
 [ec2-instance-connect]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Connect-using-EC2-Instance-Connect.html
