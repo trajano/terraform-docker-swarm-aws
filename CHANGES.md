@@ -1,6 +1,10 @@
 # Change Log
 
-## 5.1.2
+## 5.1.4
+
+* Mostly coding style issues.
+
+## 5.1.3
 
 * Fixed issue with `cloudwatch_single_log_group` in that the log group isn't created causing issues with the start up of services.
 
