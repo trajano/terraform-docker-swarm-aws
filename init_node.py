@@ -101,7 +101,7 @@ def initialize_swarm():
 
     worker_token = subprocess.check_output(
         ["docker", "swarm", "join-token", "-q", "worker"]).strip()
-    return (manager_token, worker_token)
+    return manager_token, worker_token
 
 
 def instance_tags(instance):
@@ -221,13 +221,13 @@ def join_as_manager(get_manager_instance, update_tokens):
     another_manager_instance = None
     for attempt in range(10 * instance_index):
         another_manager_instance = get_manager_instance(exclude_self=True)
-        if another_manager_instance == None:
+        if another_manager_instance is None:
             logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
             time.sleep(random.randint(5, 15))
         else:
             break
 
-    if another_manager_instance == None:
+    if another_manager_instance is None:
         initialize_swarm_and_update_tokens()
     else:
         try:
@@ -243,12 +243,12 @@ def join_as_worker(get_manager_instance):
     manager_instance = None
     for attempt in range(100):
         manager_instance = get_manager_instance()
-        if manager_instance == None:
+        if manager_instance is None:
             logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
             time.sleep(random.randint(5, 15))
         else:
             break
-    if manager_instance == None:
+    if manager_instance is None:
         raise Exception("Unable to join swarm, no manager found")
 
     join_swarm_with_token(manager_instance.ip, manager_instance.worker_token)
