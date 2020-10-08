@@ -2,7 +2,7 @@
 
 ## 5.2.0
 
-* `ec2-instance-connect` is deprecated in favor of a custom AuthorizhgedKeysCommand which is easier to manage since it's a matter of provisioning an IAM user account and uploading the SSH public key.  This is configurable through `ssh_authorization_method` which is one of `none`, `ec2-instance-connect` or `iam` and other value is equivalent to `none`.  This defaults to `ec2-instance-connect` for backwards compatibility until `6.0`. 
+* `ec2-instance-connect` is deprecated in favor of a custom AuthorizhgedKeysCommand which is easier to manage since it's a matter of provisioning an IAM user account and uploading the SSH public key.  This is configurable through `ssh_authorization_method` which is one of `none`, `ec2-instance-connect` or `iam` and other value is equivalent to `none`.  This defaults to `ec2-instance-connect` for backwards compatibility until `6.0`.
 
 ## 5.1.4
 

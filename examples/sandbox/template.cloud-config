@@ -1,7 +1,16 @@
 #cloud-config
 users:
+- name: docker-user
+  groups:
+  - docker
+- name: trajano
+  groups:
+  - wheel
+  - docker
+  sudo: ['ALL=(ALL) NOPASSWD:ALL']
 - name: admin
   groups:
+  - wheel
   - docker
   ssh-authorized-keys:
   - ${ssh_key}

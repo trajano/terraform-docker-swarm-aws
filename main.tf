@@ -247,7 +247,7 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
       "iam:GetSSHPublicKey",
     ]
 
-    resources = [ for o in data.aws_iam_user.ssh_users : o.arn ]
+    resources = [for o in data.aws_iam_user.ssh_users : o.arn]
   }
 
 }

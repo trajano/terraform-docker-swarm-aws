@@ -80,6 +80,7 @@ write_files:
   - content: |
       #!/usr/bin/env python
       import boto3
+      import grp
       import sys
       
       iam = boto3.client('iam')
@@ -87,8 +88,10 @@ write_files:
       for public_key in public_keys:
         public_key_id = public_key['SSHPublicKeyId']
         ssh_public_key = iam.get_ssh_public_key(UserName=sys.argv[1], SSHPublicKeyId=public_key_id, Encoding="SSH")['SSHPublicKey']
-        if ssh_public_key['Fingerprint'] == sys.argv[2]:
+        if sys.argv[1] in grp.getgrnam("wheel").gr_mem:
           print (ssh_public_key['SSHPublicKeyBody'])
+        else:
+          print ('command="docker system dial-stdio" ' + ssh_public_key['SSHPublicKeyBody'])
     path: /opt/iam-authorized-keys-command
     owner: root:root
     permissions: "0755"

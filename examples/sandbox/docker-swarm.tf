@@ -24,7 +24,12 @@ module "docker-swarm" {
   store_join_tokens_as_tags   = true
   cloudwatch_logs             = true
   cloudwatch_single_log_group = true
-  key_name                    = aws_key_pair.deployer.key_name
+  ssh_authorization_method    = "iam"
+  ssh_users = [
+    "trajano",
+    "docker-user",
+  ]
+  key_name = aws_key_pair.deployer.key_name
 
   additional_security_group_ids = [
     aws_security_group.exposed.id,
