@@ -26,6 +26,11 @@ variable "cloud_config_extra" {
   default     = ""
 }
 
+variable "cloud_config_extra_merge_type" {
+  description = "Merge type to apply to cloud config."
+  default     = "list()+dict()+str()"
+}
+
 variable "cloud_config_extra_script" {
   description = "Shell script that will be executed on every node.  This can be used to set up EFS mounts in fstab or do node specific bootstrapping. This is executed after `init_manager.py`"
   default     = ""
@@ -160,4 +165,14 @@ variable "daemon_cidr_block" {
 variable "store_join_tokens_as_tags" {
   description = "Store the Docker swarm join tokens as VPC tags."
   default     = false
+}
+
+variable "ssh_authorization_method" {
+  description = "Authorization method for SSH.  This is one of `none`, `ec2-instance-connect` (default), `iam` (recommended)."
+  default     = "ec2-instance-connect"
+}
+
+variable "ssh_users" {
+  description = "A list of IAM users that will have SSH access when using `iam` for `ssh_authorization_method`"
+  default     = []
 }

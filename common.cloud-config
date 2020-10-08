@@ -9,7 +9,6 @@ packages:
   - haveged
   - python2-boto3
   - yum-cron
-  - ec2-instance-connect
   - perl-Switch 
   - perl-DateTime
   - perl-Sys-Syslog
@@ -78,6 +77,21 @@ write_files:
     path: /root/bin/add-docker-user.sh
     owner: root:root
     permissions: "0700"
+  - content: |
+      #!/usr/bin/env python
+      import boto3
+      import sys
+      
+      iam = boto3.client('iam')
+      public_keys = iam.list_ssh_public_keys(UserName=sys.argv[1])['SSHPublicKeys']
+      for public_key in public_keys:
+        public_key_id = public_key['SSHPublicKeyId']
+        ssh_public_key = iam.get_ssh_public_key(UserName=sys.argv[1], SSHPublicKeyId=public_key_id, Encoding="SSH")['SSHPublicKey']
+        if ssh_public_key['Fingerprint'] == sys.argv[2]:
+          print (ssh_public_key['SSHPublicKeyBody'])
+    path: /opt/iam-authorized-keys-command
+    owner: root:root
+    permissions: "0755"
   - content: |
       #!/bin/sh
       for node_name in $*

@@ -10,6 +10,7 @@ data "template_file" "init_worker" {
     cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.workers[count.index].name) : ""
     group                     = "worker"
     store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
+    ssh_authorization_method  = var.ssh_authorization_method
   }
 }
 
@@ -25,6 +26,7 @@ data "cloudinit_config" "workers" {
   part {
     filename     = "extra.cloud-config"
     content      = var.cloud_config_extra
+    merge_type   = var.cloud_config_extra_merge_type
     content_type = "text/cloud-config"
   }
 

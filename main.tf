@@ -241,6 +241,20 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
       "*",
     ]
   }
+  statement {
+    actions = [
+      "iam:ListSSHPublicKeys",
+      "iam:GetSSHPublicKey",
+    ]
+
+    resources = [ for o in data.aws_iam_user.ssh_users : o.arn ]
+  }
+
+}
+
+data "aws_iam_user" "ssh_users" {
+  for_each  = toset(var.ssh_users)
+  user_name = each.key
 }
 
 resource "aws_iam_policy" "swarm-access-role-policy" {

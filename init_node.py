@@ -23,6 +23,7 @@ s3_bucket = '${s3_bucket}'
 vpc_name = '${vpc_name}'
 group = '${group}'
 cloudwatch_log_group = '${cloudwatch_log_group}'
+ssh_authorization_method = '''${ssh_authorization_method}'''
 
 # Global cached results
 _current_instance = None
@@ -337,8 +338,23 @@ def install_monitoring_tools():
     os.chmod("/root/aws-scripts-mon/mon-put-instance-data.pl", stat.S_IRWXU)
 
 
+def set_ssh_authorization_mode():
+    if ssh_authorization_method == 'ec2-instance-connect':
+        subprocess.check_call(["yum", "install", "ec2-instance-connect"])
+    elif ssh_authorization_method == 'iam':
+        f = open('/etc/ssh/sshd_config', mode='r')
+        sshd_config = [ line for line in f.read() if not ( line.startsWith("AuthorizedKeysCommand ") or line.startsWith("AuthorizedKeysCommandUser ") ) ]
+        sshd_config.append("AuthorizedKeysCommand /opt/iam-authorized-keys-command %u %f")
+        sshd_config.append("AuthorizedKeysCommandUser nobody")
+        f.close()
+        f = open('/etc/ssh/sshd_config', mode='w')
+        f.writeLines(sshd_config)
+        f.close()
+
+
 configure_logging()
 initialize_system_daemons_and_hostname()
 join_swarm()
 create_swap()
 install_monitoring_tools()
+set_ssh_authorization_mode()
