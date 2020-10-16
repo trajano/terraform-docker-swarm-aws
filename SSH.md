@@ -14,7 +14,7 @@ aws iam upload-ssh-public-key --user-name docker-user --ssh-public-key-body "ssh
 
 ## Defining the users
 
-cloud-init uses the data pointed to by `cloud_config_extra` to add users.  The following are  is an example configuration file with two users: an admin and a normal docker daemon user.  The `docker-admin` account is part of the `wheel` group that will allow the user to access the shell directly, without the `wheel` group, the user will be limited to using `docker context` to access the server. 
+cloud-init uses the data pointed to by `cloud_config_extra` to add users.  The following is an example configuration file with two users: an admin and a normal docker daemon user.  The `docker-admin` account is part of the `wheel` group that will allow the user to access the shell directly, without the `wheel` group, the user will be limited to using `docker context` to access the server. 
 
 ```yaml
 #cloud-config
