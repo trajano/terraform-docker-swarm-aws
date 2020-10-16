@@ -26,6 +26,11 @@ variable "cloud_config_extra" {
   default     = ""
 }
 
+variable "cloud_config_extra_merge_type" {
+  description = "Merge type to apply to cloud config."
+  default     = "list()+dict()+str()"
+}
+
 variable "cloud_config_extra_script" {
   description = "Shell script that will be executed on every node.  This can be used to set up EFS mounts in fstab or do node specific bootstrapping. This is executed after `init_manager.py`"
   default     = ""
@@ -42,8 +47,8 @@ variable "cloudwatch_single_log_group" {
 }
 
 variable "cloudwatch_retention_in_days" {
-  description = " Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653."
-  default     = 7
+  description = "Specifies the number of days you want to retain log events in the specified log group. Possible values are: 0, 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.  0 means never expire."
+  default     = 0
 }
 
 variable "additional_security_group_ids" {
@@ -160,4 +165,14 @@ variable "daemon_cidr_block" {
 variable "store_join_tokens_as_tags" {
   description = "Store the Docker swarm join tokens as VPC tags."
   default     = false
+}
+
+variable "ssh_authorization_method" {
+  description = "Authorization method for SSH.  This is one of `none`, `ec2-instance-connect` (default), `iam` (recommended)."
+  default     = "ec2-instance-connect"
+}
+
+variable "ssh_users" {
+  description = "A list of IAM users that will have SSH access when using `iam` for `ssh_authorization_method`"
+  default     = []
 }

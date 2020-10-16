@@ -10,6 +10,7 @@ data "template_file" "init_manager" {
     cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
     group                     = "manager"
     store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
+    ssh_authorization_method  = var.ssh_authorization_method
   }
 }
 
@@ -26,6 +27,7 @@ data "cloudinit_config" "managers" {
     filename     = "extra.cloud-config"
     content      = var.cloud_config_extra
     content_type = "text/cloud-config"
+    merge_type   = var.cloud_config_extra_merge_type
   }
 
   part {
@@ -50,7 +52,6 @@ data "cloudinit_config" "managers" {
 resource "aws_instance" "managers" {
   depends_on = [
     aws_s3_bucket.terraform,
-    aws_instance.managers,
     aws_cloudwatch_log_group.managers,
     aws_cloudwatch_log_group.main,
   ]

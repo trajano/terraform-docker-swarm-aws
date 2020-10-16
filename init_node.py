@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from botocore.exceptions import NoCredentialsError
+from botocore.exceptions import BotoCoreError
 import boto3
 import simplejson as json
 import logging
@@ -23,6 +24,7 @@ s3_bucket = '${s3_bucket}'
 vpc_name = '${vpc_name}'
 group = '${group}'
 cloudwatch_log_group = '${cloudwatch_log_group}'
+ssh_authorization_method = '${ssh_authorization_method}'
 
 # Global cached results
 _current_instance = None
@@ -101,7 +103,7 @@ def initialize_swarm():
 
     worker_token = subprocess.check_output(
         ["docker", "swarm", "join-token", "-q", "worker"]).strip()
-    return (manager_token, worker_token)
+    return manager_token, worker_token
 
 
 def instance_tags(instance):
@@ -137,7 +139,7 @@ def join_swarm_with_token(swarm_manager_ip, token):
 def get_manager_instance_vpc_tags(exclude_self=False):
     instances_considered = get_running_instances()
     if exclude_self:
-        instances_considered = filter(lambda vpc_instance: vpc_instance != get_current_instance(), instances_considered)
+        instances_considered = filter(lambda vpc: vpc != get_current_instance(), instances_considered)
     for vpc_instance in instances_considered:
         vpc_instance_tags = instance_tags(instance=vpc_instance)
         if vpc_instance_tags['Role'] == 'manager' and vpc_instance_tags['ManagerJoinToken'] and vpc_instance_tags[
@@ -156,9 +158,9 @@ def get_manager_instance_s3(exclude_self=False):
         Gets an object from S3, returns None for any error
         """
         try:
-            object = s3.Object(s3_bucket, name)
-            return object.get()['Body'].read()
-        except:
+            s3_object = s3.Object(s3_bucket, name)
+            return s3_object.get()['Body'].read()
+        except BotoCoreError:
             return None
 
     manager_token = get_object_from_s3("manager_token")
@@ -170,7 +172,7 @@ def get_manager_instance_s3(exclude_self=False):
     manager_instance = None
     instances_considered = get_running_instances()
     if exclude_self:
-        instances_considered = filter(lambda vpc_instance: vpc_instance != get_current_instance(), instances_considered)
+        instances_considered = filter(lambda vpc: vpc != get_current_instance(), instances_considered)
     for vpc_instance in instances_considered:
         if vpc_instance.private_ip_address == manager0_ip or vpc_instance.private_ip_address == manager1_ip:
             manager_instance = vpc_instance
@@ -221,13 +223,13 @@ def join_as_manager(get_manager_instance, update_tokens):
     another_manager_instance = None
     for attempt in range(10 * instance_index):
         another_manager_instance = get_manager_instance(exclude_self=True)
-        if another_manager_instance == None:
+        if another_manager_instance is None:
             logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
             time.sleep(random.randint(5, 15))
         else:
             break
 
-    if another_manager_instance == None:
+    if another_manager_instance is None:
         initialize_swarm_and_update_tokens()
     else:
         try:
@@ -243,12 +245,12 @@ def join_as_worker(get_manager_instance):
     manager_instance = None
     for attempt in range(100):
         manager_instance = get_manager_instance()
-        if manager_instance == None:
+        if manager_instance is None:
             logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
             time.sleep(random.randint(5, 15))
         else:
             break
-    if manager_instance == None:
+    if manager_instance is None:
         raise Exception("Unable to join swarm, no manager found")
 
     join_swarm_with_token(manager_instance.ip, manager_instance.worker_token)
@@ -282,7 +284,7 @@ def join_swarm():
         try:
             bucket = s3.Bucket(s3_bucket)
             bucket.objects.all()
-        except NoCredentialsError as e:
+        except NoCredentialsError:
             time.sleep(5)
         get_manager_instance = get_manager_instance_s3
         update_tokens = update_tokens_s3
@@ -337,8 +339,28 @@ def install_monitoring_tools():
     os.chmod("/root/aws-scripts-mon/mon-put-instance-data.pl", stat.S_IRWXU)
 
 
+def set_ssh_authorization_mode():
+    if ssh_authorization_method == 'ec2-instance-connect':
+        subprocess.check_call(["yum", "install", "ec2-instance-connect"])
+    elif ssh_authorization_method == 'iam':
+        f = open('/etc/ssh/sshd_config', mode='r')
+        sshd_config = []
+        for line in f.readlines():
+            if not line.startswith("AuthorizedKeysCommand ") and not line.startswith("AuthorizedKeysCommandUser "):
+                sshd_config.append(line)
+        f.close()
+        sshd_config.append("AuthorizedKeysCommand /opt/iam-authorized-keys-command %u %f\n")
+        sshd_config.append("AuthorizedKeysCommandUser nobody\n")
+
+        f = open('/etc/ssh/sshd_config', mode='w')
+        f.writelines(sshd_config)
+        f.close()
+        subprocess.check_call(["systemctl", "restart", "sshd"])
+
+
 configure_logging()
 initialize_system_daemons_and_hostname()
 join_swarm()
 create_swap()
 install_monitoring_tools()
+set_ssh_authorization_mode()
