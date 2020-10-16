@@ -52,7 +52,6 @@ data "cloudinit_config" "managers" {
 resource "aws_instance" "managers" {
   depends_on = [
     aws_s3_bucket.terraform,
-    aws_instance.managers,
     aws_cloudwatch_log_group.managers,
     aws_cloudwatch_log_group.main,
   ]
