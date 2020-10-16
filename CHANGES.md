@@ -1,5 +1,10 @@
 # Change Log
 
+## 5.2.2
+
+* Fix issues with CloudWatch dashboard
+* Fix issues when `ssh_authorization_method` is false
+
 ## 5.2.1
 
 * Upgraded provider versions to current ones.  Major one was cloud-init which is now version 2.0.0 and set the upper bound for versions.

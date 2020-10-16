@@ -103,13 +103,14 @@ widgets:
   "y": !!int 0
 
 - properties:
-    quer"y": |
+    query: |
       SOURCE '${log_group_name}' 
         | fields @timestamp, @message 
         | sort @timestamp desc 
         | limit 20
     region: ${region}
     stacked: false
+    title: Logs
     view: table
   type: log
   width: 24
