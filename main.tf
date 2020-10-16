@@ -279,7 +279,7 @@ resource "aws_iam_policy" "swarm-access-role-policy-ssh" {
 resource "aws_iam_role_policy_attachment" "swarm-access-role-policy-ssh" {
   count      = var.ssh_authorization_method == "iam" ? 1 : 0
   role       = aws_iam_role.ec2.name
-  policy_arn = aws_iam_policy.swarm-access-role-policy-ssh.arn
+  policy_arn = aws_iam_policy.swarm-access-role-policy-ssh[0].arn
 }
 
 resource "aws_iam_role" "ec2" {

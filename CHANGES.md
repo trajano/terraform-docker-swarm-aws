@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.2.3
+
+* Fix issues when `ssh_authorization_method` is false
+
 ## 5.2.2
 
 * Fix issues with CloudWatch dashboard
