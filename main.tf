@@ -272,8 +272,8 @@ resource "aws_iam_role_policy_attachment" "swarm-access-role-policy" {
 
 resource "aws_iam_policy" "swarm-access-role-policy-ssh" {
   count  = var.ssh_authorization_method == "iam" ? 1 : 0
-  name   = "${local.dns_name}-swarm-ec2-policy"
-  policy = data.aws_iam_policy_document.swarm-access-role-policy.json
+  name   = "${local.dns_name}-swarm-ec2-policy-ssh"
+  policy = data.aws_iam_policy_document.swarm-access-role-policy-ssh.json
 }
 
 resource "aws_iam_role_policy_attachment" "swarm-access-role-policy-ssh" {
