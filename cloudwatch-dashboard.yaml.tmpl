@@ -1,0 +1,118 @@
+---
+widgets:
+- properties:
+    title: Memory
+    stacked: false
+    view: timeSeries
+    region: ${region}
+    metrics:
+%{ for instance_id in instance_ids ~}
+    - - System/Linux
+      - MemoryUtilization
+      - InstanceId
+      - ${instance_id}
+    - - .
+      - SwapUtilization
+      - .
+      - .
+%{ endfor ~}
+    period: 60
+    yAxis:
+      left:
+        max: 100
+        min: 0
+  type: metric
+  width: 6
+  height: 6
+  x: 0
+  "y": 0
+
+- properties:
+    metrics:
+%{ for instance_id in instance_ids ~}
+    - - AWS/EC2
+      - CPUUtilization
+      - InstanceId
+      - ${instance_id}
+%{ endfor ~}
+    period: 60
+    region: ${region}
+    stacked: false
+    stat: Average
+    title: CPU utilization
+    view: timeSeries
+    yAxis:
+      left:
+        max: 100
+        min: 0
+  type: metric
+  width: 6
+  height: 6
+  x: 6
+  "y": 0
+
+- height: 6
+  properties:
+    metrics:
+%{ for instance_id in instance_ids ~}
+    - - AWS/EC2
+      - CPUCreditBalance
+      - InstanceId
+      - ${instance_id}
+%{ endfor ~}
+    period: 60
+    region: ${region}
+    stacked: false
+    stat: Minimum
+    title: CPU credit balance
+    view: timeSeries
+    yAxis:
+      left:
+        min: 0
+  type: metric
+  width: 6
+  x: 12
+  "y": 0
+
+- height: 6
+  properties:
+    metrics:
+%{ for instance_id in instance_ids ~}
+    - - System/Linux
+      - DiskSpaceUtilization
+      - MountPath
+      - "/"
+      - InstanceId
+      - ${instance_id}
+      - Filesystem
+      - "/dev/nvme0n1p1"
+%{ endfor ~}
+    period: 60
+    region: ${region}
+    stacked: false
+    stat: Maximum
+    view: timeSeries
+    title: Disk utilization
+    yAxis:
+      left:
+        min: 0
+        max: 100
+  type: metric
+  width: 6
+  x: 18
+  "y": !!int 0
+
+- properties:
+    quer"y": |
+      SOURCE '${log_group_name}' 
+        | fields @timestamp, @message 
+        | sort @timestamp desc 
+        | limit 20
+    region: ${region}
+    stacked: false
+    view: table
+  type: log
+  width: 24
+  x: !!int 0
+  "y": 6
+  height: 12
