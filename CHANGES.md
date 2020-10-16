@@ -2,6 +2,7 @@
 
 ## 5.2.1
 
+* `cloudwatch_retention_in_days` specifies that 0 is allowed for never expire and use that as the default.
 * Fixed cycle in managers.tf preventing multiple managers from being created.
 
 ## 5.2.0
