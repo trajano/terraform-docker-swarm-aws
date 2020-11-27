@@ -105,7 +105,7 @@ widgets:
 - properties:
     query: |
       SOURCE '${log_group_name}' 
-        | fields @timestamp, @message 
+        | fields @timestamp, @logStream, @message 
         | sort @timestamp desc 
         | limit 20
     region: ${region}

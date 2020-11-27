@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.2.5
+
+* Added logStream to the dashboard logs
+
 ## 5.2.4
 
 * Fix issues when `ssh_authorization_method` is false
