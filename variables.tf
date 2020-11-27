@@ -57,6 +57,12 @@ variable "additional_security_group_ids" {
   default     = []
 }
 
+variable "additional_alarm_actions" {
+  description = "These are ARNs to alarm actions that will be appended to the one created by the module."
+  type        = list(string)
+  default     = []
+}
+
 variable "exposed_security_group_ids" {
   description = "These are security groups that are applied to the Docker swarm nodes primarily for accessing other resources or exposing to the Internet. The variable name is kept for legacy reasons, use `additional_security_group_ids`"
   type        = list(string)

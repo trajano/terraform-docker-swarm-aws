@@ -3,6 +3,7 @@
 ## 5.2.5
 
 * Added logStream to the dashboard logs
+* Added support for additional_alarm_actions
 
 ## 5.2.4
 

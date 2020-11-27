@@ -99,9 +99,10 @@ resource "aws_instance" "workers" {
 resource "aws_cloudwatch_metric_alarm" "low-cpu-credit-workers" {
   count           = local.burstable_instance_type_worker ? var.workers : 0
   actions_enabled = true
-  alarm_actions = [
+  alarm_actions = flatten([
     aws_sns_topic.alarms.arn,
-  ]
+    var.additional_alarm_actions,
+  ])
   alarm_name          = "${local.dns_name}-low-cpu-credit-worker${count.index}"
   comparison_operator = "LessThanThreshold"
   datapoints_to_alarm = 1
