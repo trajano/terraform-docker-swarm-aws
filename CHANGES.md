@@ -1,5 +1,11 @@
 # Change Log
 
+## 5.2.6
+
+* Changed the `aws` provider to allow anything before `4.0.0` 
+* Removed the `version` in the `aws` provider used in `examples`
+* Created a version lock file in `sandbox` example 
+
 ## 5.2.5
 
 * Added logStream to the dashboard logs
