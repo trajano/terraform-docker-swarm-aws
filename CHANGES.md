@@ -1,6 +1,6 @@
 # Change Log
 
-## 5.2.7
+## 5.2.8
 
 * Fix to support non-burstable instances.
 
