@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.2.7
+
+* Fix to support non-burstable instances.
+
 ## 5.2.6
 
 * Changed the `aws` provider to allow anything before `4.0.0` 
