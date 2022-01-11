@@ -220,14 +220,15 @@ def join_as_manager(get_manager_instance, update_tokens):
         (manager_token, worker_token) = initialize_swarm()
         update_tokens(get_current_instance(), manager_token, worker_token)
 
-    another_manager_instance = None
-    for attempt in range(10 * instance_index):
-        another_manager_instance = get_manager_instance(exclude_self=True)
-        if another_manager_instance is None:
-            logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
-            time.sleep(random.randint(5, 15))
-        else:
-            break
+    another_manager_instance = get_manager_instance(exclude_self=True)
+    if another_manager_instance is None:
+        for attempt in range(10 * instance_index):
+            another_manager_instance = get_manager_instance(exclude_self=True)
+            if another_manager_instance is None:
+                logger.warning("Attempt #%d failed, retrying after sleep...", attempt)
+                time.sleep(random.randint(5, 15))
+            else:
+                break
 
     if another_manager_instance is None:
         initialize_swarm_and_update_tokens()

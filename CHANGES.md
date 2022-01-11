@@ -1,5 +1,10 @@
 # Change Log
 
+## 5.2.9
+
+* Fix so that `manager0` will rejoin swarm if tainted.
+* Updated Upgrade guide in README to explicitly indicate nodes.
+
 ## 5.2.8
 
 * Fix to support non-burstable instances.
