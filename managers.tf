@@ -159,7 +159,7 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu-managers" {
 }
 
 resource "aws_cloudwatch_log_group" "managers" {
-  count             = (var.cloudwatch_logs && ! var.cloudwatch_single_log_group) ? var.managers : 0
+  count             = (var.cloudwatch_logs && !var.cloudwatch_single_log_group) ? var.managers : 0
   name              = "${local.dns_name}-manager${count.index}"
   retention_in_days = var.cloudwatch_retention_in_days
 

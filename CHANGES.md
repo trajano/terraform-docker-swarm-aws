@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.2.10
+
+* `vm.overcommit_memory=1` is to prevent [background saving issues with Redis](https://redis.io/topics/faq#background-saving-fails-with-a-fork-error-under-linux-even-if-i-have-a-lot-of-free-ram)
+
 ## 5.2.9
 
 * Fix so that `manager0` will rejoin swarm if tainted.

@@ -130,6 +130,10 @@ A future relase of this would utilize auto-scaling for now this needs to be done
 * Add additional SSH users using `sudo /root/bin/add-docker-user.sh <username> <ssh key string>`.  Note this creates users in such a way that it only allows the use of `docker context`
 * In order to improve performance when using strong cryptography, [haveged] should be installed.
 * `yum-cron` and `haveged` can be removed from the `packages` in the custom cloud config if desired.
+* The servers are built with ElasticSearch and Redis containers in mind and the following documents specify the changes that are implemented as part of Terraform.
+
+  * [ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-prerequisites)
+  * [Redis](https://redis.io/topics/faq#background-saving-fails-with-a-fork-error-under-linux-even-if-i-have-a-lot-of-free-ram)
 
 ## Thanks JetBrains
 
