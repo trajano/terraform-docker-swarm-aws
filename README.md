@@ -101,7 +101,14 @@ Upgrading a 3 manager swarm needs to be done one at a time to prevent raft conse
 
 ### Upgrading the worker nodes
 
-A future relase of this would utilize auto-scaling for now this needs to be done manually
+A future release of this would utilize auto-scaling for now this needs to be done manually
+
+If `docker_username` is set:
+
+1. Destroy the workers removed from the command line `terraform destroy -target module.docker-swarm.aws_instance.workers[#]`.  `destroy` is used instead of `taint` as [`taint` won't execute the destroy provisioner](https://www.terraform.io/language/resources/provisioners/syntax#destroy-time-provisioners).
+2. Rebuild the workers from the command line `terraform apply`
+
+If `docker_username` is not set:
 
 1. Drain and remove the worker node(s) from the swarm using `ssh <username>@<manager0> sudo /root/bin/rm-workers.sh <nodename[s]>`
 2. Taint the workers that are removed from the command line `terraform taint module.docker-swarm.aws_instance.workers[#]`

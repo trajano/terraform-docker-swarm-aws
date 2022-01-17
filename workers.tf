@@ -94,6 +94,21 @@ resource "aws_instance" "workers" {
   credit_specification {
     cpu_credits = "standard"
   }
+
+  provisioner "remote-exec" {
+    when = destroy
+    inline = [ 
+      "docker node update --availability drain ${self.private_ip}",
+      "sleep 10",
+      "docker node rm --force ${self.private_ip}"
+    ]
+    on_failure = continue
+    connection {
+      type = "ssh"
+      user = var.docker_username
+      host = aws_instance.managers[0].public_ip
+    }
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "low-cpu-credit-workers" {
