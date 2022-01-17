@@ -182,3 +182,8 @@ variable "ssh_users" {
   description = "A list of IAM users that will have SSH access when using `iam` for `ssh_authorization_method`"
   default     = []
 }
+
+variable "docker_username" {
+  description = "User on manager0 that can execute the life-cycle operations such as removing a worker node.  The SSH agent on the local device must be used."
+  default     = ""
+}
