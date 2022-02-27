@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.2.12
+
+* Ignore instance_type and ebs_optimized changes on the worker and manager so that additional nodes with more powerful machines can be added without shutting down existing nodes.
+
 ## 5.2.11
 
 * Fix a bug that prevented more than 6 workers or 6 managers.

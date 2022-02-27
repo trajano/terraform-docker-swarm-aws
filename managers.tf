@@ -96,6 +96,8 @@ resource "aws_instance" "managers" {
     ignore_changes = [
       ami,
       ebs_block_device,
+      ebs_optimized,
+      instance_type,
       user_data_base64,
       subnet_id,
       private_ip,
