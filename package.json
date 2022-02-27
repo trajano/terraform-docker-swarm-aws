@@ -1,6 +1,6 @@
 {
   "name": "terraform-docker-swarm-aws",
-  "version": "5.2.11",
+  "version": "5.2.12",
   "description": "This is a Terraform configuration that sets up a Docker Swarm on an existing VPC with a configurable amount of managers and worker nodes. The swarm is configured to have TLS enabled.",
   "main": "index.js",
   "scripts": {
