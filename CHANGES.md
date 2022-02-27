@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.2.11
+
+* Fix a bug that prevented more than 6 workers or 6 managers.
+
 ## 5.2.10
 
 * `vm.overcommit_memory=1` is to prevent [background saving issues with Redis](https://redis.io/topics/faq#background-saving-fails-with-a-fork-error-under-linux-even-if-i-have-a-lot-of-free-ram)
