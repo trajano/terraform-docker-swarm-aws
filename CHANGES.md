@@ -1,5 +1,9 @@
 # Change Log
 
+## 5.2.13
+
+* Add `excluded_availability_zones` which will allow users to exclude specific availability zones.  This was added due to the addition of `ca-central-1d` which does not support specific machine types.
+
 ## 5.2.12
 
 * Ignore instance_type and ebs_optimized changes on the worker and manager so that additional nodes with more powerful machines can be added without shutting down existing nodes.

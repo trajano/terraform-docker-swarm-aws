@@ -168,6 +168,12 @@ variable "daemon_cidr_block" {
   default     = "0.0.0.0/0"
 }
 
+variable "excluded_availability_zones" {
+  description = "List of availability zones to exclude from the computation."
+  type        = list(string)
+  default     = []
+}
+
 variable "store_join_tokens_as_tags" {
   description = "Store the Docker swarm join tokens as VPC tags."
   default     = false

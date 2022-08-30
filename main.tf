@@ -26,6 +26,7 @@ locals {
 data "aws_region" "current" {}
 
 data "aws_availability_zones" "azs" {
+  exclude_names = var.excluded_availability_zones
 }
 
 resource "aws_subnet" "managers" {
