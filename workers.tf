@@ -3,13 +3,12 @@ data "template_file" "init_worker" {
   template = file("${path.module}/init_node.py")
 
   vars = {
-    s3_bucket                 = var.store_join_tokens_as_tags ? "" : aws_s3_bucket.terraform[0].bucket
     region_name               = data.aws_region.current.name
     instance_index            = count.index
     vpc_name                  = local.dns_name
     cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.workers[count.index].name) : ""
     group                     = "worker"
-    store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
+    store_join_tokens_as_tags = 1
     ssh_authorization_method  = var.ssh_authorization_method
   }
 }
@@ -45,7 +44,6 @@ data "cloudinit_config" "workers" {
 
 resource "aws_instance" "workers" {
   depends_on = [
-    aws_s3_bucket.terraform,
     aws_instance.managers,
     aws_cloudwatch_log_group.workers,
     aws_cloudwatch_log_group.main,

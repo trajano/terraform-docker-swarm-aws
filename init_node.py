@@ -18,9 +18,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "WARNING"))
 
 # Set values loaded by the template
-store_join_tokens_as_tags = bool('${store_join_tokens_as_tags}')
 instance_index = int('${instance_index}')
-s3_bucket = '${s3_bucket}'
 vpc_name = '${vpc_name}'
 group = '${group}'
 cloudwatch_log_group = '${cloudwatch_log_group}'
@@ -36,8 +34,6 @@ region_name = instance_identity['region']
 
 # AWS resources
 ec2 = boto3.resource('ec2', region_name=region_name)
-s3 = boto3.resource('s3', region_name=region_name)
-
 
 def configure_logging():
     """
@@ -152,42 +148,6 @@ def get_manager_instance_vpc_tags(exclude_self=False):
     return None
 
 
-def get_manager_instance_s3(exclude_self=False):
-    def get_object_from_s3(name):
-        """
-        Gets an object from S3, returns None for any error
-        """
-        try:
-            s3_object = s3.Object(s3_bucket, name)
-            return s3_object.get()['Body'].read()
-        except BotoCoreError:
-            return None
-
-    manager_token = get_object_from_s3("manager_token")
-    worker_token = get_object_from_s3("worker_token")
-    manager0_ip = get_object_from_s3("ip0")
-    manager1_ip = get_object_from_s3("ip1")
-
-    # Find the manager instance to use
-    manager_instance = None
-    instances_considered = get_running_instances()
-    if exclude_self:
-        instances_considered = filter(lambda vpc: vpc != get_current_instance(), instances_considered)
-    for vpc_instance in instances_considered:
-        if vpc_instance.private_ip_address == manager0_ip or vpc_instance.private_ip_address == manager1_ip:
-            manager_instance = vpc_instance
-
-    if manager_instance and manager_token and worker_token:
-        return ManagerInstance(
-            manager_instance,
-            manager_token,
-            worker_token)
-    else:
-        logger.warning("Unable to locate manager manager_token=%s worker_token=%s manager0_ip=%s manager1_ip=%s",
-                       manager_token, worker_token, manager0_ip, manager1_ip)
-        return None
-
-
 def update_tokens_vpc_tags(instance, manager_token, worker_token):
     instance.create_tags(
         Tags=[
@@ -202,17 +162,6 @@ def update_tokens_vpc_tags(instance, manager_token, worker_token):
         ]
     )
     logger.debug("update %s %s %s", instance.private_ip_address, manager_token, worker_token)
-
-
-def update_tokens_s3(instance, manager_token, worker_token):
-    manager_token_object = s3.Object(s3_bucket, 'manager_token')
-    manager_token_object.put(Body=bytes(manager_token),
-                             StorageClass="ONEZONE_IA")
-    worker_token_object = s3.Object(s3_bucket, 'worker_token')
-    worker_token_object.put(Body=bytes(worker_token),
-                            StorageClass="ONEZONE_IA")
-    myip_object = s3.Object(s3_bucket, 'ip%d' % instance_index)
-    myip_object.put(Body=bytes(instance.private_ip_address), StorageClass="ONEZONE_IA")
 
 
 def join_as_manager(get_manager_instance, update_tokens):
@@ -279,16 +228,6 @@ def get_current_instance():
 def join_swarm():
     get_manager_instance = get_manager_instance_vpc_tags
     update_tokens = update_tokens_vpc_tags
-
-    if not store_join_tokens_as_tags:
-        # Set function points to S3 version
-        try:
-            bucket = s3.Bucket(s3_bucket)
-            bucket.objects.all()
-        except NoCredentialsError:
-            time.sleep(5)
-        get_manager_instance = get_manager_instance_s3
-        update_tokens = update_tokens_s3
 
     if is_manager_role():
         join_as_manager(get_manager_instance, update_tokens)

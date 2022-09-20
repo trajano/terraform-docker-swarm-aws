@@ -8,7 +8,6 @@ locals {
     "terraform-dockerswarm-ec2-any",
     "terraform-dockerswarm-ec2-resource",
     "terraform-dockerswarm-iam",
-    "terraform-dockerswarm-s3",
   ]
 }
 resource "aws_iam_policy" "terraform-dockerswarm" {

@@ -3,13 +3,12 @@ data "template_file" "init_manager" {
   template = file("${path.module}/init_node.py")
 
   vars = {
-    s3_bucket                 = var.store_join_tokens_as_tags ? "" : aws_s3_bucket.terraform[0].bucket
     region_name               = data.aws_region.current.name
     instance_index            = count.index
     vpc_name                  = local.dns_name
     cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
     group                     = "manager"
-    store_join_tokens_as_tags = var.store_join_tokens_as_tags ? 1 : 0
+    store_join_tokens_as_tags = 1
     ssh_authorization_method  = var.ssh_authorization_method
   }
 }
@@ -31,12 +30,6 @@ data "cloudinit_config" "managers" {
   }
 
   part {
-    filename     = "init_daemon.py"
-    content      = data.template_file.init_daemon[count.index].rendered
-    content_type = "text/x-shellscript"
-  }
-
-  part {
     filename     = "init_node.py"
     content      = data.template_file.init_manager[count.index].rendered
     content_type = "text/x-shellscript"
@@ -51,7 +44,6 @@ data "cloudinit_config" "managers" {
 
 resource "aws_instance" "managers" {
   depends_on = [
-    aws_s3_bucket.terraform,
     aws_cloudwatch_log_group.managers,
     aws_cloudwatch_log_group.main,
   ]
@@ -67,10 +59,7 @@ resource "aws_instance" "managers" {
 
 
   # workaround as noted by https://github.com/hashicorp/terraform/issues/12453#issuecomment-284273475
-  vpc_security_group_ids = split(
-    ",",
-    count.index < var.daemon_count ? join(",", local.daemon_security_group_ids) : join(",", local.security_group_ids),
-  )
+  vpc_security_group_ids = local.security_group_ids
 
   iam_instance_profile = aws_iam_instance_profile.ec2.name
   user_data_base64     = data.cloudinit_config.managers[count.index].rendered

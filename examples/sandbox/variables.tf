@@ -1,10 +1,6 @@
 variable "name" {
   description = "Name of the swarm.  Note this has to be globally unique."
 }
-variable "daemon_count" {
-  description = "This is the number of daemons to expose.  This is a workaround as count in some contexts cannot be a computed value."
-  default     = 1
-}
 
 variable "ssh_key" {
   description = "SSH key to access the server."
@@ -37,7 +33,7 @@ variable "workers" {
 
 variable "instance_type" {
   description = "EC2 instance type."
-  default     = "t3.micro"
+  default     = "t3a.micro"
 }
 
 variable "access_key" {
