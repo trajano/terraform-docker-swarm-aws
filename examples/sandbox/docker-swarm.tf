@@ -20,8 +20,6 @@ module "docker-swarm" {
   workers                     = var.workers
   cloud_config_extra          = data.template_file.cloud-config.rendered
   instance_type               = var.instance_type
-  daemon_count                = 0
-  store_join_tokens_as_tags   = true
   cloudwatch_logs             = true
   cloudwatch_single_log_group = true
   ssh_authorization_method    = "iam"

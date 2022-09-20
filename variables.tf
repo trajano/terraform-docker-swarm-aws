@@ -174,11 +174,6 @@ variable "excluded_availability_zones" {
   default     = []
 }
 
-variable "store_join_tokens_as_tags" {
-  description = "Store the Docker swarm join tokens as VPC tags."
-  default     = false
-}
-
 variable "ssh_authorization_method" {
   description = "Authorization method for SSH.  This is one of `none`, `ec2-instance-connect` (default), `iam` (recommended)."
   default     = "ec2-instance-connect"

@@ -1,5 +1,13 @@
 # Change Log
 
+## 6.0.0
+
+This release cleans up some of the older deprecations and upgrades the AWS provider.
+
+* Upgrade to AWS 4.31
+* `store_join_tokens_as_tags` is always `true`.  This removes the need to manage S3 resources for Terraform
+* `daemon_count` is now always `0`.
+
 ## 5.2.13
 
 * Add `excluded_availability_zones` which will allow users to exclude specific availability zones.  This was added due to the addition of `ca-central-1d` which does not support specific machine types.

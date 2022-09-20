@@ -55,9 +55,3 @@ output "iam_role" {
   description = "This is the IAM role that is generated during provisioning.  This can be used to add additional access to AWS resources from the EC2 instances."
   value       = aws_iam_role.ec2.name
 }
-
-output "daemon_cert_request_pems" {
-  description = "These are TLS certificate request PEMs that need to be signed by a CA outside the module."
-  value       = tls_cert_request.daemons.*.cert_request_pem
-}
-

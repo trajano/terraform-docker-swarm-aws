@@ -16,3 +16,8 @@ FYI at time of this writing, it is NOT recommended that users upgrade to 5.x unl
 * [`aws_availability_zones` will always have a diff](https://github.com/terraform-providers/terraform-provider-aws/issues/14579)
 * `terraform state replace-provider -- -/aws hashicorp/aws` generally helps address existing state issues [terraform#25819](https://github.com/hashicorp/terraform/issues/25819#issuecomment-672939811)
 * [State files may need to be modified using pull and push](https://github.com/hashicorp/terraform/issues/25752#issuecomment-672217777) to [remove resource state attributes that are no longer in the schema that was fixed for 0.13.1](https://github.com/hashicorp/terraform/issues/25752#issuecomment-672217777)
+
+## 5.x to 6.x
+
+* Remove `store_join_tokens_as_tags`, the setting is no longer supported
+* Remove `daemon_count`, the setting is no longer supported
