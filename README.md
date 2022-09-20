@@ -22,7 +22,7 @@ AWS permissions to do the following:
 
 The `examples/iam-policies` shows the policy JSONs that are used.
 
-For earlier versions of the module, *S3 Create and Access* was required to store the tokens.  Tags are used in the current releases to save on S3 costs.  This method is not deprecated as of yet.
+For earlier versions of the module, *S3 Create and Access* was required to store the tokens.  Tags are used in the current releases to save on S3 costs.  This method is has been depreacted and removed as of v6.0.0.
 
 ## Limitations
 
@@ -37,10 +37,6 @@ For earlier versions of the module, *S3 Create and Access* was required to store
 ## Example
 
 The `examples/simple` folder shows an example of how to use this module.
-
-## Usage of S3
-
-S3 was used because EFS and SimpleDB (both better choices in terms of cost and function) are NOT available in `ca-central-1` and likely some other non-US regions.
 
 ## Cloud Config merging
 
