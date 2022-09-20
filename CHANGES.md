@@ -4,8 +4,9 @@
 
 This release cleans up some of the older deprecations and upgrades the AWS provider.
 
-* Upgrade to AWS 4.31
-* `store_join_tokens_as_tags` is always `true`.  This removes the need to manage S3 resources for Terraform
+* Upgrade to AWS 4.31.
+* Removes use of S3 resources.
+* `store_join_tokens_as_tags` is always `true`.  This allows the removal of S3 resources.
 * `daemon_count` is now always `0`.
 
 ## 5.2.13
