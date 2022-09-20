@@ -33,7 +33,7 @@ variable "workers" {
 
 variable "instance_type" {
   description = "EC2 instance type."
-  default     = "t3.micro"
+  default     = "t3a.nano"
 }
 
 variable "access_key" {
