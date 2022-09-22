@@ -99,10 +99,11 @@ resource "aws_instance" "managers" {
     aws_cloudwatch_log_group.main,
   ]
 
-  count         = var.managers
-  ami           = data.aws_ami.base_ami.id
-  instance_type = local.instance_type_manager
-  subnet_id     = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.names)].id
+  count                       = var.managers
+  ami                         = data.aws_ami.base_ami.id
+  instance_type               = local.instance_type_manager
+  associate_public_ip_address = var.associate_public_ip_address
+  subnet_id                   = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.names)].id
   private_ip = cidrhost(
     aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.names)].cidr_block,
     10 + count.index,

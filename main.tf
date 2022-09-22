@@ -298,7 +298,9 @@ resource "aws_iam_instance_profile" "ec2" {
 
 
 resource "aws_sns_topic" "alarms" {
-  name = "${local.dns_name}-alarms"
+  name              = "${local.dns_name}-alarms"
+  display_name      = "${local.dns_name} alarms"
+  kms_master_key_id = var.sns_kms_id
 }
 
 resource "aws_cloudwatch_log_group" "main" {

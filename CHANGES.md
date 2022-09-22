@@ -3,6 +3,7 @@
 ## 6.0.2
 
 * Allow disabling `associate_public_ip_address` to limit swarm access to other systems like API Gateway.  Enabled by default.
+* `sns_kms_id` allows encrypting the SNS messages.
 
 ## 6.0.1
 
