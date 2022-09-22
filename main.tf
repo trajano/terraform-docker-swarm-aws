@@ -228,7 +228,6 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
       "logs:CreateLogStream",
       "logs:DescribeLogGroups",
       "logs:PutLogEvents",
-      "ssm:DescribeParameters",
     ]
 
     resources = [
