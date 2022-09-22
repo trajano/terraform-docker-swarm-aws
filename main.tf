@@ -7,16 +7,6 @@ locals {
       aws_security_group.docker.id
     ],
   )
-  daemon_security_group_ids = concat(
-    var.exposed_security_group_ids,
-    var.additional_security_group_ids,
-    [
-      aws_security_group.docker.id
-    ],
-    aws_security_group.daemon.*.id,
-    aws_security_group.daemon_ssh.*.id,
-  )
-
   instance_type_manager           = coalesce(var.instance_type_manager, var.instance_type)
   instance_type_worker            = coalesce(var.instance_type_worker, var.instance_type)
   burstable_instance_type_manager = length(regexall("^t\\d\\..*", local.instance_type_manager)) > 0
@@ -151,55 +141,6 @@ resource "aws_security_group" "docker" {
   }
 }
 
-resource "aws_security_group" "daemon_ssh" {
-  count       = var.daemon_ssh ? 1 : 0
-  name        = "docker-daemon-ssh"
-  description = "Docker Daemon SSH port"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
-    cidr_blocks = [
-      var.daemon_cidr_block,
-    ]
-  }
-
-  tags = {
-    Name = "${var.name} Docker Daemon SSH"
-  }
-
-  timeouts {
-    create = "2m"
-    delete = "2m"
-  }
-}
-
-resource "aws_security_group" "daemon" {
-  count       = var.daemon_tls ? 1 : 0
-  name        = "docker-daemon"
-  description = "Docker Daemon port"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    from_port = 2376
-    to_port   = 2376
-    protocol  = "tcp"
-    cidr_blocks = [
-      var.daemon_cidr_block,
-    ]
-  }
-
-  tags = {
-    Name = "${var.name} Docker TLS Daemon"
-  }
-
-  timeouts {
-    create = "2m"
-    delete = "2m"
-  }
-}
 
 data "aws_iam_policy_document" "instance-assume-role-policy" {
   statement {
@@ -241,7 +182,7 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
     ]
 
     resources = [
-      "arn:aws:ssm:*:*:parameter/${local.cloudwatch_agent_parameter}"
+      "arn:aws:ssm:${data.aws_region.current.name}:*:parameter/${local.cloudwatch_agent_parameter}"
     ]
   }
 }
