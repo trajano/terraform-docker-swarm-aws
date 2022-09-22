@@ -122,7 +122,8 @@ resource "aws_instance" "managers" {
   }
 
   metadata_options {
-    http_tokens = "required"
+    http_endpoint = "enabled"
+    http_tokens   = "required"
   }
 
   ebs_optimized = true
