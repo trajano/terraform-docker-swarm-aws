@@ -1,19 +1,19 @@
 # ECDSA key with P384 elliptic curve
 resource "tls_private_key" "managers-ecdsa" {
-  count       = var.managers
+  count       = var.generate_host_keys ? var.managers : 0
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
 # RSA key of size 4096 bits
 resource "tls_private_key" "managers-rsa" {
-  count     = var.managers
+  count     = var.generate_host_keys ? var.managers : 0
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 resource "tls_private_key" "managers-ed25519" {
-  count     = var.managers
+  count     = var.generate_host_keys ? var.managers : 0
   algorithm = "ED25519"
 }
 
@@ -43,7 +43,7 @@ data "cloudinit_config" "managers" {
 
   part {
     filename = "ssh_keys.cloud-config"
-    content = yamlencode({
+    content = var.generate_host_keys ? yamlencode({
       "ssh_keys" : {
         "rsa_private" : "${tls_private_key.managers-rsa[count.index].private_key_openssh}",
         "rsa_public" : "${tls_private_key.managers-rsa[count.index].public_key_openssh}",
@@ -56,7 +56,7 @@ data "cloudinit_config" "managers" {
       "ssh" : {
         "emit_keys_to_console" : false
       }
-    })
+    }) : ""
     content_type = "text/cloud-config"
   }
 

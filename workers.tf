@@ -1,18 +1,19 @@
 # ECDSA key with P384 elliptic curve
 resource "tls_private_key" "workers-ecdsa" {
-  count       = var.workers
+  count       = var.generate_host_keys ? var.workers : 0
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
 # RSA key of size 4096 bits
 resource "tls_private_key" "workers-rsa" {
-  count     = var.workers
+  count     = var.generate_host_keys ? var.workers : 0
   algorithm = "RSA"
   rsa_bits  = 4096
 }
+
 resource "tls_private_key" "workers-ed25519" {
-  count     = var.workers
+  count     = var.generate_host_keys ? var.workers : 0
   algorithm = "ED25519"
 }
 
@@ -40,7 +41,7 @@ data "cloudinit_config" "workers" {
     content = file("${path.module}/common.cloud-config")
   }
 
- part {
+  part {
     filename = "ssh_keys.cloud-config"
     content = yamlencode({
       "ssh_keys" : {
