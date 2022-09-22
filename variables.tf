@@ -26,6 +26,11 @@ variable "vpc_id" {
   description = "The VPC that will contain the swarm."
 }
 
+variable "associate_public_ip_address" {
+  description = "This makes the manager and worker nodes accessible from the Internet."
+  default     = true
+}
+
 variable "cloud_config_extra" {
   description = "Content added to the end of the cloud-config file."
   default     = ""
