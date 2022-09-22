@@ -99,12 +99,6 @@ A future relase of this would utilize auto-scaling for now this needs to be done
   * [ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-prerequisites)
   * [Redis](https://redis.io/topics/faq#background-saving-fails-with-a-fork-error-under-linux-even-if-i-have-a-lot-of-free-ram)
 
-## Thanks JetBrains
-
-Thanks to [JetBrains License for Open Source Development](https://www.jetbrains.com/community/opensource/#support) for allowing use on this project.
-
-![IntelliJ screenshot](examples/intellij.jpg)
-
 [ssh-daemon]: https://github.com/docker/cli/pull/1014
 [haveged]: http://issihosts.com/haveged/
 [ec2-instance-connect]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Connect-using-EC2-Instance-Connect.html
