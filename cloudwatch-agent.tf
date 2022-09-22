@@ -49,5 +49,5 @@ resource "aws_ssm_parameter" "cloudwatch-agent" {
 }
 
 locals {
-  cloudwatch_agent_parameter = var.cloudwatch_agent_parameter == "" ? "AmazonCloudWatch--${local.dns_name}" : var.cloudwatch_agent_parameter
+  cloudwatch_agent_parameter = var.cloudwatch_agent_parameter == "" ? aws_ssm_parameter.cloudwatch-agent[0].name : var.cloudwatch_agent_parameter
 }

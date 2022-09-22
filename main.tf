@@ -219,14 +219,6 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
   statement {
     actions = [
       "ec2:DescribeVpcs",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-  statement {
-    actions = [
       "ec2:DescribeInstances",
       "ec2:CreateTags",
       "ec2:DeleteTags",
@@ -236,7 +228,7 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
       "logs:CreateLogStream",
       "logs:DescribeLogGroups",
       "logs:PutLogEvents",
-      "ssm:DescribeParameters"
+      "ssm:DescribeParameters",
     ]
 
     resources = [
@@ -246,13 +238,11 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
 
   statement {
     actions = [
-      "ssm:GetParameters",
       "ssm:GetParameter",
-      "ssm:GetParametersByPath",
     ]
 
     resources = [
-      "arn:aws:ssm:::parameter/${local.cloudwatch_agent_parameter}}"
+      "arn:aws:ssm:*:*:parameter/${local.cloudwatch_agent_parameter}"
     ]
   }
 }
