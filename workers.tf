@@ -128,6 +128,7 @@ resource "aws_instance" "workers" {
   lifecycle {
     ignore_changes = [
       ami,
+      root_block_device,
       ebs_block_device,
       ebs_optimized,
       instance_type,
