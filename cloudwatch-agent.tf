@@ -1,0 +1,53 @@
+resource "aws_ssm_parameter" "cloudwatch-agent" {
+  count = var.cloudwatch_agent_parameter == "" ? 1 : 0
+  name  = "AmazonCloudWatch-${local.dns_name}"
+  type  = "String"
+  insecure_value = jsonencode({
+    "agent" : {
+      "metrics_collection_interval" : 60,
+      "run_as_user" : "root"
+    },
+    "metrics" : {
+      "aggregation_dimensions" : [
+        [
+          "InstanceId"
+        ]
+      ],
+      "append_dimensions" : {
+        "InstanceId" : "$${aws:InstanceId}",
+      },
+      "metrics_collected" : {
+        "disk" : {
+          "measurement" : [
+            "used_percent",
+            "used",
+            "free"
+          ],
+          "metrics_collection_interval" : 60,
+          "resources" : [
+            "*"
+          ]
+        },
+        "mem" : {
+          "measurement" : [
+            "used_percent",
+            "used",
+            "free"
+          ],
+          "metrics_collection_interval" : 60
+        },
+        "swap" : {
+          "measurement" : [
+            "free",
+            "used_percent"
+          ],
+          "metrics_collection_interval" : 60
+        }
+      }
+    }
+  })
+}
+
+locals {
+  cloudwatch_agent_parameter = var.cloudwatch_agent_parameter == "" ? "AmazonCloudWatch--${local.dns_name}" : var.cloudwatch_agent_parameter
+}

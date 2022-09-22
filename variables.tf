@@ -45,6 +45,12 @@ variable "cloudwatch_logs" {
   description = "Enables logging to Cloudwatch."
   default     = false
 }
+
+variable "cloudwatch_agent_parameter" {
+  description = "Provides an override to the metrics that are going to be sent by the cloudwatch agent."
+  default     = ""
+}
+
 variable "cloudwatch_kms_key_id" {
   description = "KMS key ID for Cloudwatch log encryption."
   default     = ""

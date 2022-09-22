@@ -42,6 +42,19 @@ data "cloudinit_config" "managers" {
   }
 
   part {
+    filename = "bootcmd.cloud-config"
+    content = yamlencode({
+      "bootcmd" : [
+        ["cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker"],
+        ["cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel"],
+        ["cloud-init-per", "boot", "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"],
+      ]
+    })
+    content_type = "text/cloud-config"
+  }
+
+
+  part {
     filename = "ssh_keys.cloud-config"
     content = var.generate_host_keys ? yamlencode({
       "ssh_keys" : {
