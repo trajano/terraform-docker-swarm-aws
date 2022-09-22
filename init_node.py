@@ -27,8 +27,19 @@ ssh_authorization_method = '${ssh_authorization_method}'
 # Global cached results
 _current_instance = None
 
+# Obtain token
+class TokenRequest(urllib2.Request):
+    def __init__(self):
+        super(TokenRequest, self).__init__("http://169.254.169.254/latest/api/token", headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"} )
+    def get_method(self, *args, **kwargs):
+        return 'PUT'
+
+metadata_token = urllib2.urlopen(TokenRequest()).read()
+
+instance_identity_request = urllib2.Request('http://169.254.169.254/latest/dynamic/instance-identity/document', headers={"X-aws-ec2-metadata-token" : metadata_token})
+
 # Extract metadata
-instance_identity = json.load(urllib2.urlopen('http://169.254.169.254/latest/dynamic/instance-identity/document'))
+instance_identity = json.load(urllib2.urlopen(instance_identity_request))
 instance_id = instance_identity['instanceId']
 region_name = instance_identity['region']
 
@@ -211,9 +222,10 @@ def is_manager_role():
 
 
 def get_vpc():
-    mac = urllib2.urlopen('http://169.254.169.254/latest/meta-data/mac').read().decode()
-    vpc_id = urllib2.urlopen(
-        'http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id' % mac).read().decode()
+    mac_request = urllib2.Request('http://169.254.169.254/latest/meta-data/mac', headers={"X-aws-ec2-metadata-token" : metadata_token})
+    mac = urllib2.urlopen(mac_request).read().decode()
+    vpc_id_request = urllib2.Request('http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id' % mac, headers={"X-aws-ec2-metadata-token" : metadata_token})
+    vpc_id = urllib2.urlopen(vpc_id_request).read().decode()
     return ec2.Vpc(vpc_id)
 
 

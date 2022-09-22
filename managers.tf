@@ -112,13 +112,17 @@ resource "aws_instance" "managers" {
 
   root_block_device {
     volume_size = var.volume_size
-    encrypted = true
+    encrypted   = true
   }
 
   ebs_block_device {
     device_name = "xvdf"
     volume_size = var.swap_size
-    encrypted = true
+    encrypted   = true
+  }
+
+  metadata_options {
+    http_tokens = "required"
   }
 
   lifecycle {

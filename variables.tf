@@ -40,6 +40,10 @@ variable "cloudwatch_logs" {
   description = "Enables logging to Cloudwatch."
   default     = false
 }
+variable "cloudwatch_kms_key_id" {
+  description = "KMS key ID for Cloudwatch log encryption."
+  default     = ""
+}
 
 variable "cloudwatch_single_log_group" {
   description = "Creates a single log group for the whole swarm rather than one per node."
