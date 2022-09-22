@@ -19,21 +19,44 @@ logging.basicConfig(level=os.environ.get("LOGLEVEL", "WARNING"))
 
 # Set values loaded by the template
 instance_index = int('${instance_index}')
-vpc_name = '${vpc_name}'
-group = '${group}'
-cloudwatch_log_group = '${cloudwatch_log_group}'
-ssh_authorization_method = '${ssh_authorization_method}'
+vpc_name = "${vpc_name}"
+group = "${group}"
+cloudwatch_log_group = "${cloudwatch_log_group}"
+ssh_authorization_method = "${ssh_authorization_method}"
 
 # Global cached results
 _current_instance = None
 
+class TokenRequest(urllib2.Request, object):
+    """
+    A urllib2 request specifically used to obtain the token to access the metadata.
+    """
+
+    def __init__(self):
+        super(TokenRequest, self).__init__(
+            "http://169.254.169.254/latest/api/token",
+            headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
+        )
+
+    def get_method(self, *args, **kwargs):
+        return "PUT"
+
+
+metadata_token = urllib2.urlopen(TokenRequest()).read()
+
+instance_identity_request = urllib2.Request(
+    "http://169.254.169.254/latest/dynamic/instance-identity/document",
+    headers={"X-aws-ec2-metadata-token": metadata_token},
+)
+
 # Extract metadata
-instance_identity = json.load(urllib2.urlopen('http://169.254.169.254/latest/dynamic/instance-identity/document'))
-instance_id = instance_identity['instanceId']
-region_name = instance_identity['region']
+instance_identity = json.load(urllib2.urlopen(instance_identity_request))
+instance_id = instance_identity["instanceId"]
+region_name = instance_identity["region"]
 
 # AWS resources
-ec2 = boto3.resource('ec2', region_name=region_name)
+ec2 = boto3.resource("ec2", region_name=region_name)
+
 
 def configure_logging():
     """
@@ -50,7 +73,7 @@ def configure_logging():
     daemon_json["log-driver"] = "awslogs"
     daemon_json["log-opts"] = {
         "awslogs-group": cloudwatch_log_group,
-        "tag": "{{.Name}}"
+        "tag": "{{.Name}}",
     }
 
     f = open(DAEMON_JSON, "w")
@@ -74,8 +97,9 @@ def initialize_system_daemons_and_hostname():
         subprocess.check_call(["systemctl", "enable", "haveged"])
         subprocess.check_call(["systemctl", "start", "haveged"])
 
-    subprocess.check_call(["hostnamectl", "set-hostname",
-                           "%s%d-%s" % (group, instance_index, vpc_name)])
+    subprocess.check_call(
+        ["hostnamectl", "set-hostname", "%s%d-%s" % (group, instance_index, vpc_name)]
+    )
 
 
 def create_swap():
@@ -95,10 +119,12 @@ def initialize_swarm():
     """
     subprocess.check_call(["docker", "swarm", "init"])
     manager_token = subprocess.check_output(
-        ["docker", "swarm", "join-token", "-q", "manager"]).strip()
+        ["docker", "swarm", "join-token", "-q", "manager"]
+    ).strip()
 
     worker_token = subprocess.check_output(
-        ["docker", "swarm", "join-token", "-q", "worker"]).strip()
+        ["docker", "swarm", "join-token", "-q", "worker"]
+    ).strip()
     return manager_token, worker_token
 
 
@@ -106,14 +132,18 @@ def instance_tags(instance):
     """
     Converts boto3 tags to a dict()
     """
-    return {tag['Key']: tag['Value'] for tag in instance.tags}
+    return {tag["Key"]: tag["Value"] for tag in instance.tags}
 
 
 def get_running_instances():
     """
     Gets the running instances in a VPC as a set.
     """
-    return {vpc_instance for vpc_instance in get_vpc().instances.all() if vpc_instance.state['Name'] == 'running'}
+    return {
+        vpc_instance
+        for vpc_instance in get_vpc().instances.all()
+        if vpc_instance.state["Name"] == "running"
+    }
 
 
 class ManagerInstance:
@@ -129,21 +159,28 @@ def join_swarm_with_token(swarm_manager_ip, token):
     """
     logging.debug("join %s %s", swarm_manager_ip, token)
     subprocess.check_call(
-        ["docker", "swarm", "join", "--token", token, swarm_manager_ip])
+        ["docker", "swarm", "join", "--token", token, swarm_manager_ip]
+    )
 
 
 def get_manager_instance_vpc_tags(exclude_self=False):
     instances_considered = get_running_instances()
     if exclude_self:
-        instances_considered = filter(lambda vpc: vpc != get_current_instance(), instances_considered)
+        instances_considered = filter(
+            lambda vpc: vpc != get_current_instance(), instances_considered
+        )
     for vpc_instance in instances_considered:
         vpc_instance_tags = instance_tags(instance=vpc_instance)
-        if vpc_instance_tags['Role'] == 'manager' and vpc_instance_tags['ManagerJoinToken'] and vpc_instance_tags[
-            'WorkerJoinToken']:
+        if (
+            vpc_instance_tags["Role"] == "manager"
+            and vpc_instance_tags["ManagerJoinToken"]
+            and vpc_instance_tags["WorkerJoinToken"]
+        ):
             return ManagerInstance(
                 vpc_instance,
-                vpc_instance_tags['ManagerJoinToken'],
-                vpc_instance_tags['WorkerJoinToken'])
+                vpc_instance_tags["ManagerJoinToken"],
+                vpc_instance_tags["WorkerJoinToken"],
+            )
 
     return None
 
@@ -151,17 +188,13 @@ def get_manager_instance_vpc_tags(exclude_self=False):
 def update_tokens_vpc_tags(instance, manager_token, worker_token):
     instance.create_tags(
         Tags=[
-            {
-                "Key": "ManagerJoinToken",
-                "Value": manager_token
-            },
-            {
-                "Key": "WorkerJoinToken",
-                "Value": worker_token
-            }
+            {"Key": "ManagerJoinToken", "Value": manager_token},
+            {"Key": "WorkerJoinToken", "Value": worker_token},
         ]
     )
-    logger.debug("update %s %s %s", instance.private_ip_address, manager_token, worker_token)
+    logger.debug(
+        "update %s %s %s", instance.private_ip_address, manager_token, worker_token
+    )
 
 
 def join_as_manager(get_manager_instance, update_tokens):
@@ -183,9 +216,14 @@ def join_as_manager(get_manager_instance, update_tokens):
         initialize_swarm_and_update_tokens()
     else:
         try:
-            join_swarm_with_token(another_manager_instance.ip, another_manager_instance.manager_token)
-            update_tokens(get_current_instance(), another_manager_instance.manager_token,
-                          another_manager_instance.worker_token)
+            join_swarm_with_token(
+                another_manager_instance.ip, another_manager_instance.manager_token
+            )
+            update_tokens(
+                get_current_instance(),
+                another_manager_instance.manager_token,
+                another_manager_instance.worker_token,
+            )
         except:
             # Unable to join the swarm, it may no longer be valid.  Create a new one.
             initialize_swarm_and_update_tokens()
@@ -207,13 +245,21 @@ def join_as_worker(get_manager_instance):
 
 
 def is_manager_role():
-    return instance_tags(get_current_instance())['Role'] == 'manager'
+    return instance_tags(get_current_instance())["Role"] == "manager"
 
 
 def get_vpc():
-    mac = urllib2.urlopen('http://169.254.169.254/latest/meta-data/mac').read().decode()
-    vpc_id = urllib2.urlopen(
-        'http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id' % mac).read().decode()
+    mac_request = urllib2.Request(
+        "http://169.254.169.254/latest/meta-data/mac",
+        headers={"X-aws-ec2-metadata-token": metadata_token},
+    )
+    mac = urllib2.urlopen(mac_request).read().decode()
+    vpc_id_request = urllib2.Request(
+        "http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id"
+        % mac,
+        headers={"X-aws-ec2-metadata-token": metadata_token},
+    )
+    vpc_id = urllib2.urlopen(vpc_id_request).read().decode()
     return ec2.Vpc(vpc_id)
 
 
@@ -243,34 +289,37 @@ def install_monitoring_tools():
     scripts_zip_path = "/tmp/CloudWatchMonitoringScripts.zip"
     crontab_path = "/tmp/aws-scripts-mon.crontab"
     scripts_zip = urllib2.urlopen(
-        'https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip').read()
-    scripts_zip_file = open(scripts_zip_path, 'wb')
+        "https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip"
+    ).read()
+    scripts_zip_file = open(scripts_zip_path, "wb")
     scripts_zip_file.write(scripts_zip)
     scripts_zip_file.close()
 
-    zipfile.ZipFile(scripts_zip_path, 'r').extractall("/root")
+    zipfile.ZipFile(scripts_zip_path, "r").extractall("/root")
 
-    with open(crontab_path, 'w') as f:
+    with open(crontab_path, "w") as f:
         try:
-            crontab = subprocess.check_output(['crontab', '-l']).decode()
-            crontab += "\n"
+            crontab = subprocess.check_output(["crontab", "-l"]).decode()
+            crontab = "\n"
         except subprocess.CalledProcessError:
             crontab = ""
-        crontab += "*/5 * * * * "
-        crontab += " ".join([
-            "/root/aws-scripts-mon/mon-put-instance-data.pl",
-            "--mem-used-incl-cache-buff",
-            "--mem-util",
-            "--mem-used",
-            "--swap-util",
-            "--swap-used",
-            "--disk-space-util",
-            "--disk-space-avail",
-            "--disk-space-used",
-            "--disk-path=/",
-            "--from-cron"
-        ])
-        crontab += "\n"
+        crontab = "*/5 * * * * "
+        crontab = " ".join(
+            [
+                "/root/aws-scripts-mon/mon-put-instance-data.pl",
+                "--mem-used-incl-cache-buff",
+                "--mem-util",
+                "--mem-used",
+                "--swap-util",
+                "--swap-used",
+                "--disk-space-util",
+                "--disk-space-avail",
+                "--disk-space-used",
+                "--disk-path=/",
+                "--from-cron",
+            ]
+        )
+        crontab = "\n"
         f.write(crontab)
         f.close()
     subprocess.check_call(["crontab", crontab_path])
@@ -280,19 +329,23 @@ def install_monitoring_tools():
 
 
 def set_ssh_authorization_mode():
-    if ssh_authorization_method == 'ec2-instance-connect':
+    if ssh_authorization_method == "ec2-instance-connect":
         subprocess.check_call(["yum", "install", "ec2-instance-connect"])
-    elif ssh_authorization_method == 'iam':
-        f = open('/etc/ssh/sshd_config', mode='r')
+    elif ssh_authorization_method == "iam":
+        f = open("/etc/ssh/sshd_config", mode="r")
         sshd_config = []
         for line in f.readlines():
-            if not line.startswith("AuthorizedKeysCommand ") and not line.startswith("AuthorizedKeysCommandUser "):
+            if not line.startswith("AuthorizedKeysCommand ") and not line.startswith(
+                "AuthorizedKeysCommandUser "
+            ):
                 sshd_config.append(line)
         f.close()
-        sshd_config.append("AuthorizedKeysCommand /opt/iam-authorized-keys-command %u %f\n")
+        sshd_config.append(
+            "AuthorizedKeysCommand /opt/iam-authorized-keys-command %u %f\n"
+        )
         sshd_config.append("AuthorizedKeysCommandUser nobody\n")
 
-        f = open('/etc/ssh/sshd_config', mode='w')
+        f = open("/etc/ssh/sshd_config", mode="w")
         f.writelines(sshd_config)
         f.close()
         subprocess.check_call(["systemctl", "restart", "sshd"])

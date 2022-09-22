@@ -1,3 +1,22 @@
+# ECDSA key with P384 elliptic curve
+resource "tls_private_key" "workers-ecdsa" {
+  count       = var.generate_host_keys ? var.workers : 0
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+# RSA key of size 4096 bits
+resource "tls_private_key" "workers-rsa" {
+  count     = var.generate_host_keys ? var.workers : 0
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "tls_private_key" "workers-ed25519" {
+  count     = var.generate_host_keys ? var.workers : 0
+  algorithm = "ED25519"
+}
+
 data "template_file" "init_worker" {
   count    = var.workers
   template = file("${path.module}/init_node.py")
@@ -20,6 +39,25 @@ data "cloudinit_config" "workers" {
 
   part {
     content = file("${path.module}/common.cloud-config")
+  }
+
+  part {
+    filename = "ssh_keys.cloud-config"
+    content = var.generate_host_keys ? yamlencode({
+      "ssh_keys" : {
+        "rsa_private" : "${tls_private_key.workers-rsa[count.index].private_key_openssh}",
+        "rsa_public" : "${tls_private_key.workers-rsa[count.index].public_key_openssh}",
+        "ecdsa_private" : "${tls_private_key.workers-ecdsa[count.index].private_key_openssh}",
+        "ecdsa_public" : "${tls_private_key.workers-ecdsa[count.index].public_key_openssh}",
+        "ed25519_private" : "${tls_private_key.workers-ed25519[count.index].private_key_openssh}",
+        "ed25519_public" : "${tls_private_key.workers-ed25519[count.index].public_key_openssh}",
+      },
+      "no_ssh_fingerprints" : false,
+      "ssh" : {
+        "emit_keys_to_console" : false
+      }
+    }) : ""
+    content_type = "text/cloud-config"
   }
 
   part {
@@ -71,16 +109,27 @@ resource "aws_instance" "workers" {
 
   root_block_device {
     volume_size = var.volume_size
+    encrypted   = true
   }
 
   ebs_block_device {
     device_name = "xvdf"
     volume_size = var.swap_size
+    encrypted   = true
   }
+
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
+
+  ebs_optimized = true
+  monitoring    = var.detailed_monitoring
 
   lifecycle {
     ignore_changes = [
       ami,
+      root_block_device,
       ebs_block_device,
       ebs_optimized,
       instance_type,
@@ -148,7 +197,7 @@ resource "aws_cloudwatch_log_group" "workers" {
   count             = (var.cloudwatch_logs && !var.cloudwatch_single_log_group) ? var.workers : 0
   name              = "${local.dns_name}-worker${count.index}"
   retention_in_days = var.cloudwatch_retention_in_days
-
+  kms_key_id        = var.cloudwatch_kms_key_id
   tags = {
     Environment = var.name
     Name        = "${var.name} worker ${count.index}"

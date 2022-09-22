@@ -22,6 +22,7 @@ module "docker-swarm" {
   instance_type               = var.instance_type
   cloudwatch_logs             = true
   cloudwatch_single_log_group = true
+  generate_host_keys          = true
   ssh_authorization_method    = "iam"
   ssh_users = [
     "trajano",
