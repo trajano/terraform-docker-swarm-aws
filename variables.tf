@@ -12,6 +12,11 @@ variable "workers" {
   default     = 0
 }
 
+variable "detailed_monitoring" {
+  description = "Detailed instance monitoring"
+  default     = false
+}
+
 variable "create_daemon_certificate_request" {
   description = "Create daemon certificate request."
   default     = true

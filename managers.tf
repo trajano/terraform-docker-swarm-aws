@@ -126,6 +126,7 @@ resource "aws_instance" "managers" {
   }
 
   ebs_optimized = true
+  monitoring    = var.detailed_monitoring
 
   lifecycle {
     ignore_changes = [

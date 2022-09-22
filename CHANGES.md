@@ -8,6 +8,7 @@
 * Use Instance Metadata Service Version 2 
 * Allow passing `cloudwatch_kms_key_id` for encrypting Cloudwatch logs.
 * `ebs_optimized` setting is explicitly enabled
+* `detailed_monitoring` is configurable and disabled by default to reduce cost.
 
 ## 6.0.0
 
