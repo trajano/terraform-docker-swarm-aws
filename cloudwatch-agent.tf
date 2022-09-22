@@ -4,8 +4,8 @@ resource "aws_ssm_parameter" "cloudwatch-agent" {
   type  = "String"
   insecure_value = jsonencode({
     "agent" : {
-      "metrics_collection_interval" : 60,
-      "run_as_user" : "root"
+      "run_as_user" : "cwagent",
+      "quiet": true
     },
     "metrics" : {
       "aggregation_dimensions" : [
