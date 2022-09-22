@@ -43,7 +43,7 @@ data "cloudinit_config" "workers" {
 
   part {
     filename = "ssh_keys.cloud-config"
-    content = yamlencode({
+    content = var.generate_host_keys ? yamlencode({
       "ssh_keys" : {
         "rsa_private" : "${tls_private_key.workers-rsa[count.index].private_key_openssh}",
         "rsa_public" : "${tls_private_key.workers-rsa[count.index].public_key_openssh}",
@@ -56,7 +56,7 @@ data "cloudinit_config" "workers" {
       "ssh" : {
         "emit_keys_to_console" : false
       }
-    })
+    }) : ""
     content_type = "text/cloud-config"
   }
 
