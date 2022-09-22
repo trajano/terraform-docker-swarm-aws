@@ -112,16 +112,19 @@ resource "aws_instance" "managers" {
 
   root_block_device {
     volume_size = var.volume_size
+    encrypted = true
   }
 
   ebs_block_device {
     device_name = "xvdf"
     volume_size = var.swap_size
+    encrypted = true
   }
 
   lifecycle {
     ignore_changes = [
       ami,
+      root_block_device,
       ebs_block_device,
       ebs_optimized,
       instance_type,
