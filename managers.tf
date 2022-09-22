@@ -1,3 +1,22 @@
+# ECDSA key with P384 elliptic curve
+resource "tls_private_key" "managers-ecdsa" {
+  count       = var.managers
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+# RSA key of size 4096 bits
+resource "tls_private_key" "managers-rsa" {
+  count     = var.managers
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "tls_private_key" "managers-ed25519" {
+  count     = var.managers
+  algorithm = "ED25519"
+}
+
 data "template_file" "init_manager" {
   count    = var.managers
   template = file("${path.module}/init_node.py")
@@ -20,6 +39,25 @@ data "cloudinit_config" "managers" {
 
   part {
     content = file("${path.module}/common.cloud-config")
+  }
+
+  part {
+    filename = "ssh_keys.cloud-config"
+    content = yamlencode({
+      "ssh_keys" : {
+        "rsa_private" : "${tls_private_key.managers-rsa[count.index].private_key_openssh}",
+        "rsa_public" : "${tls_private_key.managers-rsa[count.index].public_key_openssh}",
+        "ecdsa_private" : "${tls_private_key.managers-ecdsa[count.index].private_key_openssh}",
+        "ecdsa_public" : "${tls_private_key.managers-ecdsa[count.index].public_key_openssh}",
+        "ed25519_private" : "${tls_private_key.managers-ed25519[count.index].private_key_openssh}",
+        "ed25519_public" : "${tls_private_key.managers-ed25519[count.index].public_key_openssh}",
+      },
+      "no_ssh_fingerprints" : false,
+      "ssh" : {
+        "emit_keys_to_console" : false
+      }
+    })
+    content_type = "text/cloud-config"
   }
 
   part {

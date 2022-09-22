@@ -1,3 +1,21 @@
+# ECDSA key with P384 elliptic curve
+resource "tls_private_key" "workers-ecdsa" {
+  count       = var.workers
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
+}
+
+# RSA key of size 4096 bits
+resource "tls_private_key" "workers-rsa" {
+  count     = var.workers
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+resource "tls_private_key" "workers-ed25519" {
+  count     = var.workers
+  algorithm = "ED25519"
+}
+
 data "template_file" "init_worker" {
   count    = var.workers
   template = file("${path.module}/init_node.py")
@@ -20,6 +38,25 @@ data "cloudinit_config" "workers" {
 
   part {
     content = file("${path.module}/common.cloud-config")
+  }
+
+ part {
+    filename = "ssh_keys.cloud-config"
+    content = yamlencode({
+      "ssh_keys" : {
+        "rsa_private" : "${tls_private_key.workers-rsa[count.index].private_key_openssh}",
+        "rsa_public" : "${tls_private_key.workers-rsa[count.index].public_key_openssh}",
+        "ecdsa_private" : "${tls_private_key.workers-ecdsa[count.index].private_key_openssh}",
+        "ecdsa_public" : "${tls_private_key.workers-ecdsa[count.index].public_key_openssh}",
+        "ed25519_private" : "${tls_private_key.workers-ed25519[count.index].private_key_openssh}",
+        "ed25519_public" : "${tls_private_key.workers-ed25519[count.index].public_key_openssh}",
+      },
+      "no_ssh_fingerprints" : false,
+      "ssh" : {
+        "emit_keys_to_console" : false
+      }
+    })
+    content_type = "text/cloud-config"
   }
 
   part {
