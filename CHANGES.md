@@ -7,6 +7,7 @@
 * EBS partitions are encrypted
 * Use Instance Metadata Service Version 2 
 * Allow passing `cloudwatch_kms_key_id` for encrypting Cloudwatch logs.
+* `ebs_optimized` setting is explicitly enabled
 
 ## 6.0.0
 

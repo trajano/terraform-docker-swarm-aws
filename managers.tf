@@ -125,6 +125,8 @@ resource "aws_instance" "managers" {
     http_tokens = "required"
   }
 
+  ebs_optimized = true
+
   lifecycle {
     ignore_changes = [
       ami,
