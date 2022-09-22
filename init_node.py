@@ -27,8 +27,11 @@ ssh_authorization_method = "${ssh_authorization_method}"
 # Global cached results
 _current_instance = None
 
-# Obtain token
 class TokenRequest(urllib2.Request, object):
+    """
+    A urllib2 request specifically used to obtain the token to access the metadata.
+    """
+
     def __init__(self):
         super(TokenRequest, self).__init__(
             "http://169.254.169.254/latest/api/token",
