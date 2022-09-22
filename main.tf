@@ -236,10 +236,23 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
       "logs:CreateLogStream",
       "logs:DescribeLogGroups",
       "logs:PutLogEvents",
+      "ssm:DescribeParameters"
     ]
 
     resources = [
       "*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "ssm:GetParameters",
+      "ssm:GetParameter",
+      "ssm:GetParametersByPath",
+    ]
+
+    resources = [
+      "arn:aws:ssm:::parameter/${local.cloudwatch_agent_parameter}}"
     ]
   }
 }
