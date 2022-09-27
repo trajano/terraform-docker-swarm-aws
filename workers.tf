@@ -133,7 +133,7 @@ resource "aws_instance" "workers" {
 
   metadata_options {
     http_endpoint = "enabled"
-    http_tokens   = "required"
+    http_tokens   = var.metadata_http_tokens_required ? "required" : "optional"
   }
 
   ebs_optimized = true
