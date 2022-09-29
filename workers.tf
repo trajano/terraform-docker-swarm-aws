@@ -17,21 +17,6 @@ resource "tls_private_key" "workers-ed25519" {
   algorithm = "ED25519"
 }
 
-data "template_file" "init_worker" {
-  count    = var.workers
-  template = file("${path.module}/init_node.py")
-
-  vars = {
-    region_name               = data.aws_region.current.name
-    instance_index            = count.index
-    vpc_name                  = local.dns_name
-    cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.workers[count.index].name) : ""
-    group                     = "worker"
-    store_join_tokens_as_tags = 1
-    ssh_authorization_method  = var.ssh_authorization_method
-  }
-}
-
 data "cloudinit_config" "workers" {
   count         = var.workers
   gzip          = "true"
@@ -80,8 +65,18 @@ data "cloudinit_config" "workers" {
   }
 
   part {
-    filename     = "init_worker.py"
-    content      = data.template_file.init_worker[count.index].rendered
+    filename = "init_worker.py"
+    content = templatefile(
+      "${path.module}/init_node.py",
+      {
+        region_name              = data.aws_region.current.name
+        instance_index           = count.index
+        vpc_name                 = local.dns_name
+        cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+        group                    = "worker"
+        ssh_authorization_method = var.ssh_authorization_method
+      }
+    )
     content_type = "text/x-shellscript"
   }
 

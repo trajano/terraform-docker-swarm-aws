@@ -81,8 +81,18 @@ data "cloudinit_config" "managers" {
   }
 
   part {
-    filename     = "init_node.py"
-    content      = data.template_file.init_manager[count.index].rendered
+    filename = "init_node.py"
+    content = templatefile(
+      "${path.module}/init_node.py",
+      {
+        region_name              = data.aws_region.current.name
+        instance_index           = count.index
+        vpc_name                 = local.dns_name
+        cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+        group                    = "manager"
+        ssh_authorization_method = var.ssh_authorization_method
+      }
+    )
     content_type = "text/x-shellscript"
   }
 

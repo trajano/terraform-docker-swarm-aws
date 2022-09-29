@@ -11,10 +11,6 @@ terraform {
       source  = "hashicorp/cloudinit"
       version = ">= 2.0.0, < 3.0.0"
     }
-    template = {
-      source  = "hashicorp/template"
-      version = ">= 2.2.0, < 3.0.0"
-    }
     tls = {
       source  = "hashicorp/tls"
       version = ">= 4.0.3, < 5.0.0"
