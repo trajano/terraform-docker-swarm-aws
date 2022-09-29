@@ -1,7 +1,4 @@
 #cloud-config
-bootcmd:
-  - [ "cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker" ]
-  - [ "cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel" ]
 repo_update: true
 repo_upgrade: all
 packages:
@@ -9,6 +6,7 @@ packages:
   - haveged
   - python2-boto3
   - yum-cron
+  - amazon-cloudwatch-agent
   - perl-Switch 
   - perl-DateTime
   - perl-Sys-Syslog

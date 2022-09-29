@@ -17,21 +17,6 @@ resource "tls_private_key" "workers-ed25519" {
   algorithm = "ED25519"
 }
 
-data "template_file" "init_worker" {
-  count    = var.workers
-  template = file("${path.module}/init_node.py")
-
-  vars = {
-    region_name               = data.aws_region.current.name
-    instance_index            = count.index
-    vpc_name                  = local.dns_name
-    cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.workers[count.index].name) : ""
-    group                     = "worker"
-    store_join_tokens_as_tags = 1
-    ssh_authorization_method  = var.ssh_authorization_method
-  }
-}
-
 data "cloudinit_config" "workers" {
   count         = var.workers
   gzip          = "true"
@@ -39,6 +24,18 @@ data "cloudinit_config" "workers" {
 
   part {
     content = file("${path.module}/common.cloud-config")
+  }
+
+  part {
+    filename = "bootcmd.cloud-config"
+    content = yamlencode({
+      "bootcmd" : [
+        ["cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker"],
+        ["cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel"],
+        ["cloud-init-per", "boot", "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"],
+      ]
+    })
+    content_type = "text/cloud-config"
   }
 
   part {
@@ -68,8 +65,18 @@ data "cloudinit_config" "workers" {
   }
 
   part {
-    filename     = "init_worker.py"
-    content      = data.template_file.init_worker[count.index].rendered
+    filename = "init_worker.py"
+    content = templatefile(
+      "${path.module}/init_node.py",
+      {
+        region_name              = data.aws_region.current.name
+        instance_index           = count.index
+        vpc_name                 = local.dns_name
+        cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+        group                    = "worker"
+        ssh_authorization_method = var.ssh_authorization_method
+      }
+    )
     content_type = "text/x-shellscript"
   }
 
@@ -87,10 +94,11 @@ resource "aws_instance" "workers" {
     aws_cloudwatch_log_group.main,
   ]
 
-  count         = var.workers
-  ami           = data.aws_ami.base_ami.id
-  instance_type = local.instance_type_worker
-  subnet_id     = aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.names)].id
+  count                       = var.workers
+  ami                         = data.aws_ami.base_ami.id
+  instance_type               = local.instance_type_worker
+  associate_public_ip_address = var.associate_public_ip_address
+  subnet_id                   = aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.names)].id
   private_ip = cidrhost(
     aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.names)].cidr_block,
     10 + count.index,
@@ -120,7 +128,7 @@ resource "aws_instance" "workers" {
 
   metadata_options {
     http_endpoint = "enabled"
-    http_tokens   = "required"
+    http_tokens   = var.metadata_http_tokens_required ? "required" : "optional"
   }
 
   ebs_optimized = true

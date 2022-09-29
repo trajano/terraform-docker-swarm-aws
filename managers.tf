@@ -42,6 +42,19 @@ data "cloudinit_config" "managers" {
   }
 
   part {
+    filename = "bootcmd.cloud-config"
+    content = yamlencode({
+      "bootcmd" : [
+        ["cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker"],
+        ["cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel"],
+        ["cloud-init-per", "boot", "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"],
+      ]
+    })
+    content_type = "text/cloud-config"
+  }
+
+
+  part {
     filename = "ssh_keys.cloud-config"
     content = var.generate_host_keys ? yamlencode({
       "ssh_keys" : {
@@ -68,8 +81,18 @@ data "cloudinit_config" "managers" {
   }
 
   part {
-    filename     = "init_node.py"
-    content      = data.template_file.init_manager[count.index].rendered
+    filename = "init_node.py"
+    content = templatefile(
+      "${path.module}/init_node.py",
+      {
+        region_name              = data.aws_region.current.name
+        instance_index           = count.index
+        vpc_name                 = local.dns_name
+        cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+        group                    = "manager"
+        ssh_authorization_method = var.ssh_authorization_method
+      }
+    )
     content_type = "text/x-shellscript"
   }
 
@@ -86,10 +109,11 @@ resource "aws_instance" "managers" {
     aws_cloudwatch_log_group.main,
   ]
 
-  count         = var.managers
-  ami           = data.aws_ami.base_ami.id
-  instance_type = local.instance_type_manager
-  subnet_id     = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.names)].id
+  count                       = var.managers
+  ami                         = data.aws_ami.base_ami.id
+  instance_type               = local.instance_type_manager
+  associate_public_ip_address = var.associate_public_ip_address
+  subnet_id                   = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.names)].id
   private_ip = cidrhost(
     aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.names)].cidr_block,
     10 + count.index,
@@ -123,7 +147,7 @@ resource "aws_instance" "managers" {
 
   metadata_options {
     http_endpoint = "enabled"
-    http_tokens   = "required"
+    http_tokens   = var.metadata_http_tokens_required ? "required" : "optional"
   }
 
   ebs_optimized = true
