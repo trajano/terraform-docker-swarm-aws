@@ -4,8 +4,10 @@
 
 * Allow disabling `associate_public_ip_address` to limit swarm access to other systems like API Gateway.  Enabled by default.
 * `sns_kms_id` allows encrypting the SNS messages.
-* `metadata_http_tokens_required` to allow the use of the IMDSv2 to be optional.  `true` by default.
+* `metadata_http_tokens_required` to allow the use of the IMDSv2 to be optional.  `false` by default as neither the Java SDK nor the legacy metric provider still support it.
 * Removed the use of `template` provider.
+
+* At present the cloudwatch agent is installed and run in parallel with the existing metric provider, but there is no dashboard put in place as of yet.  Once the dashboard is put in place the older metric provider 
 
 ## 6.0.1
 

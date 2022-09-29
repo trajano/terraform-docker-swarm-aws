@@ -24,7 +24,7 @@ variable "create_daemon_certificate_request" {
 
 variable "metadata_http_tokens_required" {
   description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)."
-  default     = true
+  default     = false
 }
 
 variable "vpc_id" {
