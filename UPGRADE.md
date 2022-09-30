@@ -22,3 +22,23 @@ FYI at time of this writing, it is NOT recommended that users upgrade to 5.x unl
 * Remove `store_join_tokens_as_tags`, the setting is no longer supported
 * Remove `daemon_count`, the setting is no longer supported
 * Regenerate the dashboard by tainting it e.g., `terraform taint module.docker-swarm.aws_cloudwatch_dashboard.main[0]`.
+
+## 6.0.x to 6.1.x
+
+* Migrate the security group to rules 
+
+  1. Get the docker security group ID 
+
+    ```
+    terraform state show module.docker-swarm.aws_security_group.docker | grep arn
+    ```
+  
+  2. Import the 6 rules `sg-01621c3f441daa9b1` is an example of a security group from above and `10.95.0.0/16` is an example CIDR block.
+    ```
+    terraform import module.docker-swarm.aws_security_group_rule.docker-swarm sg-01621c3f441daa9b1_ingress_tcp_2377_2377_10.95.0.0/16
+    terraform import module.docker-swarm.aws_security_group_rule.docker-network-discovery-tcp sg-01621c3f441daa9b1_ingress_tcp_7946_7946_10.95.0.0/16
+    terraform import module.docker-swarm.aws_security_group_rule.docker-network-discovery-udp sg-01621c3f441daa9b1_ingress_udp_7946_7946_10.95.0.0/16
+    terraform import module.docker-swarm.aws_security_group_rule.docker-overlay-network sg-01621c3f441daa9b1_ingress_udp_4789_4789_10.95.0.0/16
+    terraform import module.docker-swarm.aws_security_group_rule.docker-egress-udp sg-01621c3f441daa9b1_egress_udp_0_0_10.95.0.0/16
+    terraform import module.docker-swarm.aws_security_group_rule.docker-egress-tcp sg-01621c3f441daa9b1_egress_tcp_0_0_10.95.0.0/16
+    ```

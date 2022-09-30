@@ -1,8 +1,9 @@
 # Change Log
 
-## 6.0.3
+## 6.1.0
 
 * Now uses Cloudwatch Agent to provide the metrics.  The deprecated monitoring tools are no longer used.
+* Removal of rules inside the `aws_security_group.docker` and made them individual `aws_security_group_rule` resources.
 
 ## 6.0.2
 

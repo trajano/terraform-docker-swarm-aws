@@ -2,10 +2,7 @@ data "template_file" "cloud-config" {
   template = file("template.cloud-config")
 
   vars = {
-    ssh_key       = var.ssh_key
-    repo_url      = var.repo_url
-    repo_username = var.repo_username
-    repo_password = var.repo_password
+    ssh_key = var.ssh_key
   }
 }
 
@@ -31,7 +28,7 @@ module "docker-swarm" {
   key_name = aws_key_pair.deployer.key_name
 
   additional_security_group_ids = [
-    aws_security_group.exposed.id,
+    aws_vpc.main.default_security_group_id,
   ]
 }
 

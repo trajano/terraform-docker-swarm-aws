@@ -70,67 +70,6 @@ resource "aws_security_group" "docker" {
   name        = "docker"
   description = "Docker Swarm ports"
   vpc_id      = var.vpc_id
-
-  ingress {
-    description = "Docker swarm management"
-    from_port   = 2377
-    to_port     = 2377
-    protocol    = "tcp"
-    cidr_blocks = [
-      data.aws_vpc.main.cidr_block,
-    ]
-  }
-
-  ingress {
-    description = "Docker container network discovery"
-    from_port   = 7946
-    to_port     = 7946
-    protocol    = "tcp"
-    cidr_blocks = [
-      data.aws_vpc.main.cidr_block,
-    ]
-  }
-
-  ingress {
-    description = "Docker container network discovery"
-    from_port   = 7946
-    to_port     = 7946
-    protocol    = "udp"
-    cidr_blocks = [
-      data.aws_vpc.main.cidr_block,
-    ]
-  }
-
-  ingress {
-    description = "Docker overlay network"
-    from_port   = 4789
-    to_port     = 4789
-    protocol    = "udp"
-    cidr_blocks = [
-      data.aws_vpc.main.cidr_block,
-    ]
-  }
-
-  egress {
-    description = "Docker swarm (udp)"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "udp"
-    cidr_blocks = [
-      data.aws_vpc.main.cidr_block,
-    ]
-  }
-
-  egress {
-    description = "Docker swarm (tcp)"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "tcp"
-    cidr_blocks = [
-      data.aws_vpc.main.cidr_block,
-    ]
-  }
-
   tags = {
     Name = "${var.name} Docker"
   }
@@ -140,6 +79,79 @@ resource "aws_security_group" "docker" {
     delete = "2m"
   }
 }
+resource "aws_security_group_rule" "docker-swarm" {
+  security_group_id = aws_security_group.docker.id
+  type              = "ingress"
+  description       = "Docker swarm management"
+  from_port         = 2377
+  to_port           = 2377
+  protocol          = "tcp"
+  cidr_blocks = [
+    data.aws_vpc.main.cidr_block,
+  ]
+}
+
+resource "aws_security_group_rule" "docker-network-discovery-tcp" {
+  security_group_id = aws_security_group.docker.id
+  type              = "ingress"
+  description       = "Docker container network discovery"
+  from_port         = 7946
+  to_port           = 7946
+  protocol          = "tcp"
+  cidr_blocks = [
+    data.aws_vpc.main.cidr_block,
+  ]
+}
+
+resource "aws_security_group_rule" "docker-network-discovery-udp" {
+  security_group_id = aws_security_group.docker.id
+  type              = "ingress"
+  description       = "Docker container network discovery"
+  from_port         = 7946
+  to_port           = 7946
+  protocol          = "udp"
+  cidr_blocks = [
+    data.aws_vpc.main.cidr_block,
+  ]
+}
+
+resource "aws_security_group_rule" "docker-overlay-network" {
+  security_group_id = aws_security_group.docker.id
+  type              = "ingress"
+  description       = "Docker overlay network"
+  from_port         = 4789
+  to_port           = 4789
+  protocol          = "udp"
+  cidr_blocks = [
+    data.aws_vpc.main.cidr_block,
+  ]
+}
+
+resource "aws_security_group_rule" "docker-egress-udp" {
+  security_group_id = aws_security_group.docker.id
+  type              = "egress"
+  description       = "Docker swarm (udp)"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "udp"
+  cidr_blocks = [
+    data.aws_vpc.main.cidr_block,
+  ]
+}
+
+resource "aws_security_group_rule" "docker-egress-tcp" {
+  security_group_id = aws_security_group.docker.id
+  type              = "egress"
+  description       = "Docker swarm (tcp)"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "tcp"
+  cidr_blocks = [
+    data.aws_vpc.main.cidr_block,
+  ]
+}
+
+
 
 
 data "aws_iam_policy_document" "instance-assume-role-policy" {

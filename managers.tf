@@ -22,11 +22,11 @@ data "template_file" "init_manager" {
   template = file("${path.module}/init_node.py")
 
   vars = {
-    instance_index            = count.index
-    vpc_name                  = local.dns_name
-    cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
-    group                     = "manager"
-    ssh_authorization_method  = var.ssh_authorization_method
+    instance_index           = count.index
+    vpc_name                 = local.dns_name
+    cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+    group                    = "manager"
+    ssh_authorization_method = var.ssh_authorization_method
   }
 }
 
