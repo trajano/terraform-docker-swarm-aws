@@ -51,6 +51,11 @@ variable "cloud_config_extra_script" {
   default     = ""
 }
 
+variable "cloudwatch_dashboard" {
+  description = "Enables Creation of the dashboard.  Note this requires `cloudwatch_logs` and `cloudwatch_single_log_group` to be enabled as well."
+  default     = true
+}
+
 variable "cloudwatch_logs" {
   description = "Enables logging to Cloudwatch."
   default     = false
@@ -69,6 +74,11 @@ variable "cloudwatch_kms_key_id" {
 variable "cloudwatch_single_log_group" {
   description = "Creates a single log group for the whole swarm rather than one per node."
   default     = false
+}
+
+variable "cloudwatch_log_stream_template" {
+  description = "Specifies the name of the log stream, defaults to the name of the container."
+  default     = "{{.Name}}"
 }
 
 variable "cloudwatch_retention_in_days" {

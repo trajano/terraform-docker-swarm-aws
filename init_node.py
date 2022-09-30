@@ -23,6 +23,7 @@ vpc_name = "${vpc_name}"
 group = "${group}"
 cloudwatch_log_group = "${cloudwatch_log_group}"
 ssh_authorization_method = "${ssh_authorization_method}"
+log_stream_template = "${log_stream_template}"
 
 # Global cached results
 _current_instance = None
@@ -73,7 +74,7 @@ def configure_logging():
     daemon_json["log-driver"] = "awslogs"
     daemon_json["log-opts"] = {
         "awslogs-group": cloudwatch_log_group,
-        "tag": "{{.Name}}",
+        "tag": log_stream_template,
     }
 
     f = open(DAEMON_JSON, "w")

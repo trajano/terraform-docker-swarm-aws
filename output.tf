@@ -55,3 +55,8 @@ output "iam_role" {
   description = "This is the IAM role that is generated during provisioning.  This can be used to add additional access to AWS resources from the EC2 instances."
   value       = aws_iam_role.ec2.name
 }
+
+output "cloudwatch_log_group" {
+  description = "Cloudwatch Log Group that the nodes will write to"
+  value       = aws_cloudwatch_log_group.main[0].name
+}

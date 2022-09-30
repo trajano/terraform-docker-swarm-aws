@@ -28,8 +28,10 @@ module "docker-swarm" {
   key_name = aws_key_pair.deployer.key_name
 
   additional_security_group_ids = [
-    aws_vpc.main.default_security_group_id,
+    aws_security_group.exposed.id,
   ]
+
+  cloudwatch_log_stream_template = "{{ with split .Names \".\" }}{{ index . 0 }}{{end}}"
 }
 
 resource "aws_key_pair" "deployer" {

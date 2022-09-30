@@ -80,6 +80,7 @@ data "cloudinit_config" "workers" {
         instance_index           = count.index
         vpc_name                 = local.dns_name
         cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+        log_stream_template      = var.cloudwatch_log_stream_template
         group                    = "worker"
         ssh_authorization_method = var.ssh_authorization_method
       }
