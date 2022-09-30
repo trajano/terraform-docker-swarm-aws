@@ -77,7 +77,6 @@ data "cloudinit_config" "workers" {
     content = templatefile(
       "${path.module}/init_node.py",
       {
-        region_name              = data.aws_region.current.name
         instance_index           = count.index
         vpc_name                 = local.dns_name
         cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
