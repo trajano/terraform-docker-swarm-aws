@@ -48,6 +48,14 @@ data "cloudinit_config" "managers" {
         ["cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker"],
         ["cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel"],
         ["cloud-init-per", "boot", "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"],
+      ],
+      "runcmd" : [
+        ["sysctl", "-w", "vm.max_map_count=262144"],
+        ["sysctl", "-w", "fs.file-max=65536"],
+        ["sysctl", "-w", "vm.overcommit_memory=1"],
+        ["ulimit", "-n", "65536"],
+        ["ulimit", "-u", "4096"],
+        ["/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"]
       ]
     })
     content_type = "text/cloud-config"

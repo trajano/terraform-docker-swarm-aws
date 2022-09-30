@@ -17,12 +17,6 @@ output:
 manage_resolve_conf: true
 resolve_conf:
   name_servers: [ '169.254.169.253' ]
-runcmd:
-  - [ sysctl, -w, vm.max_map_count=262144 ]
-  - [ sysctl, -w, fs.file-max=65536 ]
-  - [ sysctl, -w, vm.overcommit_memory=1 ]
-  - [ ulimit, -n, '65536' ]
-  - [ ulimit, -u, '4096' ]
 write_files:
   - content: |
       vm.max_map_count=262144
