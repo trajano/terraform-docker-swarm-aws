@@ -1,5 +1,9 @@
 # Change Log
 
+## 6.0.3
+
+* Now uses Cloudwatch Agent to provide the metrics.  The deprecated monitoring tools are no longer used.
+
 ## 6.0.2
 
 * Allow disabling `associate_public_ip_address` to limit swarm access to other systems like API Gateway.  Enabled by default.
@@ -7,7 +11,7 @@
 * `metadata_http_tokens_required` to allow the use of the IMDSv2 to be optional.  `false` by default as neither the Java SDK nor the legacy metric provider still support it.
 * Removed the use of `template` provider.  This allows the use of [Apple M1 Macs](https://github.com/trajano/terraform-docker-swarm-aws/issues/25).
 
-* At present the cloudwatch agent is installed and run in parallel with the existing metric provider, but there is no dashboard put in place as of yet.  Once the dashboard is put in place the older metric provider 
+* At present the Cloudwatch Agent is installed and run in parallel with the existing metric provider, but there is no dashboard put in place as of yet.  Once the dashboard is put in place the older metric provider 
 
 ## 6.0.1
 

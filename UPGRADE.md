@@ -21,3 +21,4 @@ FYI at time of this writing, it is NOT recommended that users upgrade to 5.x unl
 
 * Remove `store_join_tokens_as_tags`, the setting is no longer supported
 * Remove `daemon_count`, the setting is no longer supported
+* Regenerate the dashboard by tainting it e.g., `terraform taint module.docker-swarm.aws_cloudwatch_dashboard.main[0]`.
