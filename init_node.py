@@ -23,7 +23,7 @@ vpc_name = "${vpc_name}"
 group = "${group}"
 cloudwatch_log_group = "${cloudwatch_log_group}"
 ssh_authorization_method = "${ssh_authorization_method}"
-log_stream_template = "${log_stream_template}"
+log_stream_template = r'${log_stream_template}'
 
 # Global cached results
 _current_instance = None
