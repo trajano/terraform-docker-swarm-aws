@@ -112,8 +112,6 @@ resource "aws_instance" "workers" {
     10 + count.index,
   )
 
-  vpc_security_group_ids = local.security_group_ids
-
   iam_instance_profile = aws_iam_instance_profile.ec2.name
   user_data_base64     = data.cloudinit_config.workers[count.index].rendered
   key_name             = var.key_name
@@ -153,6 +151,7 @@ resource "aws_instance" "workers" {
       subnet_id,
       private_ip,
       availability_zone,
+      vpc_security_group_ids,
     ]
   }
 
@@ -219,4 +218,12 @@ resource "aws_cloudwatch_log_group" "workers" {
     Name        = "${var.name} worker ${count.index}"
     Node        = "${local.dns_name}-worker${count.index}"
   }
+}
+
+resource "aws_network_interface_sg_attachment" "workers" {
+  count = var.use_network_interface_sg_attachment ? length(setproduct(local.security_group_ids, aws_instance.workers.*.primary_network_interface_id)) : 0
+
+  security_group_id    = setproduct(local.security_group_ids, aws_instance.workers.*.primary_network_interface_id)[count.index][0]
+  network_interface_id = setproduct(local.security_group_ids, aws_instance.workers.*.primary_network_interface_id)[count.index][1]
+
 }

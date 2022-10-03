@@ -9,6 +9,9 @@ This release adds more changes that would require some state manipulation and da
 * Added `cloudwatch_log_stream_template` that allows changing the name of the log stream which defaults to `{{.Name}}`.  It can be changed to something like `{{ with split .Names "." }}{{ index . 0 }}{{end}}` which puts the contents of all service replicas into a single log stream.
 * Added `cloudwatch_dashboard` flag (defaults to `true`) that will allow removal of the dashboard so a custom one can be used in its place.
 * Added `cloudwatch_log_group` to the output (note this is just the VPC name in DNS form).  This allows creation of dashboard with the log group that's defined in the module.
+* Added `manager_subnets` was missing before and had a `worker_subnets` already.
+* Security groups are now attached using `aws_network_interface_sg_attachment`.  This will provide more predictable changes to security groups at the expense of recreating the nodes.  This is only applied if `use_network_interface_sg_attachment` is `true` (which it is by default).
+* Swarm upgrade instructions relocated to SWARM-UPGRADE.md
 
 ## 6.0.2
 

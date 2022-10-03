@@ -8,7 +8,7 @@ data "template_file" "cloud-config" {
 
 module "docker-swarm" {
   # source  = "trajano/swarm-aws/docker"
-  # version = "~>1.2"
+  # version = "~>6.0"
   source = "../../"
 
   name                        = var.name

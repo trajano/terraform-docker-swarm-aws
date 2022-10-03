@@ -228,3 +228,8 @@ variable "sns_kms_id" {
   description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK for SNS use."
   default     = ""
 }
+
+variable "use_network_interface_sg_attachment" {
+  description = "Determines whether the security groups are associated with network interfaces rather than the instance.  This should be false to allow **existing** ENI and security group mappings to be kept."
+  default     = true
+}

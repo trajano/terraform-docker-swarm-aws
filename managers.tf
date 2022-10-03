@@ -114,9 +114,6 @@ resource "aws_instance" "managers" {
   )
 
 
-  # workaround as noted by https://github.com/hashicorp/terraform/issues/12453#issuecomment-284273475
-  vpc_security_group_ids = local.security_group_ids
-
   iam_instance_profile = aws_iam_instance_profile.ec2.name
   user_data_base64     = data.cloudinit_config.managers[count.index].rendered
   key_name             = var.key_name
@@ -158,6 +155,7 @@ resource "aws_instance" "managers" {
       subnet_id,
       private_ip,
       availability_zone,
+      vpc_security_group_ids,
       tags["ManagerJoinToken"],
       tags["WorkerJoinToken"],
     ]
@@ -226,4 +224,12 @@ resource "aws_cloudwatch_log_group" "managers" {
     Name        = "${var.name} manager ${count.index}"
     Node        = "${local.dns_name}-manager${count.index}"
   }
+}
+
+resource "aws_network_interface_sg_attachment" "managers" {
+  count = var.use_network_interface_sg_attachment ? length(setproduct(local.security_group_ids, aws_instance.managers.*.primary_network_interface_id)) : 0
+
+  security_group_id    = setproduct(local.security_group_ids, aws_instance.managers.*.primary_network_interface_id)[count.index][0]
+  network_interface_id = setproduct(local.security_group_ids, aws_instance.managers.*.primary_network_interface_id)[count.index][1]
+
 }
