@@ -20,13 +20,15 @@ resource "aws_route" "internet_access" {
 }
 
 resource "aws_security_group" "exposed" {
-  name   = "${var.name}-exposed"
-  vpc_id = aws_vpc.main.id
+  name        = "${var.name}-exposed"
+  description = "${var.name} exposed ports"
+  vpc_id      = aws_vpc.main.id
   timeouts {
     create = "2m"
     delete = "2m"
   }
 }
+
 resource "aws_security_group_rule" "exposed-ssh" {
   security_group_id = aws_security_group.exposed.id
   type              = "ingress"
@@ -62,11 +64,3 @@ resource "aws_security_group_rule" "exposed-outbound" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
-# resource "aws_network_interface" "managers-b" {
-#   count     = 1
-#   subnet_id = module.docker-swarm.manager_subnets[count.index]
-#   attachment {
-#     instance     = module.docker-swarm.manager_instance_ids[count.index]
-#     device_index = 2
-#   }
-# }
