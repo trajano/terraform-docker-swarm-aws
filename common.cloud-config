@@ -63,6 +63,7 @@ write_files:
     permissions: "0700"
   - content: |
       #!/bin/sh
+      docker node demote $(docker node ls --format "{{.ID}} {{.Status}} {{.Availability}}" --filter 'role=manager' | grep " Down Drain" |  awk '{ print $1 }')
       docker node rm $(docker node ls --format "{{.ID}} {{.Status}} {{.Availability}}" | grep " Down Drain" |  awk '{ print $1 }')
     path: /root/bin/prune-nodes.sh
     owner: root:root
