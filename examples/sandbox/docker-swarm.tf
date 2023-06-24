@@ -2,16 +2,13 @@ data "template_file" "cloud-config" {
   template = file("template.cloud-config")
 
   vars = {
-    ssh_key       = var.ssh_key
-    repo_url      = var.repo_url
-    repo_username = var.repo_username
-    repo_password = var.repo_password
+    ssh_key = var.ssh_key
   }
 }
 
 module "docker-swarm" {
   # source  = "trajano/swarm-aws/docker"
-  # version = "~>1.2"
+  # version = "~>6.0"
   source = "../../"
 
   name                        = var.name
@@ -33,6 +30,8 @@ module "docker-swarm" {
   additional_security_group_ids = [
     aws_security_group.exposed.id,
   ]
+
+  cloudwatch_log_stream_template = "{{ with split .Name \".\" }}{{ index . 0 }}{{end}}"
 }
 
 resource "aws_key_pair" "deployer" {

@@ -51,6 +51,11 @@ variable "cloud_config_extra_script" {
   default     = ""
 }
 
+variable "cloudwatch_dashboard" {
+  description = "Enables Creation of the dashboard.  Note this requires `cloudwatch_logs` and `cloudwatch_single_log_group` to be enabled as well."
+  default     = true
+}
+
 variable "cloudwatch_logs" {
   description = "Enables logging to Cloudwatch."
   default     = false
@@ -69,6 +74,11 @@ variable "cloudwatch_kms_key_id" {
 variable "cloudwatch_single_log_group" {
   description = "Creates a single log group for the whole swarm rather than one per node."
   default     = false
+}
+
+variable "cloudwatch_log_stream_template" {
+  description = "Specifies the name of the log stream, defaults to the name of the container."
+  default     = "{{.Name}}"
 }
 
 variable "cloudwatch_retention_in_days" {
@@ -217,4 +227,9 @@ variable "generate_host_keys" {
 variable "sns_kms_id" {
   description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK for SNS use."
   default     = ""
+}
+
+variable "use_network_interface_sg_attachment" {
+  description = "Determines whether the security groups are associated with network interfaces rather than the instance.  This should be false to allow **existing** ENI and security group mappings to be kept."
+  default     = true
 }

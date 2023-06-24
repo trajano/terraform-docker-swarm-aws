@@ -33,6 +33,14 @@ data "cloudinit_config" "workers" {
         ["cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker"],
         ["cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel"],
         ["cloud-init-per", "boot", "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"],
+      ],
+      "runcmd" : [
+        ["sysctl", "-w", "vm.max_map_count=262144"],
+        ["sysctl", "-w", "fs.file-max=65536"],
+        ["sysctl", "-w", "vm.overcommit_memory=1"],
+        ["ulimit", "-n", "65536"],
+        ["ulimit", "-u", "4096"],
+        ["/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"]
       ]
     })
     content_type = "text/cloud-config"
@@ -69,10 +77,10 @@ data "cloudinit_config" "workers" {
     content = templatefile(
       "${path.module}/init_node.py",
       {
-        region_name              = data.aws_region.current.name
         instance_index           = count.index
         vpc_name                 = local.dns_name
         cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+        log_stream_template      = var.cloudwatch_log_stream_template
         group                    = "worker"
         ssh_authorization_method = var.ssh_authorization_method
       }
@@ -103,8 +111,6 @@ resource "aws_instance" "workers" {
     aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.names)].cidr_block,
     10 + count.index,
   )
-
-  vpc_security_group_ids = local.security_group_ids
 
   iam_instance_profile = aws_iam_instance_profile.ec2.name
   user_data_base64     = data.cloudinit_config.workers[count.index].rendered
@@ -145,6 +151,7 @@ resource "aws_instance" "workers" {
       subnet_id,
       private_ip,
       availability_zone,
+      vpc_security_group_ids,
     ]
   }
 
@@ -211,4 +218,12 @@ resource "aws_cloudwatch_log_group" "workers" {
     Name        = "${var.name} worker ${count.index}"
     Node        = "${local.dns_name}-worker${count.index}"
   }
+}
+
+resource "aws_network_interface_sg_attachment" "workers" {
+  count = var.use_network_interface_sg_attachment ? length(setproduct(local.security_group_ids, aws_instance.workers.*.primary_network_interface_id)) : 0
+
+  security_group_id    = setproduct(local.security_group_ids, aws_instance.workers.*.primary_network_interface_id)[count.index][0]
+  network_interface_id = setproduct(local.security_group_ids, aws_instance.workers.*.primary_network_interface_id)[count.index][1]
+
 }

@@ -17,21 +17,6 @@ resource "tls_private_key" "managers-ed25519" {
   algorithm = "ED25519"
 }
 
-data "template_file" "init_manager" {
-  count    = var.managers
-  template = file("${path.module}/init_node.py")
-
-  vars = {
-    region_name               = data.aws_region.current.name
-    instance_index            = count.index
-    vpc_name                  = local.dns_name
-    cloudwatch_log_group      = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
-    group                     = "manager"
-    store_join_tokens_as_tags = 1
-    ssh_authorization_method  = var.ssh_authorization_method
-  }
-}
-
 data "cloudinit_config" "managers" {
   count         = var.managers
   gzip          = "true"
@@ -48,6 +33,14 @@ data "cloudinit_config" "managers" {
         ["cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker"],
         ["cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel"],
         ["cloud-init-per", "boot", "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"],
+      ],
+      "runcmd" : [
+        ["sysctl", "-w", "vm.max_map_count=262144"],
+        ["sysctl", "-w", "fs.file-max=65536"],
+        ["sysctl", "-w", "vm.overcommit_memory=1"],
+        ["ulimit", "-n", "65536"],
+        ["ulimit", "-u", "4096"],
+        ["/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"]
       ]
     })
     content_type = "text/cloud-config"
@@ -89,6 +82,7 @@ data "cloudinit_config" "managers" {
         instance_index           = count.index
         vpc_name                 = local.dns_name
         cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+        log_stream_template      = var.cloudwatch_log_stream_template
         group                    = "manager"
         ssh_authorization_method = var.ssh_authorization_method
       }
@@ -119,9 +113,6 @@ resource "aws_instance" "managers" {
     10 + count.index,
   )
 
-
-  # workaround as noted by https://github.com/hashicorp/terraform/issues/12453#issuecomment-284273475
-  vpc_security_group_ids = local.security_group_ids
 
   iam_instance_profile = aws_iam_instance_profile.ec2.name
   user_data_base64     = data.cloudinit_config.managers[count.index].rendered
@@ -164,6 +155,7 @@ resource "aws_instance" "managers" {
       subnet_id,
       private_ip,
       availability_zone,
+      vpc_security_group_ids,
       tags["ManagerJoinToken"],
       tags["WorkerJoinToken"],
     ]
@@ -232,4 +224,12 @@ resource "aws_cloudwatch_log_group" "managers" {
     Name        = "${var.name} manager ${count.index}"
     Node        = "${local.dns_name}-manager${count.index}"
   }
+}
+
+resource "aws_network_interface_sg_attachment" "managers" {
+  count = var.use_network_interface_sg_attachment ? length(setproduct(local.security_group_ids, aws_instance.managers.*.primary_network_interface_id)) : 0
+
+  security_group_id    = setproduct(local.security_group_ids, aws_instance.managers.*.primary_network_interface_id)[count.index][0]
+  network_interface_id = setproduct(local.security_group_ids, aws_instance.managers.*.primary_network_interface_id)[count.index][1]
+
 }

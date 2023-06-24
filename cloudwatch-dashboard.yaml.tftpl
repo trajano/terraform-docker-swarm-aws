@@ -7,12 +7,12 @@ widgets:
     region: ${region}
     metrics:
 %{ for instance_id in instance_ids ~}
-    - - System/Linux
-      - MemoryUtilization
+    - - CWAgent
+      - mem_used_percent
       - InstanceId
       - ${instance_id}
     - - .
-      - SwapUtilization
+      - swap_used_percent
       - .
       - .
 %{ endfor ~}
@@ -78,14 +78,10 @@ widgets:
   properties:
     metrics:
 %{ for instance_id in instance_ids ~}
-    - - System/Linux
-      - DiskSpaceUtilization
-      - MountPath
-      - "/"
+    - - CWAgent
+      - disk_used_percent
       - InstanceId
       - ${instance_id}
-      - Filesystem
-      - "/dev/nvme0n1p1"
 %{ endfor ~}
     period: 60
     region: ${region}

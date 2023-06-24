@@ -46,33 +46,7 @@ The default merge rules of cloud-config is used which may yield unexpected resul
 
 ## Upgrading the swarm
 
-Though `yum update` can simply update the software, it may be required to update things that are outside such as updates to the module itself, `cloud_config_extra` information or AMI updates.  For this to work, you need to have at least 3 managers otherwise you'd lose raft consensus and have to rebuild the swarm from scratch.
-
-### Example of how to upgrade a 3 manager swawrm
-
-Upgrading a 3 manager swarm needs to be done one at a time to prevent raft consensus loss.
-
-1. Make `manager0` leave the swarm by executing `ssh <username>@<manager0> sudo /root/bin/leave-swarm.sh`
-2. Taint `manager0` from the command line `terraform taint module.docker-swarm.aws_instance.managers[0]`
-3. Rebuild `manager0` from the command line `terraform apply`
-4. Wait until `manager0` rejoins the swarm by checking `docker node ls`
-5. Make `manager1` leave the swarm by executing  `ssh <username>@<manager1> sudo /root/bin/leave-swarm.sh`
-6. Taint `manager1` from the command line `terraform taint module.docker-swarm.aws_instance.managers[1]`
-7. Rebuild `manager1` from the command line `terraform apply`
-8. Wait until `manager1` rejoins the swarm by checking `docker node ls`
-9. Make `manager2` leave the swarm by executing `ssh <username>@<manager2> sudo /root/bin/leave-swarm.sh`
-10. Taint `manager2` from the command line `terraform taint module.docker-swarm.aws_instance.managers[2]`
-11. Rebuild `manager2` from the command line `terraform apply`
-12. Wait until `manager2` rejoins the swarm by checking `docker node ls`
-13. Prune the nodes that are down and are drained `ssh <username>@<manager0> sudo /root/bin/prune-nodes.sh`
-
-### Upgrading the worker nodes
-
-A future relase of this would utilize auto-scaling for now this needs to be done manually
-
-1. Drain and remove the worker node(s) from the swarm using `ssh <username>@<manager0> sudo /root/bin/rm-workers.sh <nodename[s]>`
-2. Taint the workers that are removed from the command line `terraform taint module.docker-swarm.aws_instance.workers[#]`
-3. Rebuild the workers from the command line `terraform apply`
+See SWARM-UPGRADE.md
 
 ## Other tips
 
@@ -98,6 +72,8 @@ A future relase of this would utilize auto-scaling for now this needs to be done
 
   * [ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-prerequisites)
   * [Redis](https://redis.io/topics/faq#background-saving-fails-with-a-fork-error-under-linux-even-if-i-have-a-lot-of-free-ram)
+
+* `cloudwatch_log_stream_template` can change the name of the log stream to something easier to manage namely use the name of the service by setting it to `"{{ with split .Name \".\" }}{{ index . 0 }}{{end}}"`.
 
 [ssh-daemon]: https://github.com/docker/cli/pull/1014
 [haveged]: http://issihosts.com/haveged/

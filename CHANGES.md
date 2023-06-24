@@ -1,5 +1,18 @@
 # Change Log
 
+## 6.1.0
+
+This release adds more changes that would require some state manipulation and dashboard reworks, if you do not require the features lock to 6.0.x
+
+* Now uses Cloudwatch Agent to provide the metrics.  The deprecated monitoring tools are no longer used.
+* Removal of rules inside the `aws_security_group.docker` and made them individual `aws_security_group_rule` resources.
+* Added `cloudwatch_log_stream_template` that allows changing the name of the log stream which defaults to `{{.Name}}`.  It can be changed to something like `{{ with split .Names "." }}{{ index . 0 }}{{end}}` which puts the contents of all service replicas into a single log stream.
+* Added `cloudwatch_dashboard` flag (defaults to `true`) that will allow removal of the dashboard so a custom one can be used in its place.
+* Added `cloudwatch_log_group` to the output (note this is just the VPC name in DNS form).  This allows creation of dashboard with the log group that's defined in the module.
+* Added `manager_subnets` was missing before and had a `worker_subnets` already.
+* Security groups are now attached using `aws_network_interface_sg_attachment`.  This will provide more predictable changes to security groups at the expense of recreating the nodes.  This is only applied if `use_network_interface_sg_attachment` is `true` (which it is by default).
+* Swarm upgrade instructions relocated to SWARM-UPGRADE.md
+
 ## 6.0.2
 
 * Allow disabling `associate_public_ip_address` to limit swarm access to other systems like API Gateway.  Enabled by default.
@@ -7,7 +20,7 @@
 * `metadata_http_tokens_required` to allow the use of the IMDSv2 to be optional.  `false` by default as neither the Java SDK nor the legacy metric provider still support it.
 * Removed the use of `template` provider.  This allows the use of [Apple M1 Macs](https://github.com/trajano/terraform-docker-swarm-aws/issues/25).
 
-* At present the cloudwatch agent is installed and run in parallel with the existing metric provider, but there is no dashboard put in place as of yet.  Once the dashboard is put in place the older metric provider 
+* At present the Cloudwatch Agent is installed and run in parallel with the existing metric provider, but there is no dashboard put in place as of yet.  Once the dashboard is put in place the older metric provider 
 
 ## 6.0.1
 
