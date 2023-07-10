@@ -1,5 +1,9 @@
 # Change Log
 
+## 6.0.3
+
+* Removed the one instance of `template_file` that is triggering the load of the Hashicorp template module.
+
 ## 6.0.2
 
 * Allow disabling `associate_public_ip_address` to limit swarm access to other systems like API Gateway.  Enabled by default.
