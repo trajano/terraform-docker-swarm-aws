@@ -65,6 +65,14 @@ data "cloudinit_config" "workers" {
   }
 
   part {
+    filename     = "init_boto.sh"
+    content      = <<EOT
+#!/bin/sh
+pip3 install botocore boto3
+EOT
+    content_type = "text/x-shellscript"
+  }
+  part {
     filename = "init_worker.py"
     content = templatefile(
       "${path.module}/init_node.py",

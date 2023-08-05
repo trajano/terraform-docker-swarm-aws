@@ -3,15 +3,9 @@ repo_update: true
 repo_upgrade: all
 packages:
   - docker
-  - haveged
-  - python2-boto3
-  - yum-cron
   - amazon-cloudwatch-agent
-  - perl-Switch 
-  - perl-DateTime
-  - perl-Sys-Syslog
-  - perl-LWP-Protocol-https
-  - perl-Digest-SHA.x86_64
+  - python3-pip
+  - dnf-automatic.noarch
 output:
   all: "| tee -a /var/log/cloud-init-output.log"
 manage_resolve_conf: true
@@ -79,7 +73,7 @@ write_files:
     owner: root:root
     permissions: "0700"
   - content: |
-      #!/usr/bin/env python
+      #!/usr/bin/env python3
       import boto3
       import grp
       import sys

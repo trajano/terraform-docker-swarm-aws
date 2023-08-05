@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from botocore.exceptions import NoCredentialsError
 from botocore.exceptions import BotoCoreError
 import boto3
-import simplejson as json
+import json
 import logging
 import os
 import os.path
@@ -10,7 +10,7 @@ import random
 import stat
 import subprocess
 import time
-import urllib2
+import urllib.request
 import zipfile
 
 DAEMON_JSON = "/etc/docker/daemon.json"
@@ -27,9 +27,9 @@ ssh_authorization_method = "${ssh_authorization_method}"
 # Global cached results
 _current_instance = None
 
-class TokenRequest(urllib2.Request, object):
+class TokenRequest(urllib.request.Request, object):
     """
-    A urllib2 request specifically used to obtain the token to access the metadata.
+    A urllib request specifically used to obtain the token to access the metadata.
     """
 
     def __init__(self):
@@ -42,15 +42,15 @@ class TokenRequest(urllib2.Request, object):
         return "PUT"
 
 
-metadata_token = urllib2.urlopen(TokenRequest()).read()
+metadata_token = urllib.request.urlopen(TokenRequest()).read()
 
-instance_identity_request = urllib2.Request(
+instance_identity_request = urllib.request.Request(
     "http://169.254.169.254/latest/dynamic/instance-identity/document",
     headers={"X-aws-ec2-metadata-token": metadata_token},
 )
 
 # Extract metadata
-instance_identity = json.load(urllib2.urlopen(instance_identity_request))
+instance_identity = json.load(urllib.request.urlopen(instance_identity_request))
 instance_id = instance_identity["instanceId"]
 region_name = instance_identity["region"]
 
@@ -66,7 +66,8 @@ def configure_logging():
         return
 
     if os.path.exists(DAEMON_JSON):
-        daemon_json = json.load(DAEMON_JSON)
+        with open(DAEMON_JSON) as json_file:
+            daemon_json = json.load(json_file)
     else:
         daemon_json = json.loads("{}")
 
@@ -89,13 +90,10 @@ def initialize_system_daemons_and_hostname():
     subprocess.check_call(["systemctl", "enable", "docker.service"])
     subprocess.check_call(["systemctl", "start", "docker.service"])
 
-    list_unit_files = subprocess.check_output(["systemctl", "list-unit-files"])
-    if "yum-cron.service" in list_unit_files:
-        subprocess.check_call(["systemctl", "enable", "yum-cron"])
-        subprocess.check_call(["systemctl", "start", "yum-cron"])
-    if "haveged.service" in list_unit_files:
-        subprocess.check_call(["systemctl", "enable", "haveged"])
-        subprocess.check_call(["systemctl", "start", "haveged"])
+    list_unit_files = subprocess.check_output(["systemctl", "list-unit-files"]).decode("utf-8")
+    if "dnf-automatic.service" in list_unit_files:
+        subprocess.check_call(["systemctl", "enable", "dnf-automatic"])
+        subprocess.check_call(["systemctl", "start", "dnf-automatic"])
 
     subprocess.check_call(
         ["hostnamectl", "set-hostname", "%s%d-%s" % (group, instance_index, vpc_name)]
@@ -104,13 +102,13 @@ def initialize_system_daemons_and_hostname():
 
 def create_swap():
     """
-    Initializes and registeres the swap volume
+    Initializes and registers the swap volume
     """
-    subprocess.check_output(["mkswap", "/dev/xvdf"])
+    subprocess.check_call(["mkswap", "/dev/xvdf"])
     f = open("/etc/fstab", "a")
     f.write("/dev/xvdf none swap defaults 0 0\n")
     f.close()
-    subprocess.check_output(["swapon", "-a"])
+    subprocess.check_call(["swapon", "-a"])
 
 
 def initialize_swarm():
@@ -120,11 +118,11 @@ def initialize_swarm():
     subprocess.check_call(["docker", "swarm", "init"])
     manager_token = subprocess.check_output(
         ["docker", "swarm", "join-token", "-q", "manager"]
-    ).strip()
+    ).decode("utf-8").strip()
 
     worker_token = subprocess.check_output(
         ["docker", "swarm", "join-token", "-q", "worker"]
-    ).strip()
+    ).decode("utf-8").strip()
     return manager_token, worker_token
 
 
@@ -249,17 +247,17 @@ def is_manager_role():
 
 
 def get_vpc():
-    mac_request = urllib2.Request(
+    mac_request = urllib.request.Request(
         "http://169.254.169.254/latest/meta-data/mac",
         headers={"X-aws-ec2-metadata-token": metadata_token},
     )
-    mac = urllib2.urlopen(mac_request).read().decode()
-    vpc_id_request = urllib2.Request(
+    mac = urllib.request.urlopen(mac_request).read().decode()
+    vpc_id_request = urllib.request.Request(
         "http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id"
         % mac,
         headers={"X-aws-ec2-metadata-token": metadata_token},
     )
-    vpc_id = urllib2.urlopen(vpc_id_request).read().decode()
+    vpc_id = urllib.request.urlopen(vpc_id_request).read().decode()
     return ec2.Vpc(vpc_id)
 
 
@@ -281,51 +279,6 @@ def join_swarm():
         join_as_worker(get_manager_instance)
 
 
-def install_monitoring_tools():
-    """
-    As documented in https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html
-    """
-
-    scripts_zip_path = "/tmp/CloudWatchMonitoringScripts.zip"
-    crontab_path = "/tmp/aws-scripts-mon.crontab"
-    scripts_zip = urllib2.urlopen(
-        "https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip"
-    ).read()
-    scripts_zip_file = open(scripts_zip_path, "wb")
-    scripts_zip_file.write(scripts_zip)
-    scripts_zip_file.close()
-
-    zipfile.ZipFile(scripts_zip_path, "r").extractall("/root")
-
-    with open(crontab_path, "w") as f:
-        try:
-            crontab = subprocess.check_output(["crontab", "-l"]).decode()
-            crontab = "\n"
-        except subprocess.CalledProcessError:
-            crontab = ""
-        crontab = "*/5 * * * * "
-        crontab = " ".join(
-            [
-                "/root/aws-scripts-mon/mon-put-instance-data.pl",
-                "--mem-used-incl-cache-buff",
-                "--mem-util",
-                "--mem-used",
-                "--swap-util",
-                "--swap-used",
-                "--disk-space-util",
-                "--disk-space-avail",
-                "--disk-space-used",
-                "--disk-path=/",
-                "--from-cron",
-            ]
-        )
-        crontab = "\n"
-        f.write(crontab)
-        f.close()
-    subprocess.check_call(["crontab", crontab_path])
-    os.remove(crontab_path)
-    os.remove(scripts_zip_path)
-    os.chmod("/root/aws-scripts-mon/mon-put-instance-data.pl", stat.S_IRWXU)
 
 
 def set_ssh_authorization_mode():
@@ -350,10 +303,14 @@ def set_ssh_authorization_mode():
         f.close()
         subprocess.check_call(["systemctl", "restart", "sshd"])
 
+def install_docker():
+    subprocess.check_call(["yum-config-manager", "--add-repo", "https://download.docker.com/linux/centos/docker-ce.repo"])
+    subprocess.check_call(["yum", "install", "docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"])
+    subprocess.check_call(["systemctl", "start", "docker"])
 
+# install_docker()
 configure_logging()
 initialize_system_daemons_and_hostname()
 join_swarm()
 create_swap()
-install_monitoring_tools()
 set_ssh_authorization_mode()

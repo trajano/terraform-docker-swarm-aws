@@ -59,7 +59,7 @@ data "aws_vpc" "main" {
 
 data "aws_ami" "base_ami" {
   most_recent = true
-  name_regex  = "^amzn2-ami-hvm-.*-x86_64-ebs"
+  name_regex  = "^al2023-ami-2023.0.*-.*-x86_64"
   owners = [
     "amazon",
     "self",
