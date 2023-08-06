@@ -1,0 +1,108 @@
+#cloud-config
+repo_update: true
+repo_upgrade: all
+packages:
+  - ca-certificates 
+  - curl
+  - gnupg
+#   - docker
+#   - amazon-cloudwatch-agent
+#   - python3-pip
+#   - dnf-automatic.noarch
+output:
+  all: "| tee -a /var/log/cloud-init-output.log"
+manage_resolve_conf: true
+resolve_conf:
+  name_servers: [ '169.254.169.253' ]
+# runcmd:
+#   - [ sysctl, -w, vm.max_map_count=262144 ]
+#   - [ sysctl, -w, fs.file-max=65536 ]
+#   - [ sysctl, -w, vm.overcommit_memory=1 ]
+#   - [ ulimit, -n, '65536' ]
+#   # - [ ulimit, -u, '4096' ]
+# write_files:
+#   - content: |
+#       vm.max_map_count=262144
+#       fs.file-max=65536
+#       vm.overcommit_memory=1
+#     path: /etc/sysctl.d/01-docker.conf
+#     owner: root:root
+#     permissions: "0444"
+#   - content: |
+#       *          soft    nproc     4096
+#       *          soft    nofile    65536
+#     path: /etc/security/limits.d/01-docker.conf
+#     owner: root:root
+#     permissions: "0444"
+#   - content: |
+#       #!/bin/sh
+#       docker image prune -f > /dev/null
+#       docker container prune -f > /dev/null
+#     path: /etc/cron.hourly/docker-prune.sh
+#     owner: root:root
+#     permissions: "0700"
+#   - content: |
+#       #!/bin/sh
+#       docker image prune --all -f > /dev/null
+#       docker volume prune -f > /dev/null
+#     path: /etc/cron.daily/docker-prune.sh
+#     owner: root:root
+#     permissions: "0700"
+#   - content: |
+#       #!/bin/sh
+#       docker node update --availability drain $(docker info -f '{{.Swarm.NodeID}}')
+#       sleep 10
+#       docker node demote $(docker info -f '{{.Swarm.NodeID}}')
+#       sleep 10
+#       docker swarm leave
+#     path: /root/bin/leave-swarm.sh
+#     owner: root:root
+#     permissions: "0700"
+#   - content: |
+#       #!/bin/sh
+#       docker node demote $(docker node ls --format "{{.ID}} {{.Status}} {{.Availability}}" --filter 'role=manager' | grep " Down Drain" |  awk '{ print $1 }')
+#       docker node rm $(docker node ls --format "{{.ID}} {{.Status}} {{.Availability}}" | grep " Down Drain" |  awk '{ print $1 }')
+#     path: /root/bin/prune-nodes.sh
+#     owner: root:root
+#     permissions: "0700"
+#   - content: |
+#       #!/bin/bash
+#       USER="$1"
+#       shift
+#       SSH_PUBLIC_KEY="command=\\\"docker system dial-stdio\\\" $*"
+#       useradd -s /bin/sh -G docker ${USER}
+#       su - ${USER} -c "umask 077 ; mkdir .ssh ; echo $SSH_PUBLIC_KEY >> .ssh/authorized_keys"
+#     path: /root/bin/add-docker-user.sh
+#     owner: root:root
+#     permissions: "0700"
+#   - content: |
+#       #!/usr/bin/env python3
+#       import boto3
+#       import grp
+#       import sys
+      
+#       iam = boto3.client('iam')
+#       public_keys = iam.list_ssh_public_keys(UserName=sys.argv[1])['SSHPublicKeys']
+#       for public_key in public_keys:
+#         public_key_id = public_key['SSHPublicKeyId']
+#         ssh_public_key = iam.get_ssh_public_key(UserName=sys.argv[1], SSHPublicKeyId=public_key_id, Encoding="SSH")['SSHPublicKey']
+#         if sys.argv[1] in grp.getgrnam("wheel").gr_mem:
+#           print (ssh_public_key['SSHPublicKeyBody'])
+#         else:
+#           print ('command="docker system dial-stdio" ' + ssh_public_key['SSHPublicKeyBody'])
+#     path: /opt/iam-authorized-keys-command
+#     owner: root:root
+#     permissions: "0755"
+#   - content: |
+#       #!/bin/sh
+#       for node_name in $*
+#       do
+#         docker node update --availability drain ${node_name}
+#       done
+#       sleep 10
+#       docker node rm --force $*
+#     path: /root/bin/rm-workers.sh
+#     owner: root:root
+#     permissions: "0700"
+groups:
+  - docker

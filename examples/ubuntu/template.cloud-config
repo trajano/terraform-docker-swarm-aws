@@ -1,0 +1,24 @@
+#cloud-config
+users:
+- name: docker-user
+  shell: /bin/bash
+  groups:
+  - docker
+  ssh-authorized-keys:
+  - ${ssh_key}
+- name: trajano
+  shell: /bin/bash
+  groups:
+  - wheel
+  - docker
+  ssh-authorized-keys:
+  - ${ssh_key}
+  sudo: ['ALL=(ALL) NOPASSWD:ALL']
+- name: admin
+  groups:
+  - wheel
+  - docker
+  shell: /bin/bash
+  ssh-authorized-keys:
+  - ${ssh_key}
+  sudo: ['ALL=(ALL) NOPASSWD:ALL']
