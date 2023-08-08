@@ -68,9 +68,10 @@ data "cloudinit_config" "managers" {
   }
 
   part {
-    filename     = "install_docker.sh"
+    filename     = "install_software.sh"
     content      = <<EOT
 #!/bin/sh
+# Docker
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
@@ -80,6 +81,18 @@ echo \
   tee /etc/apt/sources.list.d/docker.list
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Cloudwatch Agent
+arch=$(uname -m)
+if [ "$arch" == "x86_64" ]; then
+  curl -sLo /tmp/amazon-cloudwatch-agent.deb https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+elif [ "$arch" == "aarch64" ]; then
+  curl -sLo /tmp/amazon-cloudwatch-agent.deb https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
+else
+  curl -sLo /tmp/amazon-cloudwatch-agent.deb https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/${arch}/latest/amazon-cloudwatch-agent.deb
+fi
+dpkg -i -E /tmp/amazon-cloudwatch-agent.deb
+
 EOT
     content_type = "text/x-shellscript"
   }
