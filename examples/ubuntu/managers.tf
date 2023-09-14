@@ -89,7 +89,7 @@ if [ "$arch" == "x86_64" ]; then
 elif [ "$arch" == "aarch64" ]; then
   curl -sLo /tmp/amazon-cloudwatch-agent.deb https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
 else
-  curl -sLo /tmp/amazon-cloudwatch-agent.deb https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/${arch}/latest/amazon-cloudwatch-agent.deb
+  curl -sLo /tmp/amazon-cloudwatch-agent.deb https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/$${arch}/latest/amazon-cloudwatch-agent.deb
 fi
 dpkg -i -E /tmp/amazon-cloudwatch-agent.deb
 
