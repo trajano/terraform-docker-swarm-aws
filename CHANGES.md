@@ -1,5 +1,9 @@
 # Change Log
 
+## 7.0.1
+* fix `examples/sample` [#29](https://github.com/trajano/terraform-docker-swarm-aws/issues/29) by correcting the image name pattern.
+* flso removed deprecation in `examples/sample/eips.tf` 
+
 ## 7.0.0
 
 * Use Amazon Linux 2003 and Python 3
