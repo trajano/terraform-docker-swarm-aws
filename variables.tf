@@ -27,6 +27,11 @@ variable "metadata_http_tokens_required" {
   default     = false
 }
 
+variable "metadata_put_response_hop_limit" {
+  description = "Desired HTTP PUT response hop limit for instance metadata requests. The larger the number, the further instance metadata requests can travel. Valid values are integer from 1 to 64."
+  default     = 1
+}
+
 variable "vpc_id" {
   description = "The VPC that will contain the swarm."
 }
