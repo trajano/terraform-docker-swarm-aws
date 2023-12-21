@@ -1,5 +1,8 @@
 # Change Log
 
+## 7.0.2
+* allow specifying the AMI name pattern `ami_name_regex` via variables to use in case AWS discontinues an AMI.
+
 ## 7.0.1
 * fix `examples/sample` [#29](https://github.com/trajano/terraform-docker-swarm-aws/issues/29) by correcting the image name pattern.
 * flso removed deprecation in `examples/sample/eips.tf` 
