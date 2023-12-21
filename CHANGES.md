@@ -8,6 +8,9 @@
 * Swap drive is a separate resource from `aws_instance` to allow resize to trigger a rebuild of the drive.
 * cloudwatch-on and cloudwatch-off scripts
 
+## 7.0.2
+* allow specifying the AMI name pattern `ami_name_regex` via variables to use in case AWS discontinues an AMI.
+
 ## 7.0.1
 * fix `examples/sample` [#29](https://github.com/trajano/terraform-docker-swarm-aws/issues/29) by correcting the image name pattern.
 * also removed deprecation in `examples/sample/eips.tf` 
