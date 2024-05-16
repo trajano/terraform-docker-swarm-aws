@@ -1,5 +1,9 @@
 # Change Log
 
+## 6.0.4
+
+* Backport https://github.com/trajano/terraform-docker-swarm-aws/pull/32
+
 ## 6.0.3
 
 * Removed the one instance of `template_file` that is triggering the load of the Hashicorp template module.
