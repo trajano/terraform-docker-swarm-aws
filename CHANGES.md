@@ -1,5 +1,8 @@
 # Change Log
 
+## 7.1.0
+* `metadata_http_tokens_required` defaults to `true`
+
 ## 7.0.1
 * fix `examples/sample` [#29](https://github.com/trajano/terraform-docker-swarm-aws/issues/29) by correcting the image name pattern.
 * flso removed deprecation in `examples/sample/eips.tf` 
