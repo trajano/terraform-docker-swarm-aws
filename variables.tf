@@ -5,6 +5,15 @@ variable "name" {
 variable "managers" {
   description = "Number of managers in the swarm.  This should be an odd number otherwise there may be issues with raft consensus."
   default     = 3
+  validation {
+    condition     = var.managers % 2 == 1
+    error_message = "The number of managers must be an odd number."
+  }
+  validation {
+    condition     = var.managers > 0
+    error_message = "The number of managers must be greater than 0."
+  }
+
 }
 
 variable "workers" {
@@ -119,8 +128,12 @@ variable "instance_type_worker" {
   default     = ""
 }
 variable "volume_size" {
-  description = "Size of root volume in gigabytes."
-  default     = 8
+  description = "Size of root volume in gigabytes.  Minimum size is 30GB."
+  default     = 30
+  validation {
+    condition     = var.volume_size >= 30
+    error_message = "The root volume size must be at least 30GB."
+  }
 }
 
 variable "swap_size" {
@@ -139,7 +152,7 @@ variable "worker_subnet_segment_start" {
 }
 
 variable "key_name" {
-  description = "The key name of the Key Pair to use for the instance; which can be managed using the aws_key_pair resource."
+  description = "The key name of the Key Pair to use for the instance; which can be managed using the aws_key_pair resource.  This is used for SSH access to the instance via the default user of the AMI (e.g. `ec2-user`) during setup, once the cloud-init completes the key will no longer be used"
   default     = ""
 }
 
@@ -222,4 +235,15 @@ variable "generate_host_keys" {
 variable "sns_kms_id" {
   description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK for SNS use."
   default     = ""
+}
+
+variable "extra_tags" {
+  description = "Extra tags to add to the resources created by this module. This can be used with cost explorer."
+  type        = map(string)
+  default     = {}
+}
+
+variable "ami_pattern" {
+  description = "AMI pattern to use for the swarm.  This is used to find the AMI ID for the region. ARCH will be replaced with the architecture of the instance."
+  default     = "al2023-ami-2023.*-ARCH"
 }

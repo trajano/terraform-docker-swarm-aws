@@ -2,10 +2,15 @@
 
 ## 7.1.0
 * `metadata_http_tokens_required` defaults to `true`
+* `ami_pattern` allows choosing an arbitrary AMI image.  Note this still presumes it is going to be something compatible with Amazon Linux 2023.  The `ARCH` in the pattern will be set to the instance architecture.  This means...
+* `*_instance_type` allows for ARM64 architectures.
+* `extra_tags` allows for adding additional tags that can be used with [`aws_ce_cost_allocation_tag`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ce_cost_allocation_tag) to manage AWS costs.
+* Swap drive is a separate resource from `aws_instance` to allow resize to trigger a rebuild of the drive.
+* cloudwatch-on and cloudwatch-off scripts
 
 ## 7.0.1
 * fix `examples/sample` [#29](https://github.com/trajano/terraform-docker-swarm-aws/issues/29) by correcting the image name pattern.
-* flso removed deprecation in `examples/sample/eips.tf` 
+* also removed deprecation in `examples/sample/eips.tf` 
 
 ## 7.0.0
 

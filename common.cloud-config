@@ -73,6 +73,62 @@ write_files:
     owner: root:root
     permissions: "0700"
   - content: |
+      #!/bin/bash
+      set -e
+
+      if systemctl is-active --quiet amazon-cloudwatch-agent; then
+        systemctl stop amazon-cloudwatch-agent
+        systemctl disable amazon-cloudwatch-agent
+      fi
+
+      DOCKER_CONFIG="/etc/docker/daemon.json"
+      BACKUP_FILE="/etc/docker/daemon.json.bak"
+
+      if grep -q '"log-driver": "awslogs"' "$DOCKER_CONFIG"; then
+        cp "$DOCKER_CONFIG" "$BACKUP_FILE"
+        jq '
+          ."log-driver" = "json-file" |
+          ."log-opts" = {
+            "env": .["log-opts"]["awslogs-group"]
+          }
+        ' "$BACKUP_FILE" > "$DOCKER_CONFIG"
+      fi
+
+      systemctl restart docker
+    path: /root/bin/cloudwatch-off
+    owner: root:root
+    permissions: "0700"
+
+  - content: |
+      #!/bin/bash
+      set -e
+
+      if systemctl is-enabled --quiet amazon-cloudwatch-agent; then
+        systemctl start amazon-cloudwatch-agent
+      else
+        systemctl enable amazon-cloudwatch-agent
+        systemctl start amazon-cloudwatch-agent
+      fi
+
+      DOCKER_CONFIG="/etc/docker/daemon.json"
+      BACKUP_FILE="/etc/docker/daemon.json.bak"
+
+      if grep -q '"log-driver": "json-file"' "$DOCKER_CONFIG"; then
+        cp "$DOCKER_CONFIG" "$BACKUP_FILE"
+        jq '
+          ."log-driver" = "awslogs" |
+          ."log-opts" = {
+            "awslogs-group": .["log-opts"]["env"],
+            "tag": "{{.Name}}"
+          }
+        ' "$BACKUP_FILE" > "$DOCKER_CONFIG"
+      fi
+
+      systemctl restart docker
+    path: /root/bin/cloudwatch-on
+    owner: root:root
+    permissions: "0700"
+  - content: |
       #!/usr/bin/env python3
       import boto3
       import grp

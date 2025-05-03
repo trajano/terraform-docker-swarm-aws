@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
-from botocore.exceptions import NoCredentialsError
-from botocore.exceptions import BotoCoreError
 import boto3
 import json
 import logging
 import os
 import os.path
 import random
-import stat
 import subprocess
 import time
 import urllib.request
-import zipfile
 
 DAEMON_JSON = "/etc/docker/daemon.json"
 logger = logging.getLogger(__name__)

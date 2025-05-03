@@ -122,7 +122,7 @@ resource "aws_instance" "managers" {
   ]
 
   count                       = var.managers
-  ami                         = data.aws_ami.base_ami.id
+  ami                         = data.aws_ami.managers.id
   instance_type               = local.instance_type_manager
   associate_public_ip_address = var.associate_public_ip_address
   subnet_id                   = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.names)].id

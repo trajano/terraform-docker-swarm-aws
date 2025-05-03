@@ -12,6 +12,8 @@ To update the SSH public key to an existing user, use the CLI as follows:
 aws iam upload-ssh-public-key --user-name docker-user --ssh-public-key-body "ssh-rsa AA... id_rsa"
 ```
 
+Note that only RSA keys are allowed by AWS at this time.
+
 ## Defining the users
 
 cloud-init uses the data pointed to by `cloud_config_extra` to add users.  The following is an example configuration file with two users: an admin and a normal docker daemon user.  The `docker-admin` account is part of the `wheel` group that will allow the user to access the shell directly, without the `wheel` group, the user will be limited to using `docker context` to access the server. 
