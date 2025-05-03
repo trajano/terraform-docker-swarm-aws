@@ -22,8 +22,8 @@ variable "workers" {
 }
 
 variable "ami_name_regex" {
-  description = "Name regex for the AMI to use.  This must be an Amazon Linux on or after Amazon Linux 2023"
-  default     = "^al2023-ami-2023.*-.*-x86_64"
+  description = "Name regex for the AMI to use.  This must be an Amazon Linux on or after Amazon Linux 2023. `ARCH` is replaced with the architecture"
+  default     = "^al2023-ami-2023.*-.*-ARCH"
 }
 variable "detailed_monitoring" {
   description = "Detailed instance monitoring"
