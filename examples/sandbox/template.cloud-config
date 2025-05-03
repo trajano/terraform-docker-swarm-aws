@@ -12,6 +12,7 @@ users:
   groups:
   - wheel
   - docker
+  # This allows user to access using specified ssh key rather than IAM.
   ssh-authorized-keys:
   - ${ssh_key}
   sudo: ['ALL=(ALL) NOPASSWD:ALL']

@@ -38,7 +38,6 @@ data "cloudinit_config" "managers" {
     content_type = "text/cloud-config"
   }
 
-
   part {
     filename = "ssh_keys.cloud-config"
     content = var.generate_host_keys ? yamlencode({
@@ -103,7 +102,7 @@ resource "aws_instance" "managers" {
   ]
 
   count                       = var.managers
-  ami                         = data.aws_ami.base_ami.id
+  ami                         = data.aws_ami.managers.id
   instance_type               = local.instance_type_manager
   associate_public_ip_address = var.associate_public_ip_address
   subnet_id                   = aws_subnet.managers[count.index % length(data.aws_availability_zones.azs.names)].id
@@ -120,22 +119,18 @@ resource "aws_instance" "managers" {
   user_data_base64     = data.cloudinit_config.managers[count.index].rendered
   key_name             = var.key_name
 
-  tags = {
-    Name             = "${var.name} manager ${count.index}"
-    Role             = "manager"
+  tags = merge({
+    Name = "${var.name} manager ${count.index}"
+    Role = "manager"
+
     ManagerJoinToken = ""
     WorkerJoinToken  = ""
-  }
+  }, var.extra_tags)
 
   root_block_device {
     volume_size = var.volume_size
     encrypted   = true
-  }
-
-  ebs_block_device {
-    device_name = "xvdf"
-    volume_size = var.swap_size
-    encrypted   = true
+    tags        = var.extra_tags
   }
 
   metadata_options {
@@ -150,8 +145,7 @@ resource "aws_instance" "managers" {
   lifecycle {
     ignore_changes = [
       ami,
-      root_block_device,
-      ebs_block_device,
+      root_block_device[0].volume_size,
       ebs_optimized,
       instance_type,
       user_data_base64,
@@ -166,6 +160,22 @@ resource "aws_instance" "managers" {
   credit_specification {
     cpu_credits = "standard"
   }
+}
+
+resource "aws_ebs_volume" "managers_swap" {
+  count             = var.managers
+  availability_zone = data.aws_availability_zones.azs.names[count.index % length(data.aws_availability_zones.azs.names)]
+  size              = var.swap_size
+  encrypted         = true
+  tags              = var.extra_tags
+}
+
+resource "aws_volume_attachment" "managers_swap" {
+  count        = var.managers
+  device_name  = "xvdf"
+  volume_id    = aws_ebs_volume.managers_swap[count.index].id
+  instance_id  = aws_instance.managers[count.index].id
+  force_detach = true # optional, but helpful when reapplying
 }
 
 resource "aws_cloudwatch_metric_alarm" "low-cpu-credit-managers" {
@@ -188,7 +198,7 @@ resource "aws_cloudwatch_metric_alarm" "low-cpu-credit-managers" {
   ok_actions                = []
   period                    = 300
   statistic                 = "Average"
-  tags                      = {}
+  tags                      = var.extra_tags
   threshold                 = 75
   treat_missing_data        = "missing"
 }
@@ -212,7 +222,7 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu-managers" {
   ok_actions                = []
   period                    = 60
   statistic                 = "Average"
-  tags                      = {}
+  tags                      = var.extra_tags
   threshold                 = 85
 }
 
@@ -220,10 +230,10 @@ resource "aws_cloudwatch_log_group" "managers" {
   count             = (var.cloudwatch_logs && !var.cloudwatch_single_log_group) ? var.managers : 0
   name              = "${local.dns_name}-manager${count.index}"
   retention_in_days = var.cloudwatch_retention_in_days
-
-  tags = {
+  kms_key_id        = var.cloudwatch_kms_key_id
+  tags = merge({
     Environment = var.name
     Name        = "${var.name} manager ${count.index}"
     Node        = "${local.dns_name}-manager${count.index}"
-  }
+  }, var.extra_tags)
 }

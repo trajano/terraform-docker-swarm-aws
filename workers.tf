@@ -60,8 +60,8 @@ data "cloudinit_config" "workers" {
   part {
     filename     = "extra.cloud-config"
     content      = var.cloud_config_extra
-    merge_type   = var.cloud_config_extra_merge_type
     content_type = "text/cloud-config"
+    merge_type   = var.cloud_config_extra_merge_type
   }
 
   part {
@@ -103,7 +103,7 @@ resource "aws_instance" "workers" {
   ]
 
   count                       = var.workers
-  ami                         = data.aws_ami.base_ami.id
+  ami                         = data.aws_ami.workers.id
   instance_type               = local.instance_type_worker
   associate_public_ip_address = var.associate_public_ip_address
   subnet_id                   = aws_subnet.workers[count.index % length(data.aws_availability_zones.azs.names)].id
@@ -112,26 +112,23 @@ resource "aws_instance" "workers" {
     10 + count.index,
   )
 
+
+  # workaround as noted by https://github.com/hashicorp/terraform/issues/12453#issuecomment-284273475
   vpc_security_group_ids = local.security_group_ids
 
   iam_instance_profile = aws_iam_instance_profile.ec2.name
   user_data_base64     = data.cloudinit_config.workers[count.index].rendered
   key_name             = var.key_name
 
-  tags = {
+  tags = merge({
     Name = "${var.name} worker ${count.index}"
     Role = "worker"
-  }
+  }, var.extra_tags)
 
   root_block_device {
     volume_size = var.volume_size
     encrypted   = true
-  }
-
-  ebs_block_device {
-    device_name = "xvdf"
-    volume_size = var.swap_size
-    encrypted   = true
+    tags        = var.extra_tags
   }
 
   metadata_options {
@@ -146,8 +143,7 @@ resource "aws_instance" "workers" {
   lifecycle {
     ignore_changes = [
       ami,
-      root_block_device,
-      ebs_block_device,
+      root_block_device[0].volume_size,
       ebs_optimized,
       instance_type,
       user_data_base64,
@@ -160,6 +156,22 @@ resource "aws_instance" "workers" {
   credit_specification {
     cpu_credits = "standard"
   }
+}
+
+resource "aws_ebs_volume" "workers_swap" {
+  count             = var.workers
+  availability_zone = data.aws_availability_zones.azs.names[count.index % length(data.aws_availability_zones.azs.names)]
+  size              = var.swap_size
+  encrypted         = true
+  tags              = var.extra_tags
+}
+
+resource "aws_volume_attachment" "workers_swap" {
+  count        = var.workers
+  device_name  = "xvdf"
+  volume_id    = aws_ebs_volume.workers_swap[count.index].id
+  instance_id  = aws_instance.workers[count.index].id
+  force_detach = true # optional, but helpful when reapplying
 }
 
 resource "aws_cloudwatch_metric_alarm" "low-cpu-credit-workers" {
@@ -182,7 +194,7 @@ resource "aws_cloudwatch_metric_alarm" "low-cpu-credit-workers" {
   ok_actions                = []
   period                    = 300
   statistic                 = "Average"
-  tags                      = {}
+  tags                      = var.extra_tags
   threshold                 = 75
   treat_missing_data        = "missing"
 }
@@ -206,7 +218,7 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu-workers" {
   ok_actions                = []
   period                    = 60
   statistic                 = "Average"
-  tags                      = {}
+  tags                      = var.extra_tags
   threshold                 = 85
 }
 
@@ -215,9 +227,10 @@ resource "aws_cloudwatch_log_group" "workers" {
   name              = "${local.dns_name}-worker${count.index}"
   retention_in_days = var.cloudwatch_retention_in_days
   kms_key_id        = var.cloudwatch_kms_key_id
-  tags = {
+  tags = merge({
     Environment = var.name
     Name        = "${var.name} worker ${count.index}"
     Node        = "${local.dns_name}-worker${count.index}"
-  }
+  }, var.extra_tags)
+
 }

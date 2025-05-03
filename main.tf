@@ -19,6 +19,32 @@ data "aws_availability_zones" "azs" {
   exclude_names = var.excluded_availability_zones
 }
 
+data "aws_ec2_instance_type" "managers" {
+  instance_type = local.instance_type_manager
+}
+data "aws_ec2_instance_type" "workers" {
+  instance_type = local.instance_type_worker
+}
+
+data "aws_ami" "managers" {
+  most_recent = true
+  owners      = ["amazon", "self"]
+  filter {
+    name   = "name"
+    values = [replace(var.ami_pattern, "ARCH", data.aws_ec2_instance_type.managers.supported_architectures[0])]
+  }
+}
+
+data "aws_ami" "workers" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = [replace(var.ami_pattern, "ARCH", data.aws_ec2_instance_type.workers.supported_architectures[0])]
+  }
+}
+
 resource "aws_subnet" "managers" {
   count  = length(data.aws_availability_zones.azs.names)
   vpc_id = var.vpc_id
@@ -55,15 +81,6 @@ resource "aws_subnet" "workers" {
 
 data "aws_vpc" "main" {
   id = var.vpc_id
-}
-
-data "aws_ami" "base_ami" {
-  most_recent = true
-  name_regex  = "^al2023-ami-2023.*-.*-x86_64"
-  owners = [
-    "amazon",
-    "self",
-  ]
 }
 
 resource "aws_security_group" "docker" {
@@ -242,6 +259,7 @@ resource "aws_sns_topic" "alarms" {
   name              = "${local.dns_name}-alarms"
   display_name      = "${local.dns_name} alarms"
   kms_master_key_id = var.sns_kms_id
+  tags              = var.extra_tags
 }
 
 resource "aws_cloudwatch_log_group" "main" {
@@ -249,9 +267,9 @@ resource "aws_cloudwatch_log_group" "main" {
   name              = local.dns_name
   retention_in_days = var.cloudwatch_retention_in_days
 
-  tags = {
+  tags = merge({
     Environment = var.name
     Name        = var.name
-  }
+  }, var.extra_tags)
 }
 
