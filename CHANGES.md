@@ -1,5 +1,8 @@
 # Change Log
 
+## 7.1.1
+* increase `metadata_put_response_hop_limit` default to 2.  This allows metadata calls from containers as that's an extra hop.
+
 ## 7.1.0
 * `metadata_http_tokens_required` defaults to `true`
 * `ami_pattern` allows choosing an arbitrary AMI image.  Note this still presumes it is going to be something compatible with Amazon Linux 2023.  The `ARCH` in the pattern will be set to the instance architecture.  This means...
