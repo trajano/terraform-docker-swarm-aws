@@ -14,7 +14,7 @@
 
 ## 7.0.0
 
-* Use Amazon Linux 2003 and Python 3
+* Use Amazon Linux 2023 and Python 3
 * Added example/ubuntu as a test to create an installation of Docker for development using Ubuntu and have capability of using the latest version of Docker.
 
 ## 6.0.3
