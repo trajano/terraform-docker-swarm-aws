@@ -256,9 +256,9 @@ resource "aws_subnet" "managers" {
   )
   map_public_ip_on_launch = var.map_public_ip_on_launch
 
-  tags = {
+  tags = merge({
     Name = "${var.name} managers ${data.aws_availability_zones.azs.names[count.index]}"
-  }
+  }, var.extra_tags)
 
   availability_zone = data.aws_availability_zones.azs.names[count.index]
 }
