@@ -19,66 +19,6 @@ data "aws_availability_zones" "azs" {
   exclude_names = var.excluded_availability_zones
 }
 
-data "aws_ec2_instance_type" "managers" {
-  instance_type = local.instance_type_manager
-}
-data "aws_ec2_instance_type" "workers" {
-  instance_type = local.instance_type_worker
-}
-
-data "aws_ami" "managers" {
-  most_recent = true
-  owners      = ["amazon", "self"]
-  filter {
-    name   = "name"
-    values = [replace(var.ami_pattern, "ARCH", data.aws_ec2_instance_type.managers.supported_architectures[0])]
-  }
-}
-
-data "aws_ami" "workers" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = [replace(var.ami_pattern, "ARCH", data.aws_ec2_instance_type.workers.supported_architectures[0])]
-  }
-}
-
-resource "aws_subnet" "managers" {
-  count  = length(data.aws_availability_zones.azs.names)
-  vpc_id = var.vpc_id
-  cidr_block = cidrsubnet(
-    data.aws_vpc.main.cidr_block,
-    8,
-    var.manager_subnet_segment_start + count.index,
-  )
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "${var.name} managers ${data.aws_availability_zones.azs.names[count.index]}"
-  }
-
-  availability_zone = data.aws_availability_zones.azs.names[count.index]
-}
-
-resource "aws_subnet" "workers" {
-  count  = length(data.aws_availability_zones.azs.names)
-  vpc_id = var.vpc_id
-  cidr_block = cidrsubnet(
-    data.aws_vpc.main.cidr_block,
-    8,
-    var.worker_subnet_segment_start + count.index,
-  )
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "${var.name} workers ${data.aws_availability_zones.azs.names[count.index]}"
-  }
-
-  availability_zone = data.aws_availability_zones.azs.names[count.index]
-}
-
 data "aws_vpc" "main" {
   id = var.vpc_id
 }

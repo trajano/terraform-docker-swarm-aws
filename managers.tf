@@ -237,3 +237,28 @@ resource "aws_cloudwatch_log_group" "managers" {
     Node        = "${local.dns_name}-manager${count.index}"
   }, var.extra_tags)
 }
+
+data "aws_ec2_instance_type" "managers" {
+  instance_type = local.instance_type_manager
+}
+data "aws_ami" "managers" {
+  most_recent = true
+  owners      = ["amazon", "self"]
+  name_regex  = replace(var.ami_name_regex, "ARCH", data.aws_ec2_instance_type.managers.supported_architectures[0])
+}
+resource "aws_subnet" "managers" {
+  count  = length(data.aws_availability_zones.azs.names)
+  vpc_id = var.vpc_id
+  cidr_block = cidrsubnet(
+    data.aws_vpc.main.cidr_block,
+    8,
+    var.manager_subnet_segment_start + count.index,
+  )
+  map_public_ip_on_launch = var.map_public_ip_on_launch
+
+  tags = {
+    Name = "${var.name} managers ${data.aws_availability_zones.azs.names[count.index]}"
+  }
+
+  availability_zone = data.aws_availability_zones.azs.names[count.index]
+}

@@ -1,15 +1,16 @@
 # Change Log
 
-## 7.1.1
-* increase `metadata_put_response_hop_limit` default to 2.  This allows metadata calls from containers as that's an extra hop.
+## 7.1.3
+Had to redo the git merges
 
-## 7.1.0
 * `metadata_http_tokens_required` defaults to `true`
 * `ami_pattern` allows choosing an arbitrary AMI image.  Note this still presumes it is going to be something compatible with Amazon Linux 2023.  The `ARCH` in the pattern will be set to the instance architecture.  This means...
 * `*_instance_type` allows for ARM64 architectures.
 * `extra_tags` allows for adding additional tags that can be used with [`aws_ce_cost_allocation_tag`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ce_cost_allocation_tag) to manage AWS costs.
 * Swap drive is a separate resource from `aws_instance` to allow resize to trigger a rebuild of the drive.
 * cloudwatch-on and cloudwatch-off scripts
+* `map_public_ip_on_launch` from https://github.com/docsaistvan/terraform-docker-swarm-aws/commit/90df9ebe2da423a7667fb7710c1cc2266640e000
+* increase `metadata_put_response_hop_limit` default to 2.  This allows metadata calls from containers as that's an extra hop.
 
 ## 7.0.2
 * allow specifying the AMI name pattern `ami_name_regex` via variables to use in case AWS discontinues an AMI.

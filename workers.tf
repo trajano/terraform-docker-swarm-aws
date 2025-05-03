@@ -234,3 +234,32 @@ resource "aws_cloudwatch_log_group" "workers" {
   }, var.extra_tags)
 
 }
+
+data "aws_ec2_instance_type" "workers" {
+  instance_type = local.instance_type_worker
+}
+
+
+data "aws_ami" "workers" {
+  most_recent = true
+  owners      = ["amazon", "self"]
+  name_regex  = replace(var.ami_name_regex, "ARCH", data.aws_ec2_instance_type.workers.supported_architectures[0])
+}
+
+
+resource "aws_subnet" "workers" {
+  count  = length(data.aws_availability_zones.azs.names)
+  vpc_id = var.vpc_id
+  cidr_block = cidrsubnet(
+    data.aws_vpc.main.cidr_block,
+    8,
+    var.worker_subnet_segment_start + count.index,
+  )
+  map_public_ip_on_launch = var.map_public_ip_on_launch
+
+  tags = merge({
+    Name = "${var.name} workers ${data.aws_availability_zones.azs.names[count.index]}"
+  }, var.extra_tags)
+
+  availability_zone = data.aws_availability_zones.azs.names[count.index]
+}

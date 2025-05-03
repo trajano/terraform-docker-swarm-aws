@@ -247,7 +247,7 @@ variable "extra_tags" {
   default     = {}
 }
 
-variable "ami_pattern" {
-  description = "AMI pattern to use for the swarm.  This is used to find the AMI ID for the region. ARCH will be replaced with the architecture of the instance."
-  default     = "al2023-ami-2023.*-ARCH"
+variable "map_public_ip_on_launch" {
+  description = "Enabling this boolean will set automatic public ip assignment on the worker and manager subnets"
+  default     = true
 }
