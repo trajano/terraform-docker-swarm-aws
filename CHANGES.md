@@ -1,5 +1,7 @@
 # Change Log
 
+## 7.1.7
+* `ec2:DescribeIamInstanceProfileAssociations` added to permissions.  This will allow the EC2 instance to query itself for the role associations it has.
 ## 7.1.6
 * `iam` is the default for `ssh_authorization_method` that was the intent from before
   but was missed.
