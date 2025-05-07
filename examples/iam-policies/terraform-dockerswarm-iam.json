@@ -1,9 +1,6 @@
 {
-  "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "IamResource",
-      "Effect": "Allow",
       "Action": [
         "iam:AddRoleToInstanceProfile",
         "iam:AttachRolePolicy",
@@ -26,11 +23,14 @@
         "iam:PassRole",
         "iam:RemoveRoleFromInstanceProfile"
       ],
+      "Effect": "Allow",
       "Resource": [
         "arn:aws:iam::*:policy/*",
         "arn:aws:iam::*:instance-profile/*",
         "arn:aws:iam::*:role/*"
-      ]
+      ],
+      "Sid": "IamResource"
     }
-  ]
+  ],
+  "Version": "2012-10-17"
 }

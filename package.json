@@ -1,19 +1,19 @@
 {
-  "name": "terraform-docker-swarm-aws",
-  "version": "7.1.5",
-  "description": "This is a Terraform configuration that sets up a Docker Swarm on an existing VPC with a configurable amount of managers and worker nodes. The swarm is configured to have TLS enabled.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "author": "Archimedes Trajano",
+  "bugs": {
+    "url": "https://github.com/trajano/terraform-docker-swarm-aws/issues"
   },
+  "description": "This is a Terraform configuration that sets up a Docker Swarm on an existing VPC with a configurable amount of managers and worker nodes. The swarm is configured to have TLS enabled.",
+  "homepage": "https://github.com/trajano/terraform-docker-swarm-aws#readme",
+  "license": "EPL-2.0",
+  "main": "index.js",
+  "name": "terraform-docker-swarm-aws",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/trajano/terraform-docker-swarm-aws.git"
   },
-  "author": "Archimedes Trajano",
-  "license": "EPL-2.0",
-  "bugs": {
-    "url": "https://github.com/trajano/terraform-docker-swarm-aws/issues"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "homepage": "https://github.com/trajano/terraform-docker-swarm-aws#readme"
+  "version": "7.1.5"
 }

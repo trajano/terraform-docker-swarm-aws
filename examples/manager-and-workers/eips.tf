@@ -5,5 +5,5 @@ resource "aws_eip" "managers" {
 }
 
 output "manager_ip_addresses" {
-  value = aws_eip.managers.*.public_ip
+  value = aws_eip.managers[*].public_ip
 }

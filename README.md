@@ -76,10 +76,10 @@ A future relase of this would utilize auto-scaling for now this needs to be done
 
 ## Other tips
 
-* Don't use Terraform to provision your containers, just let it build the infrastructure and add the hooks to connect it to your build system.
-* To use a different version of Docker create a custom cloud config with
+- Don't use Terraform to provision your containers, just let it build the infrastructure and add the hooks to connect it to your build system.
+- To use a different version of Docker create a custom cloud config with
 
-    packages:
+      packages:
       - [docker, 18.03.1ce-2.amzn2]
       - haveged
       - python2-boto3
@@ -91,13 +91,10 @@ A future relase of this would utilize auto-scaling for now this needs to be done
       - perl-LWP-Protocol-https
       - perl-Digest-SHA.x86_64
 
-* Add additional SSH users using `sudo /root/bin/add-docker-user.sh <username> <ssh key string>`.  Note this creates users in such a way that it only allows the use of `docker context`
-* In order to improve performance when using strong cryptography, [haveged] should be installed.
-* `yum-cron` and `haveged` can be removed from the `packages` in the custom cloud config if desired.
-* The servers are built with ElasticSearch and Redis containers in mind and the following documents specify the changes that are implemented as part of Terraform.
-
-  * [ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-prerequisites)
-  * [Redis](https://redis.io/topics/faq#background-saving-fails-with-a-fork-error-under-linux-even-if-i-have-a-lot-of-free-ram)
+- Add additional SSH users using `sudo /root/bin/add-docker-user.sh <username> <ssh key string>`.  Note this creates users in such a way that it only allows the use of `docker context`
+- The servers are built with ElasticSearch and Redis containers in mind and the following documents specify the changes that are implemented as part of Terraform:
+  - [ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-prerequisites)
+  - [Redis](https://redis.io/topics/faq#background-saving-fails-with-a-fork-error-under-linux-even-if-i-have-a-lot-of-free-ram)
 
 [ssh-daemon]: https://github.com/docker/cli/pull/1014
 [haveged]: http://issihosts.com/haveged/

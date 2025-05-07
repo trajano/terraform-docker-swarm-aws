@@ -1,5 +1,11 @@
 # Change Log
 
+## 7.1.6
+* `iam` is the default for `ssh_authorization_method` that was the intent from before
+  but was missed.
+* `generate_host_keys` by default is `true` that was the intent from before
+  but was missed.
+* `swap_size` corrected description to reflect the size of the volume as swap is a volume mount.
 ## 7.1.3
 Had to redo the git merges
 

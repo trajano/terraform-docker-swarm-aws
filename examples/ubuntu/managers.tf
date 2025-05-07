@@ -43,12 +43,12 @@ data "cloudinit_config" "managers" {
     filename = "ssh_keys.cloud-config"
     content = var.generate_host_keys ? yamlencode({
       "ssh_keys" : {
-        "rsa_private" : "${tls_private_key.managers-rsa[count.index].private_key_openssh}",
-        "rsa_public" : "${tls_private_key.managers-rsa[count.index].public_key_openssh}",
-        "ecdsa_private" : "${tls_private_key.managers-ecdsa[count.index].private_key_openssh}",
-        "ecdsa_public" : "${tls_private_key.managers-ecdsa[count.index].public_key_openssh}",
-        "ed25519_private" : "${tls_private_key.managers-ed25519[count.index].private_key_openssh}",
-        "ed25519_public" : "${tls_private_key.managers-ed25519[count.index].public_key_openssh}",
+        "rsa_private" : tls_private_key.managers-rsa[count.index].private_key_openssh,
+        "rsa_public" : tls_private_key.managers-rsa[count.index].public_key_openssh,
+        "ecdsa_private" : tls_private_key.managers-ecdsa[count.index].private_key_openssh,
+        "ecdsa_public" : tls_private_key.managers-ecdsa[count.index].public_key_openssh,
+        "ed25519_private" : tls_private_key.managers-ed25519[count.index].private_key_openssh,
+        "ed25519_public" : tls_private_key.managers-ed25519[count.index].public_key_openssh,
       },
       "no_ssh_fingerprints" : false,
       "ssh" : {

@@ -1,19 +1,28 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v5.0.0
     hooks:
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+    - id: pretty-format-json
+      args:
+      - --autofix
 - repo: https://github.com/antonbabenko/pre-commit-terraform
   rev: v1.99.0
   hooks:
   - id: terraform_fmt
+  - id: terraform_tflint
+    args:
+      - --args=--fix
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  # Ruff version.
   rev: v0.11.8
   hooks:
-    # Run the linter.
     - id: ruff
-    # Run the formatter.
     - id: ruff-format
+- repo: https://github.com/jackdewinter/pymarkdown
+  rev: v0.9.29
+  hooks:
+      - id: pymarkdown
+        args:
+        - fix

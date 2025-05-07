@@ -8,8 +8,8 @@ resource "aws_cloudwatch_dashboard" "main" {
         region         = data.aws_region.current.name,
         log_group_name = aws_cloudwatch_log_group.main[0].name,
         instance_ids = toset(flatten([
-          aws_instance.managers.*.id,
-          aws_instance.workers.*.id,
+          aws_instance.managers[*].id,
+          aws_instance.workers[*].id,
         ])),
         }
       )

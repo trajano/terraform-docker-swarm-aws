@@ -9,9 +9,7 @@ locals {
     ],
   )
   instance_type_manager           = coalesce(var.instance_type_manager, var.instance_type)
-  instance_type_worker            = coalesce(var.instance_type_worker, var.instance_type)
   burstable_instance_type_manager = length(regexall("^t\\d\\..*", local.instance_type_manager)) > 0
-  burstable_instance_type_worker  = length(regexall("^t\\d\\..*", local.instance_type_worker)) > 0
 }
 
 data "aws_region" "current" {}
@@ -57,15 +55,6 @@ resource "aws_subnet" "workers" {
 data "aws_vpc" "main" {
   #id = var.vpc_id
   id = aws_vpc.main.id
-}
-
-data "aws_ami" "base_ami" {
-  most_recent = true
-  name_regex  = "^ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-.*"
-  owners = [
-    "amazon",
-    "self",
-  ]
 }
 
 resource "aws_security_group" "docker" {

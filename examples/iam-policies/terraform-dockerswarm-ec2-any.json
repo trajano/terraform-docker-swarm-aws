@@ -1,9 +1,6 @@
 {
-  "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "EC2Any",
-      "Effect": "Allow",
       "Action": [
         "ec2:DescribeInstances",
         "ec2:ReplaceRouteTableAssociation",
@@ -118,7 +115,10 @@
         "ec2:DescribeTransitGatewayVpcAttachments",
         "ec2:DescribeConversionTasks"
       ],
-      "Resource": "*"
+      "Effect": "Allow",
+      "Resource": "*",
+      "Sid": "EC2Any"
     }
-  ]
+  ],
+  "Version": "2012-10-17"
 }

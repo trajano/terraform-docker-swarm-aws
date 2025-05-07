@@ -1,6 +1,6 @@
 output "manager_instance_ids" {
   description = "This is a list of the AWS instance IDs for the managers."
-  value       = aws_instance.managers.*.id
+  value       = aws_instance.managers[*].id
 }
 
 # output "worker_instance_ids" {
@@ -10,7 +10,7 @@ output "manager_instance_ids" {
 
 output "manager_ips" {
   description = "This is a list of the AWS instance public IPs for the managers."
-  value       = aws_instance.managers.*.public_ip
+  value       = aws_instance.managers[*].public_ip
 }
 
 # output "worker_ips" {
@@ -20,7 +20,7 @@ output "manager_ips" {
 
 output "manager_private_ips" {
   description = "This is a list of the AWS instance private IPs for the managers."
-  value       = aws_instance.managers.*.private_ip
+  value       = aws_instance.managers[*].private_ip
 }
 
 # output "worker_private_ips" {

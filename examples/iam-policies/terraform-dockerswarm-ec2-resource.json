@@ -1,9 +1,6 @@
 {
-  "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "EC2Resource",
-      "Effect": "Allow",
       "Action": [
         "ec2:AuthorizeSecurityGroupEgress",
         "ec2:AuthorizeSecurityGroupIngress",
@@ -23,6 +20,7 @@
         "ec2:StopInstances",
         "ec2:TerminateInstances"
       ],
+      "Effect": "Allow",
       "Resource": [
         "arn:aws:ec2:*:*:subnet/*",
         "arn:aws:ec2:*:*:vpn-gateway/*",
@@ -46,7 +44,9 @@
         "arn:aws:ec2:*:*:vpc/*",
         "arn:aws:ec2:*:*:transit-gateway-attachment/*",
         "arn:aws:ec2:*::image/*"
-      ]
+      ],
+      "Sid": "EC2Resource"
     }
-  ]
+  ],
+  "Version": "2012-10-17"
 }
