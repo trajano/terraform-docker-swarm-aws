@@ -144,6 +144,22 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
     ]
   }
 }
+data "aws_iam_policy_document" "deny-put-log-events" {
+  statement {
+    effect    = "Deny"
+    actions   = ["logs:PutLogEvents"]
+    resources = ["*"]
+  }
+}
+resource "aws_iam_policy" "deny-put-log-events" {
+  name   = "${local.dns_name}-deny-put-log-events"
+  policy = data.aws_iam_policy_document.deny-put-log-events.json
+}
+resource "aws_iam_role_policy_attachment" "deny-put-log-events" {
+  count      = var.disable_cloudwatch_logs ? 1 : 0
+  role       = aws_iam_role.ec2.name
+  policy_arn = aws_iam_policy.deny-put-log-events.arn
+}
 
 data "aws_iam_policy_document" "swarm-access-role-policy-ssh" {
   statement {
@@ -166,7 +182,6 @@ resource "aws_iam_policy" "swarm-access-role-policy" {
   name   = "${local.dns_name}-swarm-ec2-policy"
   policy = data.aws_iam_policy_document.swarm-access-role-policy.json
 }
-
 resource "aws_iam_role_policy_attachment" "swarm-access-role-policy" {
   role       = aws_iam_role.ec2.name
   policy_arn = aws_iam_policy.swarm-access-role-policy.arn

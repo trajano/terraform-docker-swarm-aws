@@ -14,6 +14,7 @@ module "docker-swarm" {
   cloudwatch_logs             = true
   cloudwatch_single_log_group = true
   generate_host_keys          = true
+  disable_cloudwatch_logs     = true
   ssh_authorization_method    = "iam"
   ssh_users = [
     "trajano",

@@ -22,7 +22,7 @@ variable "workers" {
   description = "Number of workers in the swarm."
   default     = 0
   validation {
-    condition     = var.workers > 0
+    condition     = var.workers >= 0
     error_message = "The number of managers must be greater than or equal to 0."
   }
   type = number
@@ -83,6 +83,12 @@ variable "cloud_config_extra_script" {
 
 variable "cloudwatch_logs" {
   description = "Enables logging to Cloudwatch."
+  default     = false
+  type        = bool
+}
+
+variable "disable_cloudwatch_logs" {
+  description = "If true, it attaches the policy to disable Cloudwatch if it is enabled."
   default     = false
   type        = bool
 }

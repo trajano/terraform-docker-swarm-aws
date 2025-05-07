@@ -1,5 +1,8 @@
 # Change Log
 
+## 7.1.8
+* `disable_cloudwatch_logs` variable added.  If present this will attach the deny-put-log-events policy preventing Cloudwatch logs from being generated.  This allows the configuration to be done via Terraform rather than shell scripts.
+* corrected `workers` validation to be `>= 0`
 ## 7.1.7
 * `ec2:DescribeIamInstanceProfileAssociations` added to permissions.  This will allow the EC2 instance to query itself for the role associations it has.
 ## 7.1.6
