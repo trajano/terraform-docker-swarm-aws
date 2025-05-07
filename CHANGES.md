@@ -1,5 +1,6 @@
 # Change Log
 
+* only allow Create and Delete tags for `ManagerJoinToken` and `WorkerJoinToken` from the EC2 instance.
 ## 7.1.8
 * `disable_cloudwatch_logs` variable added.  If present this will attach the deny-put-log-events policy preventing Cloudwatch logs from being generated.  This allows the configuration to be done via Terraform rather than shell scripts.
 * corrected `workers` validation to be `>= 0`

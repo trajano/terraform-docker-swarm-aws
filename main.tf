@@ -101,8 +101,7 @@ resource "aws_security_group" "docker" {
 
 data "aws_iam_policy_document" "instance-assume-role-policy" {
   statement {
-    actions = [
-    "sts:AssumeRole"]
+    actions = ["sts:AssumeRole"]
 
     principals {
       type = "Service"
@@ -116,11 +115,24 @@ data "aws_iam_policy_document" "instance-assume-role-policy" {
 data "aws_iam_policy_document" "swarm-access-role-policy" {
   statement {
     actions = [
-      "ec2:DescribeVpcs",
       "ec2:DescribeInstances",
-      "ec2:CreateTags",
-      "ec2:DeleteTags",
       "ec2:DescribeIamInstanceProfileAssociations",
+    ]
+
+    resources = [
+      "*",
+    ]
+    condition {
+      # This condition means only run on creation
+      test     = "StringEquals"
+      variable = "ec2:CreateAction"
+      values   = ["RunInstances"]
+    }
+  }
+
+  statement {
+    actions = [
+      "ec2:DescribeVpcs",
       "cloudwatch:PutMetricData",
       "cloudwatch:GetMetricStatistics",
       "cloudwatch:ListMetrics",
@@ -136,6 +148,28 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
 
   statement {
     actions = [
+      "ec2:CreateTags",
+      "ec2:DeleteTags",
+    ]
+    resources = ["*"]
+    condition {
+      test     = "ForAllValues:StringEquals"
+      variable = "aws:TagKeys"
+      values = [
+        "ManagerJoinToken",
+        "WorkerJoinToken",
+      ]
+    }
+    condition {
+      # This condition means only run on creation
+      test     = "StringEquals"
+      variable = "ec2:CreateAction"
+      values   = ["RunInstances"]
+    }
+  }
+
+  statement {
+    actions = [
       "ssm:GetParameter",
     ]
 
@@ -144,23 +178,6 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
     ]
   }
 }
-data "aws_iam_policy_document" "deny-put-log-events" {
-  statement {
-    effect    = "Deny"
-    actions   = ["logs:PutLogEvents"]
-    resources = ["*"]
-  }
-}
-resource "aws_iam_policy" "deny-put-log-events" {
-  name   = "${local.dns_name}-deny-put-log-events"
-  policy = data.aws_iam_policy_document.deny-put-log-events.json
-}
-resource "aws_iam_role_policy_attachment" "deny-put-log-events" {
-  count      = var.disable_cloudwatch_logs ? 1 : 0
-  role       = aws_iam_role.ec2.name
-  policy_arn = aws_iam_policy.deny-put-log-events.arn
-}
-
 data "aws_iam_policy_document" "swarm-access-role-policy-ssh" {
   statement {
     actions = [
@@ -203,6 +220,7 @@ resource "aws_iam_role" "ec2" {
   name               = "${local.dns_name}-ec2"
   description        = "Allows reading of infrastructure secrets"
   assume_role_policy = data.aws_iam_policy_document.instance-assume-role-policy.json
+  tags               = var.extra_tags
 }
 
 resource "aws_iam_instance_profile" "ec2" {
