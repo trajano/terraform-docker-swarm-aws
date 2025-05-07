@@ -9,4 +9,3 @@
 #   allocation_id = aws_eip.daemons[count.index].id
 #   instance_id   = module.docker-swarm.manager_instance_ids[count.index]
 # }
-

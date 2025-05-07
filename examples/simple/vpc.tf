@@ -1,5 +1,5 @@
 provider "aws" {
-  region  = "us-east-1"
+  region = "us-east-1"
 }
 
 resource "aws_vpc" "main" {
@@ -49,4 +49,3 @@ resource "aws_security_group" "exposed" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-

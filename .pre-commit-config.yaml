@@ -6,5 +6,14 @@ repos:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 - repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.99.0
   hooks:
   - id: terraform_fmt
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.11.8
+  hooks:
+    # Run the linter.
+    - id: ruff
+    # Run the formatter.
+    - id: ruff-format

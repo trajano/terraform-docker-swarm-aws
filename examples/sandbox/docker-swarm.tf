@@ -8,7 +8,7 @@ module "docker-swarm" {
   managers = var.managers
   workers  = var.workers
   cloud_config_extra = templatefile("template.cloud-config", {
-    ssh_key       = var.ssh_key
+    ssh_key = var.ssh_key
   })
   instance_type               = var.instance_type
   cloudwatch_logs             = true

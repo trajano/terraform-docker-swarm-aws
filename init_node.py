@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "WARNING"))
 
 # Set values loaded by the template
-instance_index = int('${instance_index}')
+instance_index = int("${instance_index}")
 vpc_name = "${vpc_name}"
 group = "${group}"
 cloudwatch_log_group = "${cloudwatch_log_group}"
@@ -22,6 +22,7 @@ ssh_authorization_method = "${ssh_authorization_method}"
 
 # Global cached results
 _current_instance = None
+
 
 class TokenRequest(urllib.request.Request, object):
     """
@@ -86,7 +87,9 @@ def initialize_system_daemons_and_hostname():
     subprocess.check_call(["systemctl", "enable", "docker.service"])
     subprocess.check_call(["systemctl", "start", "docker.service"])
 
-    list_unit_files = subprocess.check_output(["systemctl", "list-unit-files"]).decode("utf-8")
+    list_unit_files = subprocess.check_output(["systemctl", "list-unit-files"]).decode(
+        "utf-8"
+    )
     if "dnf-automatic.service" in list_unit_files:
         subprocess.check_call(["systemctl", "enable", "dnf-automatic"])
         subprocess.check_call(["systemctl", "start", "dnf-automatic"])
@@ -112,13 +115,17 @@ def initialize_swarm():
     Initializes an empty swarm and returns the tokens as a tuple.
     """
     subprocess.check_call(["docker", "swarm", "init"])
-    manager_token = subprocess.check_output(
-        ["docker", "swarm", "join-token", "-q", "manager"]
-    ).decode("utf-8").strip()
+    manager_token = (
+        subprocess.check_output(["docker", "swarm", "join-token", "-q", "manager"])
+        .decode("utf-8")
+        .strip()
+    )
 
-    worker_token = subprocess.check_output(
-        ["docker", "swarm", "join-token", "-q", "worker"]
-    ).decode("utf-8").strip()
+    worker_token = (
+        subprocess.check_output(["docker", "swarm", "join-token", "-q", "worker"])
+        .decode("utf-8")
+        .strip()
+    )
     return manager_token, worker_token
 
 
@@ -218,7 +225,7 @@ def join_as_manager(get_manager_instance, update_tokens):
                 another_manager_instance.manager_token,
                 another_manager_instance.worker_token,
             )
-        except:
+        except Exception:
             # Unable to join the swarm, it may no longer be valid.  Create a new one.
             initialize_swarm_and_update_tokens()
 
@@ -275,8 +282,6 @@ def join_swarm():
         join_as_worker(get_manager_instance)
 
 
-
-
 def set_ssh_authorization_mode():
     if ssh_authorization_method == "ec2-instance-connect":
         subprocess.check_call(["yum", "install", "ec2-instance-connect"])
@@ -299,10 +304,28 @@ def set_ssh_authorization_mode():
         f.close()
         subprocess.check_call(["systemctl", "restart", "sshd"])
 
+
 def install_docker():
-    subprocess.check_call(["yum-config-manager", "--add-repo", "https://download.docker.com/linux/centos/docker-ce.repo"])
-    subprocess.check_call(["yum", "install", "docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"])
+    subprocess.check_call(
+        [
+            "yum-config-manager",
+            "--add-repo",
+            "https://download.docker.com/linux/centos/docker-ce.repo",
+        ]
+    )
+    subprocess.check_call(
+        [
+            "yum",
+            "install",
+            "docker-ce",
+            "docker-ce-cli",
+            "containerd.io",
+            "docker-buildx-plugin",
+            "docker-compose-plugin",
+        ]
+    )
     subprocess.check_call(["systemctl", "start", "docker"])
+
 
 # install_docker()
 configure_logging()

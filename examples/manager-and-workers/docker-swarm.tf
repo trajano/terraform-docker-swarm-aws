@@ -13,4 +13,3 @@ module "docker-swarm" {
     aws_security_group.exposed.id,
   ]
 }
-

@@ -254,4 +254,3 @@ data "aws_ami" "managers" {
 data "aws_ec2_instance_type" "managers" {
   instance_type = local.instance_type_manager
 }
-

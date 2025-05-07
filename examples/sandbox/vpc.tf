@@ -51,4 +51,3 @@ resource "aws_security_group" "exposed" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-

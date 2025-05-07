@@ -19,14 +19,14 @@ resource "aws_iam_policy" "terraform-dockerswarm" {
 }
 
 resource "aws_iam_group" "terraform-dockerswarm" {
-  name        = "terraform-dockerswarm"
-  path        = "/terraform/"
+  name = "terraform-dockerswarm"
+  path = "/terraform/"
 }
 
 resource "aws_iam_group_policy_attachment" "terraform-dockerswarm" {
-  count = length(local.policies)
-  group = aws_iam_group.terraform-dockerswarm.name
-  policy_arn= aws_iam_policy.terraform-dockerswarm[count.index].arn
+  count      = length(local.policies)
+  group      = aws_iam_group.terraform-dockerswarm.name
+  policy_arn = aws_iam_policy.terraform-dockerswarm[count.index].arn
 }
 
 terraform {

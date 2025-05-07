@@ -133,7 +133,7 @@ write_files:
       import boto3
       import grp
       import sys
-      
+
       iam = boto3.client('iam')
       public_keys = iam.list_ssh_public_keys(UserName=sys.argv[1])['SSHPublicKeys']
       for public_key in public_keys:

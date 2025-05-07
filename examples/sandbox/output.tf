@@ -9,4 +9,3 @@ output "manager_ips" {
 output "worker_ips" {
   value = module.docker-swarm.worker_ips
 }
-

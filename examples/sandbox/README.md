@@ -13,4 +13,3 @@ This example provides an example of using a private yum repository mirror in thi
 Note the slowest part is the `instance_type` on a `t3.micro` the time to finish cloud-init is over 200 seconds the time is primarily spent on the `yum install docker-ce`. For a `t3.small` it drops down to under 150 seconds and `t3.medium` is under 100 seconds. The results are in `/var/log/cloud-init-output.log`.
 
 See the `variables.tf` file to see what to set in `terraform.tfvars`
-

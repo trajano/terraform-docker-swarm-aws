@@ -77,7 +77,7 @@ A future relase of this would utilize auto-scaling for now this needs to be done
 ## Other tips
 
 * Don't use Terraform to provision your containers, just let it build the infrastructure and add the hooks to connect it to your build system.
-* To use a different version of Docker create a custom cloud config with 
+* To use a different version of Docker create a custom cloud config with
 
     packages:
       - [docker, 18.03.1ce-2.amzn2]
@@ -85,7 +85,7 @@ A future relase of this would utilize auto-scaling for now this needs to be done
       - python2-boto3
       - yum-cron
       - ec2-instance-connect
-      - perl-Switch 
+      - perl-Switch
       - perl-DateTime
       - perl-Sys-Syslog
       - perl-LWP-Protocol-https
