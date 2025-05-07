@@ -222,3 +222,9 @@ variable "sns_kms_id" {
 variable "ssh_key" {
   description = "SSH key to access the server."
 }
+
+variable "ami_name_regex" {
+  description = "Name regex for the AMI to use.  This must be an Amazon Linux on or after Amazon Linux 2023. `ARCH` is replaced with the architecture"
+  default     = "^ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-.*"
+  # default     = "^al2023-ami-2023.*-.*-ARCH"
+}

@@ -59,10 +59,10 @@ data "cloudinit_config" "managers" {
   }
 
   part {
-    filename     = "extra.cloud-config"
-    content      = templatefile("template.cloud-config", {
-    ssh_key       = var.ssh_key
-  })
+    filename = "extra.cloud-config"
+    content = templatefile("template.cloud-config", {
+      ssh_key = var.ssh_key
+    })
     content_type = "text/cloud-config"
     merge_type   = var.cloud_config_extra_merge_type
   }
@@ -84,35 +84,35 @@ EOT
     content_type = "text/x-shellscript"
   }
 
-#   part {
-#     filename     = "init_boto.sh"
-#     content      = <<EOT
-# #!/bin/sh
-# pip3 install botocore boto3
-# EOT
-#     content_type = "text/x-shellscript"
-#   }
-#   part {
-#     filename = "init_node.py"
-#     content = templatefile(
-#       "${path.module}/init_node.py",
-#       {
-#         region_name              = data.aws_region.current.name
-#         instance_index           = count.index
-#         vpc_name                 = local.dns_name
-#         cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
-#         group                    = "manager"
-#         ssh_authorization_method = var.ssh_authorization_method
-#       }
-#     )
-#     content_type = "text/x-shellscript"
-#   }
+  #   part {
+  #     filename     = "init_boto.sh"
+  #     content      = <<EOT
+  # #!/bin/sh
+  # pip3 install botocore boto3
+  # EOT
+  #     content_type = "text/x-shellscript"
+  #   }
+  #   part {
+  #     filename = "init_node.py"
+  #     content = templatefile(
+  #       "${path.module}/init_node.py",
+  #       {
+  #         region_name              = data.aws_region.current.name
+  #         instance_index           = count.index
+  #         vpc_name                 = local.dns_name
+  #         cloudwatch_log_group     = var.cloudwatch_logs ? (var.cloudwatch_single_log_group ? local.dns_name : aws_cloudwatch_log_group.managers[count.index].name) : ""
+  #         group                    = "manager"
+  #         ssh_authorization_method = var.ssh_authorization_method
+  #       }
+  #     )
+  #     content_type = "text/x-shellscript"
+  #   }
 
-#   part {
-#     filename     = "extra.sh"
-#     content      = var.cloud_config_extra_script
-#     content_type = "text/x-shellscript"
-#   }
+  #   part {
+  #     filename     = "extra.sh"
+  #     content      = var.cloud_config_extra_script
+  #     content_type = "text/x-shellscript"
+  #   }
 }
 
 resource "aws_instance" "managers" {
@@ -245,3 +245,13 @@ resource "aws_cloudwatch_log_group" "managers" {
     Node        = "${local.dns_name}-manager${count.index}"
   }
 }
+
+data "aws_ami" "managers" {
+  most_recent = true
+  owners      = ["amazon", "self"]
+  name_regex  = replace(var.ami_name_regex, "ARCH", data.aws_ec2_instance_type.managers.supported_architectures[0])
+}
+data "aws_ec2_instance_type" "managers" {
+  instance_type = local.instance_type_manager
+}
+
