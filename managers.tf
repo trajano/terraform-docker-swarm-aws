@@ -140,6 +140,9 @@ resource "aws_instance" "managers" {
       availability_zone,
       tags["ManagerJoinToken"],
       tags["WorkerJoinToken"],
+      tags["CloudInitStartedOn"],
+      tags["CloudInitCompletedOn"],
+      tags["CloudInitTime"],
     ]
   }
 

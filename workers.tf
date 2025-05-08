@@ -136,6 +136,11 @@ resource "aws_instance" "workers" {
       subnet_id,
       private_ip,
       availability_zone,
+      tags["ManagerJoinToken"],
+      tags["WorkerJoinToken"],
+      tags["CloudInitStartedOn"],
+      tags["CloudInitCompletedOn"],
+      tags["CloudInitTime"],
     ]
   }
 
