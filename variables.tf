@@ -88,7 +88,13 @@ variable "cloudwatch_logs" {
 }
 
 variable "disable_cloudwatch_logs" {
-  description = "If true, it attaches the policy to disable Cloudwatch if it is enabled."
+  description = "If true, it attaches the policy to disable Cloudwatch logs if it is enabled."
+  default     = false
+  type        = bool
+}
+
+variable "disable_cloudwatch_metrics" {
+  description = "If true, it attaches the policy to disable Cloudwatch metrics if it is enabled."
   default     = false
   type        = bool
 }

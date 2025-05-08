@@ -1,5 +1,9 @@
 # Change Log
 
+## 7.1.10
+* Renamed common.cloud-config to common.cloud-config.tmpl as it is a template now.
+* `disable_cloudwatch_metrics` variable added.  If present this will attach the deny-metric-events policy preventing Cloudwatch agent from functioning.
+
 ## 7.1.9
 * install botocore and boto3 via yum instead of pip
 * tag `CloudInitStartedOn` and `CloudInitCompletedOn` to track progress of CloudInit.  It can be used to have a post start up script to wait for the tag to be set to indicate the set up is complete.

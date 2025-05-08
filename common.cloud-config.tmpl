@@ -1,0 +1,173 @@
+#cloud-config
+bootcmd:
+ - ["cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker"]
+ - ["cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel"]
+repo_update: true
+repo_upgrade: all
+packages:
+  - docker
+  - amazon-cloudwatch-agent
+  - python3-botocore.noarch
+  - python3-boto3.noarch
+  - dnf-automatic.noarch
+output:
+  all: "| tee -a /var/log/cloud-init-output.log"
+manage_resolve_conf: true
+resolve_conf:
+  name_servers: [ '169.254.169.253' ]
+fs_setup:
+  - device: /dev/xvdf
+    filesystem: swap
+    overwrite: true
+mounts:
+  - ["/dev/xvdf", "none", "swap", "sw,nofail,x-systemd.requires=cloud-init.service", "0", "0"]
+runcmd:
+  - [ sysctl, -w, vm.max_map_count=262144 ]
+  - [ sysctl, -w, fs.file-max=65536 ]
+  - [ sysctl, -w, vm.overcommit_memory=1 ]
+  - [ ulimit, -n, '65536' ]
+  - [ ulimit, -u, '4096' ]
+  - [ /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl, -a, fetch-config, -m, ec2, -c, "ssm:${cloudwatch_agent_parameter}", -s ]
+  - [ systemctl, enable, amazon-cloudwatch-agent ]
+write_files:
+  - content: |
+      vm.max_map_count=262144
+      fs.file-max=65536
+      vm.overcommit_memory=1
+    path: /etc/sysctl.d/01-docker.conf
+    owner: root:root
+    permissions: "0444"
+  - content: |
+      *          soft    nproc     4096
+      *          soft    nofile    65536
+    path: /etc/security/limits.d/01-docker.conf
+    owner: root:root
+    permissions: "0444"
+  - content: |
+      #!/bin/sh
+      docker image prune -f > /dev/null
+      docker container prune -f > /dev/null
+    path: /etc/cron.hourly/docker-prune.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/bin/sh
+      docker image prune --all -f > /dev/null
+      docker volume prune -f > /dev/null
+    path: /etc/cron.daily/docker-prune.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/bin/sh
+      docker node update --availability drain $(docker info -f '{{.Swarm.NodeID}}')
+      sleep 10
+      docker node demote $(docker info -f '{{.Swarm.NodeID}}')
+      sleep 10
+      docker swarm leave
+    path: /root/bin/leave-swarm.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/bin/sh
+      docker node demote $(docker node ls --format "{{.ID}} {{.Status}} {{.Availability}}" --filter 'role=manager' | grep " Down Drain" |  awk '{ print $1 }')
+      docker node rm $(docker node ls --format "{{.ID}} {{.Status}} {{.Availability}}" | grep " Down Drain" |  awk '{ print $1 }')
+    path: /root/bin/prune-nodes.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/bin/bash
+      USER="$1"
+      shift
+      SSH_PUBLIC_KEY="command=\\\"docker system dial-stdio\\\" $*"
+      useradd -s /bin/sh -G docker $${USER}
+      su - $${USER} -c "umask 077 ; mkdir .ssh ; echo $SSH_PUBLIC_KEY >> .ssh/authorized_keys"
+    path: /root/bin/add-docker-user.sh
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/bin/bash
+      set -e
+
+      if systemctl is-active --quiet amazon-cloudwatch-agent; then
+        systemctl stop amazon-cloudwatch-agent
+        systemctl disable amazon-cloudwatch-agent
+      fi
+
+      DOCKER_CONFIG="/etc/docker/daemon.json"
+      BACKUP_FILE="/etc/docker/daemon.json.bak"
+
+      if grep -q '"log-driver": "awslogs"' "$DOCKER_CONFIG"; then
+        cp "$DOCKER_CONFIG" "$BACKUP_FILE"
+        jq '
+          ."log-driver" = "json-file" |
+          ."log-opts" = {
+            "env": .["log-opts"]["awslogs-group"]
+          }
+        ' "$BACKUP_FILE" > "$DOCKER_CONFIG"
+      fi
+
+      systemctl restart docker
+    path: /root/bin/cloudwatch-off
+    owner: root:root
+    permissions: "0700"
+
+  - content: |
+      #!/bin/bash
+      set -e
+
+      if systemctl is-enabled --quiet amazon-cloudwatch-agent; then
+        systemctl start amazon-cloudwatch-agent
+      else
+        systemctl enable amazon-cloudwatch-agent
+        systemctl start amazon-cloudwatch-agent
+      fi
+
+      DOCKER_CONFIG="/etc/docker/daemon.json"
+      BACKUP_FILE="/etc/docker/daemon.json.bak"
+
+      if grep -q '"log-driver": "json-file"' "$DOCKER_CONFIG"; then
+        cp "$DOCKER_CONFIG" "$BACKUP_FILE"
+        jq '
+          ."log-driver" = "awslogs" |
+          ."log-opts" = {
+            "awslogs-group": .["log-opts"]["env"],
+            "tag": "{{.Name}}"
+          }
+        ' "$BACKUP_FILE" > "$DOCKER_CONFIG"
+      fi
+
+      systemctl restart docker
+    path: /root/bin/cloudwatch-on
+    owner: root:root
+    permissions: "0700"
+  - content: |
+      #!/usr/bin/env python3
+      import boto3
+      import grp
+      import sys
+
+      iam = boto3.client('iam')
+      public_keys = iam.list_ssh_public_keys(UserName=sys.argv[1])['SSHPublicKeys']
+      for public_key in public_keys:
+        public_key_id = public_key['SSHPublicKeyId']
+        ssh_public_key = iam.get_ssh_public_key(UserName=sys.argv[1], SSHPublicKeyId=public_key_id, Encoding="SSH")['SSHPublicKey']
+        if sys.argv[1] in grp.getgrnam("wheel").gr_mem:
+          print (ssh_public_key['SSHPublicKeyBody'])
+        else:
+          print ('command="docker system dial-stdio" ' + ssh_public_key['SSHPublicKeyBody'])
+    path: /opt/iam-authorized-keys-command
+    owner: root:root
+    permissions: "0755"
+  - content: |
+      #!/bin/sh
+      for node_name in $*
+      do
+        docker node update --availability drain $${node_name}
+      done
+      sleep 10
+      docker node rm --force $*
+    path: /root/bin/rm-workers.sh
+    owner: root:root
+    permissions: "0700"
+groups:
+  - docker

@@ -71,9 +71,26 @@ resource "aws_iam_policy" "deny-put-log-events" {
 }
 
 resource "aws_iam_role_policy_attachment" "deny-put-log-events" {
-  count = var.disable_cloudwatch_logs ? 1 : 0
-  # policies specific for the managers at run time. At this point the policy attachment
-  # can contain specific instance resources.
+  count      = var.disable_cloudwatch_logs ? 1 : 0
   policy_arn = aws_iam_policy.deny-put-log-events.arn
+  role       = aws_iam_role.ec2.name
+}
+
+data "aws_iam_policy_document" "deny-metric-events" {
+  statement {
+    effect    = "Deny"
+    actions   = ["cloudwatch:PutMetricData"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "deny-metric-events" {
+  name   = "${local.dns_name}-deny-metric-events"
+  policy = data.aws_iam_policy_document.deny-metric-events.json
+}
+
+resource "aws_iam_role_policy_attachment" "deny-metric-events" {
+  count      = var.disable_cloudwatch_metrics ? 1 : 0
+  policy_arn = aws_iam_policy.deny-metric-events.arn
   role       = aws_iam_role.ec2.name
 }
