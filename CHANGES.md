@@ -1,5 +1,8 @@
 # Change Log
 
+## 7.1.11
+* Ignore specific tag changes
+
 ## 7.1.10
 * Renamed common.cloud-config to common.cloud-config.tmpl as it is a template now.
 * `disable_cloudwatch_metrics` variable added.  If present this will attach the deny-metric-events policy preventing Cloudwatch agent from functioning.
