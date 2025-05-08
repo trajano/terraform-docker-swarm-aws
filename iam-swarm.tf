@@ -61,7 +61,7 @@ data "aws_iam_policy_document" "deny-put-log-events" {
   statement {
     effect    = "Deny"
     actions   = ["logs:PutLogEvents"]
-    resources = ["arn:aws:logs:::log-group:${local.dns_name}:log-stream:*"]
+    resources = ["*"]
   }
 }
 

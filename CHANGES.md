@@ -1,5 +1,8 @@
 # Change Log
 
+## 7.1.12
+* Block all requests to cloudwatch logs rather than resource filtering when deny is enabled.
+
 ## 7.1.11
 * Ignore specific tag changes
 
