@@ -24,7 +24,7 @@ module "docker-swarm" {
   extra_tags = {
     "foo" = "bar"
   }
-
+  metadata_http_tokens_required = true
   additional_security_group_ids = [
     aws_security_group.exposed.id,
   ]

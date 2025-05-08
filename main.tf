@@ -14,6 +14,7 @@ locals {
 }
 
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 data "aws_availability_zones" "azs" {
   exclude_names = var.excluded_availability_zones
@@ -117,28 +118,7 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
     actions = [
       "ec2:DescribeInstances",
       "ec2:DescribeIamInstanceProfileAssociations",
-    ]
-
-    resources = [
-      "*",
-    ]
-    condition {
-      # This condition means only run on creation
-      test     = "StringEquals"
-      variable = "ec2:CreateAction"
-      values   = ["RunInstances"]
-    }
-  }
-
-  statement {
-    actions = [
       "ec2:DescribeVpcs",
-      "cloudwatch:PutMetricData",
-      "cloudwatch:GetMetricStatistics",
-      "cloudwatch:ListMetrics",
-      "logs:CreateLogStream",
-      "logs:DescribeLogGroups",
-      "logs:PutLogEvents",
     ]
 
     resources = [
@@ -158,23 +138,31 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
       values = [
         "ManagerJoinToken",
         "WorkerJoinToken",
+        "CloudInitStartedOn",
+        "CloudInitCompletedOn",
+        "CloudInitTime"
       ]
-    }
-    condition {
-      # This condition means only run on creation
-      test     = "StringEquals"
-      variable = "ec2:CreateAction"
-      values   = ["RunInstances"]
     }
   }
 
+  statement {
+    actions = [
+      "ec2messages:GetMessages",
+      "ec2messages:SendReply",
+      "ec2messages:AcknowledgeMessage",
+    ]
+
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
+    ]
+  }
   statement {
     actions = [
       "ssm:GetParameter",
     ]
 
     resources = [
-      "arn:aws:ssm:${data.aws_region.current.name}:*:parameter/${local.cloudwatch_agent_parameter}"
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/*"
     ]
   }
 }
@@ -188,6 +176,16 @@ data "aws_iam_policy_document" "swarm-access-role-policy-ssh" {
     resources = [for o in data.aws_iam_user.ssh_users : o.arn]
   }
 
+}
+
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cw_agent" {
+  role       = aws_iam_role.ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
 data "aws_iam_user" "ssh_users" {

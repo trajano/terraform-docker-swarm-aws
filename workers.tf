@@ -23,24 +23,14 @@ data "cloudinit_config" "workers" {
   base64_encode = "true"
 
   part {
-    content = file("${path.module}/common.cloud-config")
-  }
-
-  part {
-    filename = "bootcmd.cloud-config"
-    content = yamlencode({
-      "bootcmd" : [
-        ["cloud-init-per", "once", "amazon-linux-extras-docker", "amazon-linux-extras", "install", "docker"],
-        ["cloud-init-per", "once", "amazon-linux-extras-epel", "amazon-linux-extras", "install", "epel"],
-        ["cloud-init-per", "boot", "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl", "-a", "fetch-config", "-m", "ec2", "-s", "-c", "ssm:${local.cloudwatch_agent_parameter}"],
-      ]
+    content = templatefile("${path.module}/common.cloud-config.tmpl", {
+      cloudwatch_agent_parameter = local.cloudwatch_agent_parameter
     })
-    content_type = "text/cloud-config"
   }
 
   part {
     filename = "ssh_keys.cloud-config"
-    content = var.generate_host_keys ? yamlencode({
+    content = join("\n", ["#cloud-config", var.generate_host_keys ? yamlencode({
       "ssh_keys" : {
         "rsa_private" : tls_private_key.workers-rsa[count.index].private_key_openssh,
         "rsa_public" : tls_private_key.workers-rsa[count.index].public_key_openssh,
@@ -53,7 +43,7 @@ data "cloudinit_config" "workers" {
       "ssh" : {
         "emit_keys_to_console" : false
       }
-    }) : ""
+    }) : ""])
     content_type = "text/cloud-config"
   }
 
@@ -64,14 +54,6 @@ data "cloudinit_config" "workers" {
     merge_type   = var.cloud_config_extra_merge_type
   }
 
-  part {
-    filename     = "init_boto.sh"
-    content      = <<EOT
-#!/bin/sh
-pip3 install botocore boto3
-EOT
-    content_type = "text/x-shellscript"
-  }
   part {
     filename = "init_worker.py"
     content = templatefile(
@@ -119,6 +101,10 @@ resource "aws_instance" "workers" {
   iam_instance_profile = aws_iam_instance_profile.ec2.name
   user_data_base64     = data.cloudinit_config.workers[count.index].rendered
   key_name             = var.key_name
+
+  private_dns_name_options {
+    hostname_type = "resource-name"
+  }
 
   tags = merge({
     Name = "${var.name} worker ${count.index}"

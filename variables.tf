@@ -64,7 +64,7 @@ variable "associate_public_ip_address" {
 
 variable "cloud_config_extra" {
   description = "Content added to the end of the cloud-config file."
-  default     = ""
+  default     = "#cloud-config"
   type        = string
 }
 
@@ -76,7 +76,7 @@ variable "cloud_config_extra_merge_type" {
 
 variable "cloud_config_extra_script" {
   description = "Shell script that will be executed on every node.  This can be used to set up EFS mounts in fstab or do node specific bootstrapping. This is executed after `init_manager.py`"
-  default     = ""
+  default     = "#!/bin/sh"
   type        = string
 
 }

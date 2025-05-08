@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import boto3
+from datetime import datetime, timezone
 import json
 import logging
 import os
@@ -20,6 +21,7 @@ group = "${group}"
 cloudwatch_log_group = "${cloudwatch_log_group}"
 ssh_authorization_method = "${ssh_authorization_method}"
 
+started_on = datetime.now(timezone.utc)
 # Global cached results
 _current_instance = None
 
@@ -99,15 +101,15 @@ def initialize_system_daemons_and_hostname():
     )
 
 
-def create_swap():
-    """
-    Initializes and registers the swap volume
-    """
-    subprocess.check_call(["mkswap", "/dev/xvdf"])
-    f = open("/etc/fstab", "a")
-    f.write("/dev/xvdf none swap defaults 0 0\n")
-    f.close()
-    subprocess.check_call(["swapon", "-a"])
+# def create_swap():
+#     """
+#     Initializes and registers the swap volume
+#     """
+#     subprocess.check_call(["mkswap", "/dev/xvdf"])
+#     f = open("/etc/fstab", "a")
+#     f.write("/dev/xvdf none swap defaults 0 0\n")
+#     f.close()
+#     subprocess.check_call(["swapon", "-a"])
 
 
 def initialize_swarm():
@@ -327,9 +329,35 @@ def install_docker():
     subprocess.check_call(["systemctl", "start", "docker"])
 
 
+def tag_start():
+    now = started_on.isoformat()
+    get_current_instance().create_tags(
+        Tags=[{"Key": "CloudInitStartedOn", "Value": now}]
+    )
+
+
+def tag_completion():
+    now = datetime.now(timezone.utc)
+    elapsed_seconds = int((now - started_on).total_seconds())
+    get_current_instance().create_tags(
+        Tags=[
+            {
+                "Key": "CloudInitCompletedOn",
+                "Value": now.isoformat(),
+            },
+            {
+                "Key": "CloudInitTime",
+                "Value": str(elapsed_seconds),
+            },
+        ]
+    )
+
+
 # install_docker()
+tag_start()
 configure_logging()
 initialize_system_daemons_and_hostname()
 join_swarm()
-create_swap()
+# create_swap()
 set_ssh_authorization_mode()
+tag_completion()

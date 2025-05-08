@@ -1,6 +1,12 @@
 # Change Log
 
+## 7.1.9
+* install botocore and boto3 via yum instead of pip
+* tag `CloudInitStartedOn` and `CloudInitCompletedOn` to track progress of CloudInit.  It can be used to have a post start up script to wait for the tag to be set to indicate the set up is complete.
+* stricter IAM permissions
 * only allow Create and Delete tags for `ManagerJoinToken` and `WorkerJoinToken` from the EC2 instance.
+* Fixed issues with cloudwatch agent
+
 ## 7.1.8
 * `disable_cloudwatch_logs` variable added.  If present this will attach the deny-put-log-events policy preventing Cloudwatch logs from being generated.  This allows the configuration to be done via Terraform rather than shell scripts.
 * corrected `workers` validation to be `>= 0`
