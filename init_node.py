@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import boto3
-from datetime import datetime, timezone
 import json
 import logging
 import os
@@ -9,6 +7,9 @@ import random
 import subprocess
 import time
 import urllib.request
+from datetime import datetime, timezone
+
+import boto3
 
 DAEMON_JSON = "/etc/docker/daemon.json"
 logger = logging.getLogger(__name__)
@@ -26,13 +27,13 @@ started_on = datetime.now(timezone.utc)
 _current_instance = None
 
 
-class TokenRequest(urllib.request.Request, object):
+class TokenRequest(urllib.request.Request):
     """
     A urllib request specifically used to obtain the token to access the metadata.
     """
 
     def __init__(self):
-        super(TokenRequest, self).__init__(
+        super().__init__(
             "http://169.254.169.254/latest/api/token",
             headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
         )
@@ -57,9 +58,11 @@ region_name = instance_identity["region"]
 ec2 = boto3.resource("ec2", region_name=region_name)
 
 
-def configure_logging():
+def update_daemon_json():
     """
-    Updates daemon.json to enable AWS Cloudwatch logging
+    Updates daemon.json.
+
+    Enables AWS Cloudwatch logging and disables userland-proxy.
     """
     if cloudwatch_log_group == "":
         return
@@ -75,10 +78,10 @@ def configure_logging():
         "awslogs-group": cloudwatch_log_group,
         "tag": "{{.Name}}",
     }
+    daemon_json["userland-proxy"] = False
 
-    f = open(DAEMON_JSON, "w")
-    f.write(json.dumps(daemon_json))
-    f.close()
+    with open(DAEMON_JSON, "w") as json_file:
+        json_file.write(json.dumps(daemon_json))
 
 
 def initialize_system_daemons_and_hostname():
@@ -97,7 +100,7 @@ def initialize_system_daemons_and_hostname():
         subprocess.check_call(["systemctl", "start", "dnf-automatic"])
 
     subprocess.check_call(
-        ["hostnamectl", "set-hostname", "%s%d-%s" % (group, instance_index, vpc_name)]
+        ["hostnamectl", "set-hostname", f"{group}{instance_index:d}-{vpc_name}"]
     )
 
 
@@ -156,14 +159,21 @@ class ManagerInstance:
         self.worker_token = worker_token
 
 
+class SwarmJoinError(RuntimeError):
+    pass
+
+
 def join_swarm_with_token(swarm_manager_ip, token):
     """
     Joins the swarm
     """
-    logging.debug("join %s %s", swarm_manager_ip, token)
-    subprocess.check_call(
-        ["docker", "swarm", "join", "--token", token, swarm_manager_ip]
-    )
+    logger.debug("join %s %s", swarm_manager_ip, token)
+    try:
+        subprocess.check_call(
+            ["docker", "swarm", "join", "--token", token, swarm_manager_ip]
+        )
+    except subprocess.CalledProcessError as error:
+        raise SwarmJoinError("Unable to join swarm") from error
 
 
 def get_manager_instance_vpc_tags(exclude_self=False):
@@ -227,7 +237,7 @@ def join_as_manager(get_manager_instance, update_tokens):
                 another_manager_instance.manager_token,
                 another_manager_instance.worker_token,
             )
-        except Exception:
+        except SwarmJoinError:
             # Unable to join the swarm, it may no longer be valid.  Create a new one.
             initialize_swarm_and_update_tokens()
 
@@ -242,7 +252,7 @@ def join_as_worker(get_manager_instance):
         else:
             break
     if manager_instance is None:
-        raise Exception("Unable to join swarm, no manager found")
+        raise SwarmJoinError("Unable to join swarm, no manager found")
 
     join_swarm_with_token(manager_instance.ip, manager_instance.worker_token)
 
@@ -258,8 +268,7 @@ def get_vpc():
     )
     mac = urllib.request.urlopen(mac_request).read().decode()
     vpc_id_request = urllib.request.Request(
-        "http://169.254.169.254/latest/meta-data/network/interfaces/macs/%s/vpc-id"
-        % mac,
+        f"http://169.254.169.254/latest/meta-data/network/interfaces/macs/{mac}/vpc-id",
         headers={"X-aws-ec2-metadata-token": metadata_token},
     )
     vpc_id = urllib.request.urlopen(vpc_id_request).read().decode()
@@ -288,22 +297,20 @@ def set_ssh_authorization_mode():
     if ssh_authorization_method == "ec2-instance-connect":
         subprocess.check_call(["yum", "install", "ec2-instance-connect"])
     elif ssh_authorization_method == "iam":
-        f = open("/etc/ssh/sshd_config", mode="r")
         sshd_config = []
-        for line in f.readlines():
-            if not line.startswith("AuthorizedKeysCommand ") and not line.startswith(
-                "AuthorizedKeysCommandUser "
-            ):
-                sshd_config.append(line)
-        f.close()
+        with open("/etc/ssh/sshd_config", mode="r") as sshd_config_file:
+            for line in sshd_config_file:
+                if not line.startswith(
+                    "AuthorizedKeysCommand "
+                ) and not line.startswith("AuthorizedKeysCommandUser "):
+                    sshd_config.append(line)
         sshd_config.append(
             "AuthorizedKeysCommand /opt/iam-authorized-keys-command %u %f\n"
         )
         sshd_config.append("AuthorizedKeysCommandUser nobody\n")
 
-        f = open("/etc/ssh/sshd_config", mode="w")
-        f.writelines(sshd_config)
-        f.close()
+        with open("/etc/ssh/sshd_config", mode="w") as sshd_config_file:
+            sshd_config_file.writelines(sshd_config)
         subprocess.check_call(["systemctl", "restart", "sshd"])
 
 
@@ -355,7 +362,7 @@ def tag_completion():
 
 # install_docker()
 tag_start()
-configure_logging()
+update_daemon_json()
 initialize_system_daemons_and_hostname()
 join_swarm()
 # create_swap()
