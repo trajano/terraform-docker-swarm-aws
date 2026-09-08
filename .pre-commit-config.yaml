@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
     -   id: check-yaml
     -   id: end-of-file-fixer
@@ -9,20 +9,21 @@ repos:
       args:
       - --autofix
 - repo: https://github.com/antonbabenko/pre-commit-terraform
-  rev: v1.99.0
+  rev: v1.109.1
   hooks:
   - id: terraform_fmt
   - id: terraform_tflint
     args:
       - --args=--fix
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.11.8
+  rev: v0.16.6
   hooks:
     - id: ruff
     - id: ruff-format
 - repo: https://github.com/jackdewinter/pymarkdown
-  rev: v0.9.29
+  rev: v0.9.39
   hooks:
       - id: pymarkdown
+        language_version: python3.12
         args:
         - fix
