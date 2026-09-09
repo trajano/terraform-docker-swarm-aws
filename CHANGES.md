@@ -1,5 +1,12 @@
 # Change Log
 
+## 6.1.0
+
+* Require AWS provider 6.63.0 or later within the 6.x series.
+* Replace deprecated region references and removed EIP arguments for AWS provider 6 compatibility.
+* Update the sandbox AWS provider lock entry while preserving Cloudinit and TLS versions.
+* Document the provider upgrade path and deployment validation steps in `UPGRADE.md`.
+
 ## 6.0.4
 
 * Backport https://github.com/trajano/terraform-docker-swarm-aws/pull/32
