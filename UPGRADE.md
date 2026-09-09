@@ -1,5 +1,17 @@
 # Upgrade notes
 
+## AWS provider 4.x to 6.x
+
+Module 6.1.x requires AWS provider 6.63.0 or later within the 6.x series.
+These provider versions are separate from the module versions below.
+
+* Follow HashiCorp's [version 5 upgrade guide](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-5-upgrade) and [version 6 upgrade guide](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-6-upgrade). Before switching to this module version, use the previous module version to check a plan with the latest 4.x provider, then the latest 5.x provider. Resolve errors, deprecation warnings, and unexpected changes at each stage.
+* In the deployment's root configuration, select AWS provider `6.63.0` to reproduce the version validated for this upgrade. Run `terraform init -upgrade` and review the dependency lock file, since this command can also upgrade other providers and modules.
+* Replace `aws_eip`'s removed `vpc = true` argument with `domain = "vpc"` in caller configurations. The examples include this change.
+* Replace `data.aws_region.current.name` with `data.aws_region.current.region`. The module includes this change for IAM policies, instance bootstrap data, and the CloudWatch dashboard.
+* The module already supplies `owners` for its most-recent AMI lookup and uses `user_data_base64` for EC2 bootstrap data. These meet the corresponding version 6 migration requirements.
+* Run `terraform validate`, then review a normal `terraform plan` against the deployment's existing state. Check instance replacements, network changes, tags, and IAM policies before applying. Local validation does not verify state migration or AWS API behavior.
+
 ## 3.x to 4.x
 
 * Do not enable `store_join_tokens_as_tags` as that will corrupt the cluster.

@@ -182,7 +182,7 @@ data "aws_iam_policy_document" "swarm-access-role-policy" {
     ]
 
     resources = [
-      "arn:aws:ssm:${data.aws_region.current.name}:*:parameter/${local.cloudwatch_agent_parameter}"
+      "arn:aws:ssm:${data.aws_region.current.region}:*:parameter/${local.cloudwatch_agent_parameter}"
     ]
   }
 }

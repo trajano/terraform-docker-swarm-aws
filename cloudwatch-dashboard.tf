@@ -5,7 +5,7 @@ resource "aws_cloudwatch_dashboard" "main" {
   dashboard_body = jsonencode(
     yamldecode(
       templatefile("${path.module}/cloudwatch-dashboard.yaml.tmpl", {
-        region         = data.aws_region.current.name,
+        region         = data.aws_region.current.region,
         log_group_name = aws_cloudwatch_log_group.main[0].name,
         instance_ids = toset(flatten([
           aws_instance.managers.*.id,
